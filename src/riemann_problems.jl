@@ -244,7 +244,7 @@ end
   if xmin ≈ 0 && xmax ≈ 0
     Δx = one(xmin)
   else
-    Δx = min(abs(xmin), abs(xmax))
+    Δx = min(abs(xmin - xmax), max(abs(xmin), abs(xmax))/10)
   end
   xmin = xmin - Δx
   xmax = xmax + Δx
