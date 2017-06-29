@@ -1,5 +1,5 @@
-using HyperbolicDiffEq
 using Base.Test
+using HyperbolicDiffEq
 
 tic()
 
