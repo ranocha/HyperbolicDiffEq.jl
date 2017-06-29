@@ -12,7 +12,7 @@ using Reexport
 # interfaces
 import DiffEqBase: solve
 
-import Base: show, *, start, done, next
+import Base: show, *, start, done, next, promote_rule, convert
 
 
 # types
@@ -45,6 +45,6 @@ include("balance_laws/burgers.jl")
 # models
 export Burgers
 
-export RiemannProblem
+export RiemannProblem, *
 
 end # module

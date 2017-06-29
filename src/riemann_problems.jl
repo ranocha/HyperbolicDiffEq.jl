@@ -26,6 +26,15 @@ function RiemannProblem(model::AbstractBalanceLaw{1}, uₗ, uᵣ, x₀::Real=0, 
 end
 
 
+function convert{Model,U,T1,T2}(::Type{RiemannProblem{Model,U,T1}}, prob::RiemannProblem{Model,U,T2})
+  RiemannProblem{Model,U,T1}(prob.model, prob.uₗ, prob.uᵣ, convert(T1,prob.x₀), convert(T1,prob.t₀))
+end
+
+function promote_rule{Model,U,T1,T2}(::Type{RiemannProblem{Model,U,T1}}, ::Type{RiemannProblem{Model,U,T2}})
+  RiemannProblem{Model,U,promote_type(T1,T2)}
+end
+
+
 function (prob::RiemannProblem)(x::Real)
   @unpack x₀, uₗ, uᵣ = prob
 
@@ -115,28 +124,28 @@ done(tup::RiemannProblemTuple, i) = done(tup.tup, i)
 next(tup::RiemannProblemTuple, i) = next(tup.tup, i)
 
 
-function *{Prob<:RiemannProblem}(prob1::Prob, prob2::Prob)
-  RiemannProblemTuple((prob1, prob2))
+function *{Model,U}(prob1::RiemannProblem{Model,U}, prob2::RiemannProblem{Model,U})
+  RiemannProblemTuple(promote(prob1, prob2))
 end
 
-function *{N,Model,U,T}(tup::RiemannProblemTuple{N,Model,U,T}, prob::RiemannProblem{Model,U,T})
-  RiemannProblemTuple((tup..., prob))
+function *{N,Model,U}(tup::RiemannProblemTuple{N,Model,U}, prob::RiemannProblem{Model,U})
+  RiemannProblemTuple(promote(tup..., prob))
 end
 
-function *{N,Model,U,T}(prob::RiemannProblem{Model,U,T}, tup::RiemannProblemTuple{N,Model,U,T})
-  RiemannProblemTuple((prob, tup...))
+function *{N,Model,U}(prob::RiemannProblem{Model,U}, tup::RiemannProblemTuple{N,Model,U})
+  RiemannProblemTuple(promote(prob, tup...))
 end
 
-function *{N,M,Model,U,T}(tup1::RiemannProblemTuple{N,Model,U,T},
-                          tup2::RiemannProblemTuple{M,Model,U,T})
-  RiemannProblemTuple((tup1..., tup2...))
+function *{N,M,Model,U}(tup1::RiemannProblemTuple{N,Model,U},
+                        tup2::RiemannProblemTuple{M,Model,U})
+  RiemannProblemTuple(promote(tup1..., tup2...))
 end
 
 
 function show{N,Model,U,T}(io::IO, prob::RiemannProblemTuple{N,Model,U,T})
   println(io, "Tuple of ", N, " consecutive Riemann problems:")
   for i in 1:N
-    println(io, prob.tup[i])
+    print(io, prob.tup[i], "\n")
   end
 end
 

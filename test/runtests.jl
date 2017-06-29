@@ -1,5 +1,8 @@
 using HyperbolicDiffEq
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+tic()
+
+@time @testset "Riemann Problems" begin include("riemann_problems_test.jl") end
+
+toc()
