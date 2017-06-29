@@ -26,3 +26,11 @@ prob1 * prob2
 (prob1 * prob2) * prob3
 prob1 * (prob2 * prob3)
 (prob1 * prob2) * (prob3 * prob4)
+
+sol = solve(prob1 * prob2)
+@test sol(1., -1.) ≈ 0
+@test sol(1., 0.) ≈ 0
+@test sol(1., 0.5) ≈ 0.5
+@test sol(1., 1-eps()) ≈ 1
+@test sol(1., 1+eps()) ≈ -1
+@test sol(1., 2.) ≈ -1
