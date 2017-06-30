@@ -45,6 +45,9 @@ include("balance_laws/burgers.jl")
 # models
 export Burgers
 
+export godunov
+export flux, max_abs_speed
+
 export RiemannProblem, *
 
 end # module

@@ -1,6 +1,6 @@
 using Base.Test
 using HyperbolicDiffEq
-using Plots
+#using Plots # Plots fails on win32 [appveyor]
 
 
 # Burgers' equation
@@ -19,7 +19,8 @@ print(DevNull, sol)
 @test sol(2., -0.5) ≈ 0
 @test sol(2., 1.) ≈ 0.5
 @test sol(2., 2.) ≈ 1
-plot(sol)
+#plot(sol) # Plots fails on win32 [appveyor]
+@test flux(sol(0), sol.prob.model) ≈ godunov(sol.prob.uₗ, sol.prob.uᵣ, sol.prob.model)
 
 # Stationary shock wave
 prob2 = HyperbolicDiffEq.RiemannProblem(HyperbolicDiffEq.Burgers(), 1., -1., 1.)
@@ -30,7 +31,8 @@ sol = HyperbolicDiffEq.solve(prob2)
 print(DevNull, sol)
 @test sol(-1) ≈  1
 @test sol( 1) ≈ -1
-plot(sol)
+#plot(sol) # Plots fails on win32 [appveyor]
+@test flux(sol(0), sol.prob.model) ≈ godunov(sol.prob.uₗ, sol.prob.uᵣ, sol.prob.model)
 
 # Tuples of Riemann problems
 prob3 = RiemannProblem(Burgers(), -1., -2., 2.f0)
@@ -52,4 +54,4 @@ print(DevNull, sol)
 @test sol(1., 1-eps()) ≈ 1
 @test sol(1., 1+eps()) ≈ -1
 @test sol(1., 2.) ≈ -1
-plot(sol)
+#plot(sol) # Plots fails on win32 [appveyor]
