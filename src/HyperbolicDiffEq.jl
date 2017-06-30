@@ -1,7 +1,11 @@
+__precompile__()
+
 module HyperbolicDiffEq
 
 using Roots
 using Parameters
+using StaticArrays
+using MappedArrays
 
 using RecipesBase
 using LaTeXStrings
@@ -14,6 +18,8 @@ using Reexport
 import DiffEqBase: solve
 
 import Base: show, *, start, done, next, promote_rule, convert
+
+import StaticArrays: similar_type
 
 
 # types
@@ -42,14 +48,16 @@ abstract type AbstractRiemannSolution end
 include("riemann_problems.jl")
 include("balance_laws/burgers.jl")
 include("balance_laws/buckley_leverette.jl")
+include("balance_laws/shallow_water.jl")
 
 
 # models
 export Burgers, BuckleyLeverette
+export ShallowWater, ShallowWaterVar1D
 
 export godunov
 export flux, max_abs_speed
 
-export RiemannProblem, *
+export RiemannProblem
 
 end # module
