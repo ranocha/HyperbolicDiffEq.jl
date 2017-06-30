@@ -15,7 +15,8 @@ function Burgers(T=Float64, Dim=1)
 end
 
 function show{T,Dim}(io::IO, model::Burgers{T,Dim})
-  print(io, "Burgers' equation {T=", T, ", Dim=", Dim, "}")
+  print(io, "Burgers' equation {T=", T, ", Dim=", Dim, "}",
+            " with flux f(u) = u^2 / 2")
 end
 
 
@@ -69,6 +70,8 @@ end
 
 
 """
+    minmax_speeds(sol::BurgersRiemannSolution)
+
 Return the minimal and maximal speeds `σ⁻, σ⁺` that appear in the solution `sol`.
 """
 function minmax_speeds(sol::BurgersRiemannSolution)
@@ -77,6 +80,8 @@ end
 
 
 """
+    (sol::BurgersRiemannSolution)(ξ::Real)
+
 Evaluate the solution `sol` at the value `ξ` of the self-similarity variable
 `ξ = (x - x₀) / (t - t₀)`.
 """
@@ -95,6 +100,8 @@ end
 
 
 """
+    (sol::BurgersRiemannSolution)(t::Real, x::Real)
+
 Evaluate the solution `sol` at the time and space coordinates `t` and `x`.
 """
 function (sol::BurgersRiemannSolution)(t::Real, x::Real)
@@ -105,6 +112,8 @@ end
 
 
 """
+    solve{T,T1}(prob::RiemannProblem{Burgers{T,1},T,T1})
+
 Compute the solution of the Riemann prolem `prob`.
 """
 function solve{T,T1}(prob::RiemannProblem{Burgers{T,1},T,T1})

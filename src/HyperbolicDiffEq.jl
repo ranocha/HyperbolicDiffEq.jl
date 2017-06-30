@@ -1,5 +1,6 @@
 module HyperbolicDiffEq
 
+using Roots
 using Parameters
 
 using RecipesBase
@@ -43,7 +44,7 @@ include("balance_laws/burgers.jl")
 
 
 # models
-export Burgers
+export Burgers, BuckleyLeverette
 
 export godunov
 export flux, max_abs_speed
