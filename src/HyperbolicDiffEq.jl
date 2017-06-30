@@ -41,6 +41,7 @@ abstract type AbstractRiemannSolution end
 
 include("riemann_problems.jl")
 include("balance_laws/burgers.jl")
+include("balance_laws/buckley_leverette.jl")
 
 
 # models

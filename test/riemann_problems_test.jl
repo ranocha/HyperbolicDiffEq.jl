@@ -4,13 +4,14 @@ using HyperbolicDiffEq
 
 
 # Burgers' equation
+model = Burgers()
 
 # Rarefaction wave
-prob1 = HyperbolicDiffEq.RiemannProblem(HyperbolicDiffEq.Burgers(), 0., 1.)
+prob1 = RiemannProblem(model, 0., 1.)
 print(DevNull, prob1)
 @test prob1(0-eps()) ≈ 0
 @test prob1(0+eps()) ≈ 1
-sol = HyperbolicDiffEq.solve(prob1)
+sol = solve(prob1)
 print(DevNull, sol)
 @test sol(-1) ≈ 0
 @test sol( 2) ≈ 1
@@ -23,11 +24,11 @@ print(DevNull, sol)
 @test flux(sol(0), sol.prob.model) ≈ godunov(sol.prob.uₗ, sol.prob.uᵣ, sol.prob.model)
 
 # Stationary shock wave
-prob2 = HyperbolicDiffEq.RiemannProblem(HyperbolicDiffEq.Burgers(), 1., -1., 1.)
+prob2 = RiemannProblem(model, 1., -1., 1.)
 print(DevNull, prob2)
 @test prob2(1-eps()) ≈ 1
 @test prob2(1+eps()) ≈ -1
-sol = HyperbolicDiffEq.solve(prob2)
+sol = solve(prob2)
 print(DevNull, sol)
 @test sol(-1) ≈  1
 @test sol( 1) ≈ -1
@@ -35,8 +36,8 @@ print(DevNull, sol)
 @test flux(sol(0), sol.prob.model) ≈ godunov(sol.prob.uₗ, sol.prob.uᵣ, sol.prob.model)
 
 # Tuples of Riemann problems
-prob3 = RiemannProblem(Burgers(), -1., -2., 2.f0)
-prob4 = RiemannProblem(Burgers(), -2., 5., 7//2)
+prob3 = RiemannProblem(model, -1., -2., 2.f0)
+prob4 = RiemannProblem(model, -2., 5., 7//2)
 
 @test_throws ErrorException prob3 * prob1
 prob1 * prob2
@@ -55,3 +56,22 @@ print(DevNull, sol)
 @test sol(1., 1+eps()) ≈ -1
 @test sol(1., 2.) ≈ -1
 #plot(sol) # Plots fails on win32 [appveyor]
+
+us = linspace(-1, 1, 10)
+for (uₗ,uᵣ) in Iterators.product(us,us)
+  prob = RiemannProblem(model, uₗ, uᵣ)
+  sol = solve(prob)
+  @test isapprox(godunov(uₗ, uᵣ, model), flux(sol(0), model), atol=1.e-30)
+end
+
+
+################################################################################
+
+# Buckley-Leverette equation
+model = BuckleyLeverette()
+us = linspace(0, 1, 10)
+for (uₗ,uᵣ) in Iterators.product(us,us)
+  prob = RiemannProblem(model, uₗ, uᵣ)
+  sol = solve(prob)
+  @test godunov(uₗ, uᵣ, model) ≈ flux(sol(0), model)
+end

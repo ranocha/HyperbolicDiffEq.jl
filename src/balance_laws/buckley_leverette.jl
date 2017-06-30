@@ -29,7 +29,9 @@ Compute the flux of `u` for `model`.
 
 Compute the speed f'(`u`) for `model`.
 """
-@inline speed(u, model::BuckleyLeverette) = 2*u*(1-u) / (u^2 + (1-u)^2)^2
+@inline function speed(u, model::BuckleyLeverette)
+  2*u*(1-u) / (u^2 + (1-u)^2)^2
+end
 
 """
     max_abs_speed(u, model::BuckleyLeverette)
@@ -134,17 +136,16 @@ end
 Compute the speed f a shock with left and right state `uₗ`, `uᵣ` for `model`.
 """
 function shockspeed(uₗ, uᵣ, model::BuckleyLeverette)
-  (-2*uₗ*uᵣ + uₗ + uᵣ) /
-    (4*uₗ^2*uᵣ^2 - 4*uₗ^2*uᵣ + 2*uₗ^2 - 4*uₗ*uᵣ^2 + 4*uₗ*uᵣ - 2*uₗ + 2*uᵣ^2 - 2*uᵣ + 1)
+  (uₗ + uᵣ - 2*uₗ*uᵣ) / ( (1 + 2*uₗ*(uₗ-1)) * (1 + 2*uᵣ*(uᵣ-1)) )
 end
 
 
 """
-    solve{T,T1}(prob::RiemannProblem{BuckleyLeverette{T,1},T,T1})
+    solve{T,T1}(prob::RiemannProblem{BuckleyLeverette{T},T,T1})
 
 Compute the solution of the Riemann prolem `prob`.
 """
-function solve{T,T1}(prob::RiemannProblem{BuckleyLeverette{T,1},T,T1})
+function solve{T,T1}(prob::RiemannProblem{BuckleyLeverette{T},T,T1})
   @unpack uₗ, uᵣ, model = prob
   u_crit = one(T) / 2
 
@@ -153,33 +154,32 @@ function solve{T,T1}(prob::RiemannProblem{BuckleyLeverette{T,1},T,T1})
   end
 
   # f(u) = u^2 / (u^2 + (1-u)^2) is convex on [0, 0.5] and concave on [0.5, 1]
-  if uₗ < uᵣ
+  if uₗ ≈ uᵣ
+    σ⁻ = σ⁺ = zero(T)
+  elseif uₗ < uᵣ
     # find the lower convex envelope
-    if uₗ < u_crit && uᵣ < u_crit
+    if uₗ <= u_crit && uᵣ <= u_crit
       # f is convex
       # the solutions contains a single rarefaction wave
       σ⁻ = speed(uₗ, model)
       σ⁺ = speed(uᵣ, model)
-    elseif uₗ > u_crit && uᵣ > u_crit
+    elseif uₗ >= u_crit && uᵣ >= u_crit
       # f is concave
-      # the solutions contains a single shock
+      # the solutions contains a single shock wave
       σ⁻ = σ⁺ = shockspeed(uₗ, uᵣ, model)
     else
       # f has both convex and concave parts
       σ⁻ = speed(uₗ, model)
-      umin = min(uₗ, uᵣ)
-      umax = max(uₗ, uᵣ)
-      σ⁺ = speed(
-        Roots.fzero(u -> speed(u, model) - shockspeed(u, uᵣ, model), [umin, umax]),
-        model)
+      umid = 1 / (2uᵣ + sqrt(2 + 4uᵣ*(uᵣ-1)))
+      σ⁺ = speed(umid, model)
     end
-  else
+  else # uₗ > uᵣ
     # find the upper concave envelope
-    if uₗ < u_crit && uᵣ < u_crit
+    if uₗ <= u_crit && uᵣ <= u_crit
       # f is convex
       # the solutions contains a single shock
       σ⁻ = σ⁺ = shockspeed(uₗ, uᵣ, model)
-    elseif uₗ > u_crit && uᵣ > u_crit
+    elseif uₗ >= u_crit && uᵣ >= u_crit
       # f is concave
       # the solutions contains a single rarefaction wave
       σ⁻ = speed(uₗ, model)
@@ -187,11 +187,8 @@ function solve{T,T1}(prob::RiemannProblem{BuckleyLeverette{T,1},T,T1})
     else
       # f has both convex and concave parts
       σ⁻ = speed(uₗ, model)
-      umin = min(uₗ, uᵣ); umin += eps(umin) # otherwise fzero takes umin if umin=0
-      umax = max(uₗ, uᵣ)
-      σ⁺ = speed(
-        Roots.fzero(u -> speed(u, model) - shockspeed(u, uᵣ, model), [umin, umax]),
-        model)
+      umid = 1 / (2uᵣ + sqrt(2 + 4uᵣ*(uᵣ-1)))
+      σ⁺ = speed(umid, model)
     end
   end
 

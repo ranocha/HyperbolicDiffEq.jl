@@ -73,7 +73,7 @@ end
   legend --> false
 
   σ⁻, σ⁺ =  minmax_speeds(sol)
-  if σ⁻ ≈ 0 && σ⁺ ≈ 0
+  if σ⁻ ≈ σ⁺
     σ = one(σ⁻)
   else
     σ = min(abs(σ⁻ - σ⁺), max(abs(σ⁻), abs(σ⁺))/10)
@@ -241,7 +241,7 @@ end
   _, σ⁺ = minmax_speeds(sol.tup[end])
   xmax = sol.tup[end].prob.x₀ + (t-t₀)*σ⁺
 
-  if xmin ≈ 0 && xmax ≈ 0
+  if xmin ≈ xmax
     Δx = one(xmin)
   else
     Δx = min(abs(xmin - xmax), max(abs(xmin), abs(xmax))/10)
