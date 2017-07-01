@@ -134,14 +134,23 @@ function compute_state_and_speeds{T}(uₗ::ShallowWaterVar1D{T}, uᵣ::ShallowWa
 
   if v_S1_SWE(hᵣ,hₗ,vₗ) <= vᵣ && vᵣ <= v_R2_SWE(hᵣ,hₗ,vₗ)
     # Case I: wave1 = shock, wave2 = rarefaction
-    hₘ = Roots.fzero(h -> vᵣ-v_R2_SWE(hᵣ,h,v_S1_SWE(h,hₗ,vₗ)), hₗ, hᵣ)
-     # this is better than vₘ = v_S1_SWE(hₘ,hₗ,vₗ) for hₗ≈0
-    vₘ = v_R2_SWE(hₘ,hᵣ,vᵣ)
-    uₘ = ShallowWaterVar1D{T}(hₘ, hₘ*vₘ)
-    # this is better than σ₁⁻ = σ₁⁺ = vₗ - sqrt(hₘ+hₘ^2/hₗ) / sqrt(2) for hₗ≈0
-    σ₁⁻ = σ₁⁺ = vₘ - sqrt(hₗ+hₗ^2/hₘ) / sqrt(2)
-    σ₂⁻ = vₘ + sqrt(hₘ)
-    σ₂⁺ = vᵣ + sqrt(hᵣ)
+    if hₗ ≈ 0
+      hₘ = hₗ
+      vₘ = v_R2_SWE(hₘ,hᵣ,vᵣ)
+      uₘ = ShallowWaterVar1D{T}(hₘ, hₘ*vₘ)
+      σ₁⁻ = σ₁⁺ = vₘ - sqrt(hₗ)
+      σ₂⁻ = vₘ + sqrt(hₘ)
+      σ₂⁺ = vᵣ + sqrt(hᵣ)
+    else
+      hₘ = Roots.fzero(h -> vᵣ-v_R2_SWE(hᵣ,h,v_S1_SWE(h,hₗ,vₗ)), hₗ, hᵣ)
+      # this is better than vₘ = v_S1_SWE(hₘ,hₗ,vₗ) for hₗ≈0
+      vₘ = v_R2_SWE(hₘ,hᵣ,vᵣ)
+      uₘ = ShallowWaterVar1D{T}(hₘ, hₘ*vₘ)
+      # this is better than σ₁⁻ = σ₁⁺ = vₗ - sqrt(hₘ+hₘ^2/hₗ) / sqrt(2) for hₗ≈0
+      σ₁⁻ = σ₁⁺ = vₘ - sqrt(hₗ+hₗ^2/hₘ) / sqrt(2)
+      σ₂⁻ = vₘ + sqrt(hₘ)
+      σ₂⁺ = vᵣ + sqrt(hᵣ)
+    end
   elseif v_R1_SWE(hᵣ,hₗ,vₗ) <= vᵣ && v_R2_SWE(hᵣ,hₗ,vₗ) <= vᵣ
     # Case II: wave1 = rarefaction, wave2 = rarefaction
     if 2*(sqrt(hᵣ)+sqrt(hₗ)) >= vᵣ-vₗ
@@ -163,12 +172,21 @@ function compute_state_and_speeds{T}(uₗ::ShallowWaterVar1D{T}, uᵣ::ShallowWa
     end
   elseif v_S2_SWE(hᵣ,hₗ,vₗ) <= vᵣ && vᵣ <= v_R1_SWE(hᵣ,hₗ,vₗ)
     # Case III: wave1 = rarefaction, wave2 = shock
-    hₘ = Roots.fzero(h->vᵣ-v_S2_SWE(hᵣ,h,v_R1_SWE(h,hₗ,vₗ)), hᵣ, hₗ)
-    vₘ = v_R1_SWE(hₘ,hₗ,vₗ)
-    uₘ = ShallowWaterVar1D{T}(hₘ,hₘ*vₘ)
-    σ₁⁻ = vₗ - sqrt(hₗ)
-    σ₁⁺ = vₘ - sqrt(hₘ)
-    σ₂⁻ = σ₂⁺ = vₘ + sqrt(hᵣ+hᵣ^2/hₘ) / sqrt(2)
+    if hᵣ ≈ 0
+      hₘ = hᵣ
+      vₘ = v_R1_SWE(hₘ,hₗ,vₗ)
+      uₘ = ShallowWaterVar1D{T}(hₘ,hₘ*vₘ)
+      σ₁⁻ = vₗ - sqrt(hₗ)
+      σ₁⁺ = vₘ - sqrt(hₘ)
+      σ₂⁻ = σ₂⁺ = vₘ + sqrt(hᵣ)
+    else
+      hₘ = Roots.fzero(h->vᵣ-v_S2_SWE(hᵣ,h,v_R1_SWE(h,hₗ,vₗ)), hᵣ, hₗ)
+      vₘ = v_R1_SWE(hₘ,hₗ,vₗ)
+      uₘ = ShallowWaterVar1D{T}(hₘ,hₘ*vₘ)
+      σ₁⁻ = vₗ - sqrt(hₗ)
+      σ₁⁺ = vₘ - sqrt(hₘ)
+      σ₂⁻ = σ₂⁺ = vₘ + sqrt(hᵣ+hᵣ^2/hₘ) / sqrt(2)
+    end
   else #vᵣ <= v_S1_SWE(hᵣ,hₗ,vₗ) && vᵣ <= v_S2_SWE(hᵣ,hₗ,vₗ)
     # Case IV: wave1 = shock, wave2 = shock
     # TODO: Chose some interval?
