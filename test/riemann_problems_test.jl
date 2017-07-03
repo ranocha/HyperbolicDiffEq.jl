@@ -83,7 +83,8 @@ end
 # Shallow water equations
 model = ShallowWater()
 
-# Example 5.20 of Holden & Risebro, 2002
+# Dam Break
+# Example 5.20 of Holden & Risebro, "Front Tracking for Hyperbolic Conservation Laws", 2002
 uₗ = ShallowWaterVar1D(1., 0.)
 uᵣ = ShallowWaterVar1D(0., 0.)
 prob = RiemannProblem(model, uₗ, uᵣ)
@@ -113,7 +114,37 @@ v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
 @test all(v[-2 .< x .< 1] ≈ -2 .* (1 .- x[-2 .< x .< 1]) ./ 3)
 @test all(v[x .> 1] .≈ 0)
 
-# Example 5.21 of Holden & Risebro, 2002
+uₗ = ShallowWaterVar1D(1., 0.)
+uᵣ = ShallowWaterVar1D(eps(), 0.)
+prob = RiemannProblem(model, uₗ, uᵣ)
+sol = solve(prob)
+x = linspace(-3, 3)
+u = sol.(1., x)
+h = mappedarray(u->u.h, u)
+v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
+@test all(h[x .< -1] .≈ 1)
+@test all(h[-1 .< x .< 2] ≈ (2 .- x[-1 .< x .< 2]).^2 ./ 9)
+@test all(h[x .> 2] .≈ eps())
+@test all(v[x .< -1] .≈ 0)
+@test all(v[-1 .< x .< 2] ≈ 2 .* (1 .+ x[-1 .< x .< 2]) ./ 3)
+@test all(v[x .> 2] .≈ 0)
+
+uₗ, uᵣ = uᵣ, uₗ
+prob = RiemannProblem(model, uₗ, uᵣ)
+sol = solve(prob)
+x = linspace(-3, 3)
+u = sol.(1., x)
+h = mappedarray(u->u.h, u)
+v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
+@test all(h[x .< -2] .≈ eps())
+@test all(h[-2 .< x .< 1] ≈ (2 .+ x[-2 .< x .< 1]).^2 ./ 9)
+@test all(h[x .> 1] .≈ 1)
+@test all(v[x .< -2] .≈ 0)
+@test all(v[-2 .< x .< 1] ≈ -2 .* (1 .- x[-2 .< x .< 1]) ./ 3)
+@test all(v[x .> 1] .≈ 0)
+
+# Moses' First Problem
+# Example 5.21 of Holden & Risebro, "Front Tracking for Hyperbolic Conservation Laws", 2002
 h₀ = 1.
 v₀ = 2.5
 uₗ = ShallowWaterVar1D(h₀, -v₀)
