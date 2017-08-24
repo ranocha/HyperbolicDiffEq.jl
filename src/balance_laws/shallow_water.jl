@@ -65,6 +65,65 @@ end
 end
 
 
+"""
+    suliciu(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1})
+
+The Suliciu relaxation solver / numerical flux.
+"""
+function suliciu(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1}) where T
+    hl, vl = primitive_variables(uₗ, model)
+    hr, vr = primitive_variables(uᵣ, model)
+    @unpack g = model
+
+    sqrt_ghl = sqrt(g*hl)
+    sqrt_ghr = sqrt(g*hr)
+
+    # compute speeds
+    cl_hl = zero(T)
+    cr_hr = zero(T)
+    if hl <= hr && 0 < hr
+      cl_hl = sqrt_ghl + 1.5*max(0, 0.5*g*(hr*hr-hl*hl)/(hr*sqrt_ghr) + vl - vr )
+      cr_hr = sqrt_ghr + 1.5*max(0, 0.5*g*(hl*hl-hr*hr)/(cl_hl*hl) + vl - vr )
+    elseif hr <= hl && 0 < hl
+      cr_hr = sqrt_ghr + 1.5*max(0, 0.5*g*(hl*hl-hr*hr)/(hl*sqrt_ghl) + vl - vr )
+      cl_hl = sqrt_ghl + 1.5*max(0, 0.5*g*(hr*hr-hl*hl)/(cr_hr*hr) + vl - vr )
+    else
+      cl_hl = cr_hr = zero(T)
+    end
+
+    # compute intermediate values
+    cl = cl_hl*hl
+    cr = cr_hr*hr
+    vls = vrs = ( cl*vl+cr*vr+0.5*g*(hl*hl-hr*hr) ) / ( cl+cr )
+    vls = vrs = ifelse(isnan(vls), zero(T), vls)
+    πls = πrs = ( 0.5*g*(cr*hl*hl+cl*hr*hr)-cl*cr*(vr-vl) ) / (cl+cr)
+    πls = πrs = ifelse(isnan(πls), zero(T), πls)
+    hls = 1 / ( 1/hl + (cr*(vr-vl)+0.5*g*(hl*hl-hr*hr))/(cl*(cl+cr)) )
+    hls = ifelse(isnan(hls), zero(T), hls)
+    hrs = 1 / ( 1/hr + (cl*(vr-vl)+0.5*g*(hr*hr-hl*hl))/(cr*(cl+cr)) )
+    hrs = ifelse(isnan(hrs), zero(T), hrs)
+
+    # compute fluxes
+    fnum_h  = zero(T)
+    fnum_hv = zero(T)
+    if 0 <= vl-cl_hl
+      fnum_h  = hl*vl
+      fnum_hv = hl*vl*vl + 0.5*g*hl*hl
+    elseif 0 <= vls
+      fnum_h  = hls*vls
+      fnum_hv = hls*vls*vls + πls
+    elseif 0 <= vr+cr_hr
+      fnum_h  = hrs*vrs
+      fnum_hv = hrs*vrs*vrs + πrs
+    else
+      fnum_h  = hr*vr
+      fnum_hv = hr*vr*vr + 0.5*g*hr*hr
+    end
+
+    SVector(fnum_h, fnum_hv)
+end
+
+
 ################################################################################
 
 struct ShallowWaterRiemannSolution{T,T1} <: AbstractRiemannSolution

@@ -85,7 +85,7 @@ export evaluate_coefficients, evaluate_coefficients!
 # finite volume methods
 export FirstOrderFV
 export semidiscretise, max_dt
-export local_lax_friedrichs, godunov
+export local_lax_friedrichs, godunov, suliciu
 
 
 end # module

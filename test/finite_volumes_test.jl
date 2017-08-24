@@ -54,3 +54,4 @@ u2 = variables(balance_law)(2., 0.)
 uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
                 RiemannProblem(balance_law, u2, u1, 0.5))
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, local_lax_friedrichs, Ns) > 0.75
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, suliciu, Ns) > 0.75
