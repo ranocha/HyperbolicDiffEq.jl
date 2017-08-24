@@ -57,7 +57,7 @@ end
   SVector{2,T}(h*v, h*v^2 + g*h^2/2)
 end
 
-@inline function max_speed{T}(u::ShallowWaterVar1D, model::ShallowWater{T,1})
+@inline function max_abs_speed{T}(u::ShallowWaterVar1D, model::ShallowWater{T,1})
   h, v = primitive_variables(u)
   @unpack g = model
 
