@@ -3,12 +3,10 @@ using OrdinaryDiffEq
 using HyperbolicDiffEq
 
 
-function calc_error(balance_law, numflux, N, usethreads=true)
-    uₐₙₐ = solve(RiemannProblem(balance_law, 0., 1., -0.5) *
-                    RiemannProblem(balance_law, 1., 0., 0.5))
-    tspan = (0., 0.5)
+function calc_error(balance_law, uₐₙₐ, tmin, tmax, numflux, N, usethreads=true)
     u₀ = x -> uₐₙₐ(tspan[1], x)
 
+    tspan = (tmin, tmax)
     mesh = UniformPeriodicMesh1D(-2., 2., N)
     fv = FirstOrderFV(balance_law, mesh, numflux, usethreads)
     ode = semidiscretise(fv, u₀, tspan)
@@ -27,14 +25,32 @@ function calc_order_estimate(Ns_and_errors)
     mean(orders)
 end
 
-function calc_order_estimate(balance_law, numflux, Ns, usethreads=true)
-    calc_order_estimate(calc_error.(balance_law, numflux, Ns, usethreads))
+function calc_order_estimate(balance_law, uₐₙₐ, tspan, numflux, Ns, usethreads=true)
+    calc_order_estimate(calc_error.(balance_law, uₐₙₐ, tspan..., numflux, Ns, usethreads))
 end
 
 
 # test convergence orders
 Ns = 100 .* 2 .^ (1:7)
-@test calc_order_estimate(Burgers(), godunov, Ns) > 0.8
-@test calc_order_estimate(Burgers(), local_lax_friedrichs, Ns) > 0.8
-@test calc_order_estimate(BuckleyLeverette(), godunov, Ns) > 0.8
-@test calc_order_estimate(BuckleyLeverette(), local_lax_friedrichs, Ns) > 0.8
+
+balance_law = Burgers()
+tspan = (0., 0.5)
+uₐₙₐ = solve(RiemannProblem(balance_law, 0., 1., -0.5) *
+                RiemannProblem(balance_law, 1., 0., 0.5))
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, godunov, Ns) > 0.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, local_lax_friedrichs, Ns) > 0.8
+
+balance_law = BuckleyLeverette()
+tspan = (0., 0.5)
+uₐₙₐ = solve(RiemannProblem(balance_law, 0., 1., -0.5) *
+                RiemannProblem(balance_law, 1., 0., 0.5))
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, godunov, Ns) > 0.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, local_lax_friedrichs, Ns) > 0.8
+
+balance_law = ShallowWater()
+tspan = (0., 0.1)
+u1 = variables(balance_law)(1., 2.)
+u2 = variables(balance_law)(2., 0.)
+uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
+                RiemannProblem(balance_law, u2, u1, 0.5))
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, local_lax_friedrichs, Ns) > 0.75

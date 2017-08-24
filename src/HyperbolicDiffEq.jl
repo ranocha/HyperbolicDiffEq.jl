@@ -73,7 +73,7 @@ include("balance_laws/shallow_water.jl")
 export Burgers, BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
 
-export flux, max_abs_speed
+export flux, max_abs_speed, variables
 
 export RiemannProblem
 
