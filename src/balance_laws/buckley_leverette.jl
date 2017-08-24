@@ -40,24 +40,24 @@ Compute the maximal absolute value of speed at `u` for `model`.
 """
 @inline max_abs_speed(u, model::BuckleyLeverette) = abs(speed(u, model))
 
+"""
+    max_abs_speed(uₗ, uᵣ, model::BuckleyLeverette)
+
+Compute the maximal absolute value of the speed in the solution of the Riemann
+problem with states `uₗ`, `uᵣ` for `model`.
+"""
+@inline function max_abs_speed(uₗ, uᵣ, model::BuckleyLeverette)
+    # the flux is not convex; the maximal speed is 0.5 at u=0.5
+    critical_u = one(uₗ) / 2
+    if min(uₗ,uᵣ) < critical_u && max(uₗ,uᵣ) > critical_u
+        λ = max_abs_speed(critical_u, model)
+    else
+        λ = max(max_abs_speed(uₗ,model), max_abs_speed(uᵣ,model))
+    end
+end
+
 
 ################################################################################
-
-"""
-    local_lax_friedrichs(uₗ, uᵣ, model::BuckleyLeverette)
-
-Compute the local Lax-Friedrichs flux between `uₗ` and `uᵣ` for `model`.
-"""
-function local_lax_friedrichs(u, uᵣ, model::BuckleyLeverette)
-  # the flux is not convex; the maximal speed is 0.5 at u=0.5
-  critical_u = one(T)/2
-  if min(uₗ,uᵣ) < critical_u && max(uₗ,uᵣ) > critical_u
-    λ = max_abs_speed(critical_u, model)
-  else
-    λ = max(max_abs_speed(uₗ,model), max_abs_speed(uᵣ,model))
-  end
-  ( flux(uₗ, model) + flux(uᵣ, model) ) / 2 - λ/2 * (uᵣ-uₗ)
-end
 
 """
     godunov(uₗ, uᵣ, model::BuckleyLeverette)
@@ -67,7 +67,6 @@ Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 function godunov(uₗ, uᵣ, model::BuckleyLeverette)
   flux(uₗ, model)
 end
-
 
 ################################################################################
 
