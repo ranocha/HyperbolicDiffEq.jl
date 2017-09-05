@@ -2,6 +2,8 @@ __precompile__()
 
 module HyperbolicDiffEq
 
+import Jacobi
+
 using Roots
 using Parameters
 using StaticArrays
@@ -55,12 +57,21 @@ An abstract type for a semidiscretisation.
 """
 abstract type AbstractSemidiscretisation end
 
+"""
+An abstract type for a basis, e.g. a polynomial basis.
+"""
+abstract type AbstractBasis end
+abstract type NodalBasis <: AbstractBasis end
+
+include("bases/bases1d.jl")
 
 include("meshes/meshes1d.jl")
 include("meshes/compute_coefficients.jl")
 
 include("finite_volumes/finite_volumes.jl")
 include("finite_volumes/numerical_fluxes.jl")
+
+include("flux_difference/uniform_flux_difference.jl")
 
 include("riemann_problems.jl")
 include("balance_laws/burgers.jl")
@@ -77,6 +88,9 @@ export flux, max_abs_speed, variables
 
 export RiemannProblem
 
+# bases
+export LobattoLegendre
+
 # meshes
 export UniformPeriodicMesh1D
 export compute_coefficients, compute_coefficients!
@@ -86,6 +100,9 @@ export evaluate_coefficients, evaluate_coefficients!
 export FirstOrderFV
 export semidiscretise, max_dt
 export local_lax_friedrichs, godunov, suliciu
+
+# flux difference methods
+export UniformPeriodicFluxDiffDisc2D
 
 
 end # module
