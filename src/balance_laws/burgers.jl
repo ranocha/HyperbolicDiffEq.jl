@@ -16,7 +16,7 @@ end
 
 function show{T,Dim}(io::IO, model::Burgers{T,Dim})
   print(io, "Burgers' equation {T=", T, ", Dim=", Dim, "}",
-            " with flux f(u) = u^2 / 2")
+            " with flux f(u) = u^2 / 2 * (1,...,1)/sqrt(Dim)")
 end
 
 

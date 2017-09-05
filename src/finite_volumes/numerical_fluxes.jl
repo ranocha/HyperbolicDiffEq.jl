@@ -26,3 +26,13 @@ end
 The "standard" energy conservative flux.
 """
 struct EnergyConservativeFlux <: NumericalFlux end
+
+
+"""
+The central flux, i.e. the arithmetic mean of the fluxes.
+"""
+struct CentralFlux <: NumericalFlux end
+
+function (flux::CentralFlux)(uₗ, uᵣ, model, direction)
+    (flux(uₗ, model, direction) + flux(uᵣ, model, direction)) / 2
+end
