@@ -40,7 +40,7 @@ An abstract type representing a scalar balance law using `T` as real type in
 `Dim` space dimensions.
 """
 abstract type ScalarBalanceLaw{T,Dim} <: AbstractBalanceLaw{Dim} end
-variables{T}(model::ScalarBalanceLaw{T,1}) = T
+variables{T,Dim}(model::ScalarBalanceLaw{T,Dim}) = T
 
 """
 An abstract type representing a Riemann problem.
@@ -56,6 +56,11 @@ abstract type AbstractRiemannSolution end
 An abstract type for a semidiscretisation.
 """
 abstract type AbstractSemidiscretisation end
+
+"""
+An abstract type for a numerical flux.
+"""
+abstract type NumericalFlux end
 
 """
 An abstract type for a basis, e.g. a polynomial basis.
@@ -99,7 +104,7 @@ export evaluate_coefficients, evaluate_coefficients!
 # finite volume methods
 export FirstOrderFV
 export semidiscretise, max_dt
-export local_lax_friedrichs, godunov, suliciu
+export local_lax_friedrichs, godunov, suliciu, EnergyConservativeFlux
 
 # flux difference methods
 export UniformPeriodicFluxDiffDisc2D

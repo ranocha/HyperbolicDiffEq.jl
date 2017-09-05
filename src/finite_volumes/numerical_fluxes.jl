@@ -20,3 +20,9 @@ problem with states `uₗ`, `uᵣ` for `model`.
 function max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw{1})
     max(max_abs_speed(uₗ,model), max_abs_speed(uᵣ,model))
 end
+
+
+"""
+The "standard" energy conservative flux.
+"""
+struct EnergyConservativeFlux <: NumericalFlux end

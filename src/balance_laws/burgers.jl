@@ -35,6 +35,10 @@ Compute the maximal absolute value of speed at `u` for `model`.
 @inline max_abs_speed(u, model::Burgers) = abs(u)
 
 
+
+@inline flux{T}(u, model::Burgers{T,2}, direction) = u^2 / (2*sqrt(2))
+
+
 ################################################################################
 
 """
@@ -52,6 +56,24 @@ function godunov{T}(uₗ::T, uᵣ::T, model::Burgers{T,1})
   else
     max(flux(uₗ, model), flux(uᵣ, model))
   end
+end
+
+
+function godunov{T}(uₗ::T, uᵣ::T, model::Burgers{T,2}, direction)
+  if uₗ < uᵣ
+    if uₗ < 0 && 0 < uᵣ
+      zero(T)
+    else
+      min(flux(uₗ, model, direction), flux(uᵣ, model, direction))
+    end
+  else
+    max(flux(uₗ, model, direction), flux(uᵣ, model, direction))
+  end
+end
+
+
+function (flux::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Burgers{T,2}, direction) where T<:Real
+    (uₗ^2 + uₗ*uᵣ + uᵣ^2) / (6*sqrt(6))
 end
 
 
