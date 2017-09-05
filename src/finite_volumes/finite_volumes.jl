@@ -60,7 +60,7 @@ function (fv::FirstOrderFV)(t, u, du)
     end
     length(u) != numcells(fv.mesh) && error("length(u) != numcells(fv.mesh)")
     if eltype(u) != variables(fv.balance_law)
-      error("eltype(u) == $(eltype(u)) != $(variables(fv.model)) == variables(fv.model)")
+      error("eltype(u) == $(eltype(u)) != $(variables(fv.balance_law)) == variables(fv.balance_law)")
     end
   end
 
