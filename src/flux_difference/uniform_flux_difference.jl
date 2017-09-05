@@ -28,7 +28,7 @@ function (semidisc::UniformPeriodicFluxDiffDisc2D)(t, u, du)
     end
   end
 
-  du .= 0
+  fill!(du, zero(eltype(du)))
   add_flux_differences!(du, u, semidisc)
   add_numerical_fluxes!(du, u, semidisc)
 

@@ -36,3 +36,9 @@ struct CentralFlux <: NumericalFlux end
 function (flux::CentralFlux)(uₗ, uᵣ, model, direction)
     (flux(uₗ, model, direction) + flux(uᵣ, model, direction)) / 2
 end
+
+
+"""
+The Suliciu relaxation solver.
+"""
+struct SuliciuFlux <: NumericalFlux end

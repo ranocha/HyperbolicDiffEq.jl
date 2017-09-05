@@ -3,7 +3,7 @@
     ShallowWater{T<:Real,Dim}
 
 The shallow water equations with gravitational constant `g`
-in `Dim` dimensions using `T` as scalar tpe.
+in `Dim` dimensions using `T` as scalar type.
 """
 struct ShallowWater{T<:Real,Dim} <: AbstractBalanceLaw{1}
   g::T
@@ -14,7 +14,7 @@ function ShallowWater(g=1., Dim=1)
 end
 
 function show{T,Dim}(io::IO, model::ShallowWater{T,Dim})
-  print(io, "Shallow water equations {T=", T, ", Dim=", Dim, "}")
+  print(io, "Shallow water equations with g=", model.g, " {T=", T, ", Dim=", Dim, "}")
 end
 
 

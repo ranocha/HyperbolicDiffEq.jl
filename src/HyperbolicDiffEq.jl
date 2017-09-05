@@ -82,12 +82,14 @@ include("riemann_problems.jl")
 include("balance_laws/burgers.jl")
 include("balance_laws/buckley_leverette.jl")
 include("balance_laws/shallow_water.jl")
+include("balance_laws/euler.jl")
 
 
 
 # models
 export Burgers, BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
+export Euler, EulerVar2D
 
 export flux, max_abs_speed, variables
 
@@ -104,7 +106,8 @@ export evaluate_coefficients, evaluate_coefficients!
 # finite volume methods
 export FirstOrderFV
 export semidiscretise, max_dt
-export local_lax_friedrichs, godunov, suliciu, EnergyConservativeFlux, CentralFlux
+export local_lax_friedrichs, godunov, suliciu, EnergyConservativeFlux, CentralFlux,
+        SuliciuFlux
 
 # flux difference methods
 export UniformPeriodicFluxDiffDisc2D
