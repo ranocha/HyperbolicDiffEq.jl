@@ -58,7 +58,7 @@ end
 
 @inline function kinetic_energy(u::EulerVar2D, model::Euler)
     ϱ, vx, vy, p = primitive_variables(u, model)
-    
+    !
     ϱ * (vx^2 + vy^2) / 2
 end
 
@@ -81,6 +81,20 @@ end
     ϱ, vx, vy, p = primitive_variables(u, model)
 
     max(abs(vx),abs(vy)) + sqrt(γ * p / ϱ)
+end
+
+@inline function max_abs_speed(u::EulerVar2D, model::Euler, dir::Val{:x})
+    @unpack γ = model
+    ϱ, vx, vy, p = primitive_variables(u, model)
+
+    abs(vx) + sqrt(γ * p / ϱ)
+end
+
+@inline function max_abs_speed(u::EulerVar2D, model::Euler, dir::Val{:y})
+    @unpack γ = model
+    ϱ, vx, vy, p = primitive_variables(u, model)
+
+    abs(vy) + sqrt(γ * p / ϱ)
 end
 
 
@@ -124,7 +138,7 @@ end
 ################################################################################
 
 
-function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T}, model::Euler{T,2}, dir::Val{:x}) where T
+Base.@pure function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T}, model::Euler{T,2}, dir::Val{:x}) where T
     @unpack γ = model
     ϱeₗ = uₗ.ϱe
     ϱeᵣ = uᵣ.ϱe
@@ -162,36 +176,36 @@ function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T}, model::Eu
     ɛᵣs = ɛᵣ + (pᵣs*pᵣs - pᵣ*pᵣ)/(2*cᵣ*cᵣ)
 
     # compute fluxes
-    fρ   = zero(T)
-    fρvx = zero(T)
-    fρvy = zero(T)
-    fρe  = zero(T)
+    fϱ   = zero(T)
+    fϱvx = zero(T)
+    fϱvy = zero(T)
+    fϱe  = zero(T)
     if 0 <= vxₗ-cₗ_ϱₗ
-        fρ   = ϱₗ*vxₗ
-        fρvx = ϱₗ*vxₗ*vxₗ + pₗ
-        fρvy = ϱₗ*vxₗ*vyₗ
-        fρe  = (ϱₗ*vxₗ*vxₗ/2 + ϱₗ*vyₗ*vyₗ/2 + ϱₗ*ɛₗ + pₗ)*vxₗ
+        fϱ   = ϱₗ*vxₗ
+        fϱvx = ϱₗ*vxₗ*vxₗ + pₗ
+        fϱvy = ϱₗ*vxₗ*vyₗ
+        fϱe  = (ϱₗ*vxₗ*vxₗ/2 + ϱₗ*vyₗ*vyₗ/2 + ϱₗ*ɛₗ + pₗ)*vxₗ
     elseif 0 <= vxs
-        fρ   = ϱₗs*vxs
-        fρvx = ϱₗs*vxs*vxs + pₗs
-        fρvy = ϱₗ*vxs*vyₗ
-        fρe  = (ϱₗs*vxs*vxs/2 + ϱₗs*vyₗ*vyₗ/2 + ϱₗs*ɛₗs + pₗs)*vxs
+        fϱ   = ϱₗs*vxs
+        fϱvx = ϱₗs*vxs*vxs + pₗs
+        fϱvy = ϱₗ*vxs*vyₗ
+        fϱe  = (ϱₗs*vxs*vxs/2 + ϱₗs*vyₗ*vyₗ/2 + ϱₗs*ɛₗs + pₗs)*vxs
     elseif 0 <= vxᵣ+cᵣ_ϱᵣ
-        fρ   = ϱᵣs*vxs
-        fρvx = ϱᵣs*vxs*vxs + pᵣs
-        fρvy = ϱₗ*vxs*vyᵣ
-        fρe  = (ϱᵣs*vxs*vxs/2 + ϱᵣs*vyᵣ*vyᵣ/2 + ϱᵣs*ɛᵣs + pᵣs)*vxs
+        fϱ   = ϱᵣs*vxs
+        fϱvx = ϱᵣs*vxs*vxs + pᵣs
+        fϱvy = ϱₗ*vxs*vyᵣ
+        fϱe  = (ϱᵣs*vxs*vxs/2 + ϱᵣs*vyᵣ*vyᵣ/2 + ϱᵣs*ɛᵣs + pᵣs)*vxs
     else
-        fρ   = ϱᵣ*vxᵣ
-        fρvx = ϱᵣ*vxᵣ*vxᵣ + pᵣ
-        fρvy = ϱₗ*vxᵣ*vyᵣ
-        fρe  = (ϱᵣ*vxᵣ*vxᵣ/2 + ϱᵣ*vyᵣ*vyᵣ/2 + ϱᵣ*ɛᵣ + pᵣ)*vxᵣ
+        fϱ   = ϱᵣ*vxᵣ
+        fϱvx = ϱᵣ*vxᵣ*vxᵣ + pᵣ
+        fϱvy = ϱₗ*vxᵣ*vyᵣ
+        fϱe  = (ϱᵣ*vxᵣ*vxᵣ/2 + ϱᵣ*vyᵣ*vyᵣ/2 + ϱᵣ*ɛᵣ + pᵣ)*vxᵣ
     end
 
-    SVector(fρ, fρvx, fρvy, fρe)
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
 
-function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T}, model::Euler{T,2}, dir::Val{:y}) where T
+Base.@pure function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T}, model::Euler{T,2}, dir::Val{:y}) where T
     @unpack γ = model
     ϱeₗ = uₗ.ϱe
     ϱeᵣ = uᵣ.ϱe
@@ -229,31 +243,195 @@ function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T}, model::Eu
     ɛᵣs = ɛᵣ + (pᵣs*pᵣs - pᵣ*pᵣ)/(2*cᵣ*cᵣ)
 
     # compute fluxes
-    fρ   = zero(T)
-    fρvx = zero(T)
-    fρvy = zero(T)
-    fρe  = zero(T)
+    fϱ   = zero(T)
+    fϱvx = zero(T)
+    fϱvy = zero(T)
+    fϱe  = zero(T)
     if 0 <= vyₗ-cₗ_ϱₗ
-        fρ   = ϱₗ*vyₗ
-        fρvx = ϱₗ*vxₗ*vyₗ
-        fρvy = ϱₗ*vyₗ*vyₗ + pₗ
-        fρe  = (ϱₗ*vxₗ*vxₗ/2 + ϱₗ*vyₗ*vyₗ/2 + ϱₗ*ɛₗ + pₗ)*vyₗ
+        fϱ   = ϱₗ*vyₗ
+        fϱvx = ϱₗ*vxₗ*vyₗ
+        fϱvy = ϱₗ*vyₗ*vyₗ + pₗ
+        fϱe  = (ϱₗ*vxₗ*vxₗ/2 + ϱₗ*vyₗ*vyₗ/2 + ϱₗ*ɛₗ + pₗ)*vyₗ
     elseif 0 <= vys
-        fρ   = ϱₗs*vys
-        fρvx = ϱₗs*vxₗ*vys
-        fρvy = ϱₗ*vys*vys + pₗs
-        fρe  = (ϱₗs*vxₗ*vxₗ/2 + ϱₗs*vys*vys/2 + ϱₗs*ɛₗs + pₗs)*vys
+        fϱ   = ϱₗs*vys
+        fϱvx = ϱₗs*vxₗ*vys
+        fϱvy = ϱₗ*vys*vys + pₗs
+        fϱe  = (ϱₗs*vxₗ*vxₗ/2 + ϱₗs*vys*vys/2 + ϱₗs*ɛₗs + pₗs)*vys
     elseif 0 <= vyᵣ+cᵣ_ϱᵣ
-        fρ   = ϱᵣs*vys
-        fρvx = ϱᵣs*vxᵣ*vys
-        fρvy = ϱₗ*vys*vys + pᵣs
-        fρe  = (ϱᵣs*vxᵣ*vxᵣ/2 + ϱᵣs*vys*vys/2 + ϱᵣs*ɛᵣs + pᵣs)*vys
+        fϱ   = ϱᵣs*vys
+        fϱvx = ϱᵣs*vxᵣ*vys
+        fϱvy = ϱₗ*vys*vys + pᵣs
+        fϱe  = (ϱᵣs*vxᵣ*vxᵣ/2 + ϱᵣs*vys*vys/2 + ϱᵣs*ɛᵣs + pᵣs)*vys
     else
-        fρ   = ϱᵣ*vyᵣ
-        fρvx = ϱᵣ*vxᵣ*vyᵣ
-        fρvy = ϱₗ*vyᵣ*vyᵣ + pᵣ
-        fρe  = (ϱᵣ*vxᵣ*vxᵣ/2 + ϱᵣ*vyᵣ*vyᵣ/2 + ϱᵣ*ɛᵣ + pᵣ)*vyᵣ
+        fϱ   = ϱᵣ*vyᵣ
+        fϱvx = ϱᵣ*vxᵣ*vyᵣ
+        fϱvy = ϱₗ*vyᵣ*vyᵣ + pᵣ
+        fϱe  = (ϱᵣ*vxᵣ*vxᵣ/2 + ϱᵣ*vyᵣ*vyᵣ/2 + ϱᵣ*ɛᵣ + pᵣ)*vyᵣ
     end
 
-    SVector(fρ, fρvx, fρvy, fρe)
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+
+Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                                model::Euler{T,2}, dir::Val{:x}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    βₗ = ϱₗ / 2pₗ
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    βᵣ = ϱᵣ / 2pᵣ
+
+    ϱ    = (ϱₗ + ϱᵣ) / 2
+    ϱlog = logmean(ϱₗ, ϱᵣ)
+    vx   = (vxₗ + vxᵣ) / 2
+    vy   = (vyₗ + vyᵣ) / 2
+    v2   = (vxₗ^2+vyₗ^2 + vxᵣ^2+vyᵣ^2) / 2
+    β    = (βₗ + βᵣ) / 2
+    βlog = logmean(βₗ, βᵣ)
+
+    fϱ   = ϱlog*vx
+    fϱvx = vx*fϱ + ϱ/2β
+    fϱvy = vy*fϱ
+    fϱe  = 1/(2γ-2)*fϱ/βlog - v2*fϱ/2 + vx*fϱvx + vy*fϱvy
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                                model::Euler{T,2}, dir::Val{:y}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    βₗ = ϱₗ / 2pₗ
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    βᵣ = ϱᵣ / 2pᵣ
+
+    ϱ    = (ϱₗ + ϱᵣ) / 2
+    ϱlog = logmean(ϱₗ, ϱᵣ)
+    vx   = (vxₗ + vxᵣ) / 2
+    vy   = (vyₗ + vyᵣ) / 2
+    v2   = (vxₗ^2+vyₗ^2 + vxᵣ^2+vyᵣ^2) / 2
+    β    = (βₗ + βᵣ) / 2
+    βlog = logmean(βₗ, βᵣ)
+
+    fϱ   = ϱlog*vy
+    fϱvx = vx*fϱ
+    fϱvy = vy*fϱ + ϱ/2β
+    fϱe  = 1/(2γ-2)*fϱ/βlog - v2*fϱ/2 + vx*fϱvx + vy*fϱvy
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+
+
+Base.@pure function roe_variables(u::EulerVar2D, model::Euler)
+    ϱ, vx, vy, p = primitive_variables(u, model)
+    z1 = sqrt(ϱ/p)
+    z2 = z1*vx
+    z3 = z1*vy
+    z5 = p*z1
+
+    z1, z2, z3, z5
+end
+
+Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                            model::Euler{T,2}, dir::Val{:x}) where T
+    @unpack γ = model
+    z1ₗ, z2ₗ, z3ₗ, z5ₗ = roe_variables(uₗ, model)
+    z1ᵣ, z2ᵣ, z3ᵣ, z5ᵣ = roe_variables(uᵣ, model)
+
+    z1    = (z1ₗ + z1ᵣ) / 2
+    z1log = logmean(z1ₗ, z1ᵣ)
+    z2    = (z2ₗ + z2ᵣ) / 2
+    z3    = (z3ₗ + z3ᵣ) / 2
+    z5    = (z5ₗ + z5ᵣ) / 2
+    z5log = logmean(z5ₗ, z5ᵣ)
+
+    ϱ  = z1*z5log
+    vx = z2/z1
+    vy = z3/z1
+    p1 = z5/z1
+    p2 = ( (γ+1)*z5log/z1log + (γ-1)*z5/z1 ) / 2γ
+    h  = γ/(γ-1) * p2/ϱ + (vx*vx + vy*vy)/2
+
+    fϱ   = ϱ*vx
+    fϱvx = ϱ*vx^2 + p1
+    fϱvy = ϱ*vx*vy
+    fϱe  = ϱ*vx*h
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                            model::Euler{T,2}, dir::Val{:y}) where T
+    @unpack γ = model
+    z1ₗ, z2ₗ, z3ₗ, z5ₗ = roe_variables(uₗ, model)
+    z1ᵣ, z2ᵣ, z3ᵣ, z5ᵣ = roe_variables(uᵣ, model)
+
+    z1    = (z1ₗ + z1ᵣ) / 2
+    z1log = logmean(z1ₗ, z1ᵣ)
+    z2    = (z2ₗ + z2ᵣ) / 2
+    z3    = (z3ₗ + z3ᵣ) / 2
+    z5    = (z5ₗ + z5ᵣ) / 2
+    z5log = logmean(z5ₗ, z5ᵣ)
+
+    ϱ  = z1*z5log
+    vx = z2/z1
+    vy = z3/z1
+    p1 = z5/z1
+    p2 = ( (γ+1)*z5log/z1log + (γ-1)*z5/z1 ) / 2γ
+    h  = γ/(γ-1) * p2/ϱ + (vx*vx + vy*vy)/2
+
+    fϱ   = ϱ*vy
+    fϱvx = ϱ*vx*vy
+    fϱvy = ϱ*vy^2 + p1
+    fϱe  = ϱ*vy*h
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+
+Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                                model::Euler{T,2}, dir::Val{:x}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+
+    ϱ    = (ϱₗ + ϱᵣ) / 2
+    ϱlog = logmean(ϱₗ, ϱᵣ)
+    vx   = (vxₗ + vxᵣ) / 2
+    vy   = (vyₗ + vyᵣ) / 2
+    v2   = (vxₗ^2+vyₗ^2 + vxᵣ^2+vyᵣ^2) / 2
+    p    = (pₗ + pᵣ) / 2
+    ϱ_p_log = logmean(ϱₗ/pₗ, ϱᵣ/pᵣ)
+
+    #TODO: Test
+    fϱ   = ϱlog*vx
+    fϱvx = vx*fϱ + p
+    fϱvy = vy*fϱ
+    fϱe  = vx*fϱvx - ϱlog*v2*vx/2 + ϱlog*vx/((γ-1)*ϱ_p_log) - (pᵣ-pₗ)*(vxᵣ-vxₗ)/4
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                                model::Euler{T,2}, dir::Val{:y}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+
+    ϱ    = (ϱₗ + ϱᵣ) / 2
+    ϱlog = logmean(ϱₗ, ϱᵣ)
+    vx   = (vxₗ + vxᵣ) / 2
+    vy   = (vyₗ + vyᵣ) / 2
+    v2   = (vxₗ^2+vyₗ^2 + vxᵣ^2+vyᵣ^2) / 2
+    p    = (pₗ + pᵣ) / 2
+    ϱ_p_log = logmean(ϱₗ/pₗ, ϱᵣ/pᵣ)
+
+    # TODO: Test
+    fϱ   = ϱlog*vy
+    fϱvx = vx*fϱ
+    fϱvy = vy*fϱ + p
+    fϱe  = vy*fϱvy - ϱlog*v2*vy/2 + ϱlog*vy/((γ-1)*ϱ_p_log) - (pᵣ-pₗ)*(vyᵣ-vyₗ)/4
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
 end

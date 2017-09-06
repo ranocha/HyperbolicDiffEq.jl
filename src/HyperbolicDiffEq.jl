@@ -84,6 +84,7 @@ include("balance_laws/buckley_leverette.jl")
 include("balance_laws/shallow_water.jl")
 include("balance_laws/euler.jl")
 
+include("utils.jl")
 
 
 # models
