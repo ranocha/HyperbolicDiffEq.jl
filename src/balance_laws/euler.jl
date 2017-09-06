@@ -1233,7 +1233,7 @@ Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱeₗ = uₗ.ϱe
-    ϱᵣ, vxᵣ, vyᵣ, vzₗ, pᵣ = primitive_variables(uᵣ, model)
+    ϱᵣ, vxᵣ, vyᵣ, vzᵣ, pᵣ = primitive_variables(uᵣ, model)
     ϱeᵣ = uᵣ.ϱe
 
     ϱ  = (ϱₗ + ϱᵣ) / 2
@@ -1256,7 +1256,7 @@ Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱeₗ = uₗ.ϱe
-    ϱᵣ, vxᵣ, vyᵣ, vzₗ, pᵣ = primitive_variables(uᵣ, model)
+    ϱᵣ, vxᵣ, vyᵣ, vzᵣ, pᵣ = primitive_variables(uᵣ, model)
     ϱeᵣ = uᵣ.ϱe
 
     ϱ  = (ϱₗ + ϱᵣ) / 2
@@ -1279,7 +1279,7 @@ Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱeₗ = uₗ.ϱe
-    ϱᵣ, vxᵣ, vyᵣ, vzₗ, pᵣ = primitive_variables(uᵣ, model)
+    ϱᵣ, vxᵣ, vyᵣ, vzᵣ, pᵣ = primitive_variables(uᵣ, model)
     ϱeᵣ = uᵣ.ϱe
 
     ϱ  = (ϱₗ + ϱᵣ) / 2
