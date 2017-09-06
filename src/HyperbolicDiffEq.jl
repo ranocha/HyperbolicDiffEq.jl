@@ -107,11 +107,16 @@ export evaluate_coefficients, evaluate_coefficients!
 # finite volume methods
 export FirstOrderFV
 export semidiscretise, max_dt
-export local_lax_friedrichs, godunov, suliciu, EnergyConservativeFlux, CentralFlux,
-        SuliciuFlux
+export local_lax_friedrichs, godunov, suliciu
+export LocalLaxFriedrichsFlux, SuliciuFlux
+export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
+export EnergyConservativeFlux, IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
 
 # flux difference methods
 export UniformPeriodicFluxDiffDisc2D
+
+# utilities
+export integrate, kinetic_energy
 
 
 end # module

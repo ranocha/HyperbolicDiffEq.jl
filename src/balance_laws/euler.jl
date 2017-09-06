@@ -50,16 +50,23 @@ end
     ϱ, vx, vy, p
 end
 
-@inline function conserved_variables(ϱ, vx, vy, p, model::Euler)
+Base.@pure function conserved_variables(ϱ, vx, vy, p, model::Euler)
     @unpack γ = model
 
     variables(model)(ϱ, ϱ*vx, ϱ*vy, (ϱ*vx^2+ϱ*vy^2)/2+(γ-1)*p)
 end
 
-@inline function kinetic_energy(u::EulerVar2D, model::Euler)
+Base.@pure function kinetic_energy(u::EulerVar2D, model::Euler)
     ϱ, vx, vy, p = primitive_variables(u, model)
-    !
+
     ϱ * (vx^2 + vy^2) / 2
+end
+
+Base.@pure function entropy(u::EulerVar2D, model::Euler)
+    @unpack γ = model
+    ϱ, vx, vy, p = primitive_variables(u, model)
+
+    -ϱ*log(p/ϱ^γ) / (γ-1)
 end
 
 @inline function flux{T}(u::EulerVar2D{T}, model::Euler, dir::Val{:x})
