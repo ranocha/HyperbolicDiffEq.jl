@@ -61,13 +61,43 @@ end
 
 
 """
+    MorinishiFlux
+
+The numerical flux corresponding to the splitting of Morinishi (2010),
+see Gassner, Winter, Kopriva (2016).
+"""
+struct MorinishiFlux <: NumericalFlux end
+
+"""
+    DucrosEtAlFlux
+
+The numerical flux corresponding to the splitting of Ducros, Laporte, Soulères,
+Guinot, Moinat, Caruelle (2000), see Gassner, Winter, Kopriva (2016).
+"""
+struct DucrosEtAlFlux <: NumericalFlux end
+
+"""
+    KennedyGruberFlux
+
+The numerical flux corresponding to the splitting of Kennedy and Gruber (2008),
+see Gassner, Winter, Kopriva (2016).
+"""
+struct KennedyGruberFlux <: NumericalFlux end
+
+"""
+    PirozzoliFlux
+
+The numerical flux corresponding to the splitting of Pirozzoli (2011),
+see Gassner, Winter, Kopriva (2016).
+"""
+struct PirozzoliFlux <: NumericalFlux end
+
+"""
     SuliciuFlux
 
 The Suliciu relaxation solver.
 """
 struct SuliciuFlux <: NumericalFlux end
-
-
 
 """
     ChandrashekarFluxEC
@@ -76,14 +106,12 @@ The entropy conservative flux of Chandrashekar (2013).
 """
 struct ChandrashekarFluxEC <: NumericalFlux end
 
-
 """
     IsmailRoeFluxEC
 
 The entropy conservative flux of Ismail and Roe (2009).
 """
 struct IsmailRoeFluxEC <: NumericalFlux end
-
 
 """
     RanochaFluxECandKEP

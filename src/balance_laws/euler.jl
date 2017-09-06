@@ -435,3 +435,54 @@ Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::Euler
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
+
+
+Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                          model::Euler{T,2}, dir::Val{:x}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    ϱvxₗ = uₗ.ϱvx
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    ϱvxᵣ = uᵣ.ϱvx
+
+    ϱvx  = (ϱvxₗ + ϱvxᵣ) / 2
+    vx   = (vxₗ + vxᵣ) / 2
+    vy   = (vyₗ + vyᵣ) / 2
+    p    = (pₗ + pᵣ) / 2
+    pvx  = (pₗ*vxₗ + pᵣ*vxᵣ) / 2
+    ϱvxx = (ϱvxₗ*vxₗ + ϱvxᵣ*vxᵣ) / 2
+    ϱvxy = (ϱvxₗ*vyₗ + ϱvxᵣ*vyᵣ) / 2
+    ϱvxv2= (ϱvxₗ*(vxₗ^2+vyₗ^2) + ϱvxᵣ*(vxᵣ^2+vyᵣ^2)) / 2
+
+    fϱ   = ϱvx
+    fϱvx = ϱvx*vx + p
+    fϱvy = ϱvx*vy
+    fϱe  = γ/(γ-1)*pvx + ϱvxx*vx + ϱvxy*vy - ϱvxv2/2
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                          model::Euler{T,2}, dir::Val{:y}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    ϱvyₗ = uₗ.ϱvy
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    ϱvyᵣ = uᵣ.ϱvy
+
+    ϱvy  = (ϱvyₗ + ϱvyᵣ) / 2
+    vx   = (vxₗ + vxᵣ) / 2
+    vy   = (vyₗ + vyᵣ) / 2
+    p    = (pₗ + pᵣ) / 2
+    pvy  = (pₗ*vyₗ + pᵣ*vyᵣ) / 2
+    ϱvyy = (ϱvyₗ*vyₗ + ϱvyᵣ*vyᵣ) / 2
+    ϱvyx = (ϱvyₗ*vxₗ + ϱvyᵣ*vxᵣ) / 2
+    ϱvyv2= (ϱvyₗ*(vxₗ^2+vyₗ^2) + ϱvyᵣ*(vxᵣ^2+vyᵣ^2)) / 2
+
+    fϱ   = ϱvy
+    fϱvx = ϱvy*vx
+    fϱvy = ϱvy*vy + p
+    fϱe  = γ/(γ-1)*pvy + ϱvyx*vx + ϱvyy*vy - ϱvyv2/2
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
