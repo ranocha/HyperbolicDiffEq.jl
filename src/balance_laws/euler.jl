@@ -2,7 +2,7 @@
 """
     Euler{T<:Real,Dim}
 
-The compᵣessible Euler equations in `Dim` dimensions using `T` as scalar type.
+The compressible Euler equations in `Dim` dimensions using `T` as scalar type.
 """
 struct Euler{T<:Real,Dim} <: AbstractBalanceLaw{Dim}
     γ::T
@@ -13,12 +13,16 @@ function Euler(γ=1., Dim=1)
 end
 
 function show{T,Dim}(io::IO, model::Euler{T,Dim})
-  pᵣint(io, "Compᵣessible Euler equations with γ=", model.γ, " {T=", T, ", Dim=", Dim, "}")
+  pᵣint(io, "Compressible Euler equations with γ=", model.γ, " {T=", T, ", Dim=", Dim, "}")
 end
+
+
 """
+    EulerVar2D{T<:Real}
+
 Conserved variables (ϱ, ϱvx, ϱvy, ϱe) of the Euler equations in two space dimensions.
 """
-struct EulerVar2D{T} <: FieldVector{4,T}
+struct EulerVar2D{T<:Real} <: FieldVector{4,T}
   ϱ  ::T
   ϱvx::T
   ϱvy::T
@@ -35,6 +39,31 @@ end
 
 @inline variables{T}(model::Euler{T,2}) = EulerVar2D{T}
 
+
+"""
+    EulerVar3D{T<:Real}
+
+Conserved variables (ϱ, ϱvx, ϱvy, ϱvz, ϱe) of the Euler equations in three space dimensions.
+"""
+struct EulerVar3D{T<:Real} <: FieldVector{5,T}
+  ϱ  ::T
+  ϱvx::T
+  ϱvy::T
+  ϱvz::T
+  ϱe ::T
+end
+
+function (::Type{EulerVar3D{T}}){T}(val::Real)
+  EulerVar3D{T}(val, val, val, val, val)
+end
+
+function similar_type{T}(::EulerVar3D{T})
+  EulerVar3D{T}
+end
+
+@inline variables{T}(model::Euler{T,3}) = EulerVar3D{T}
+
+
 @inline function primitive_variables(u::EulerVar2D, model::Euler)
     @unpack ϱ, ϱvx, ϱvy, ϱe = u
     @unpack γ = model
@@ -50,11 +79,36 @@ end
     ϱ, vx, vy, p
 end
 
+@inline function primitive_variables(u::EulerVar3D, model::Euler)
+    @unpack ϱ, ϱvx, ϱvy, ϱvz, ϱe = u
+    @unpack γ = model
+    if ϱ ≈ 0
+        vx = zero(ϱ)
+        vy = zero(ϱ)
+        vz = zero(ϱ)
+    else
+        vx = ϱvx / ϱ
+        vy = ϱvy / ϱ
+        vz = ϱvz / ϱ
+    end
+    p = (γ-1) * (ϱe - ϱvx*vx/2 - ϱvy*vy/2 - ϱvz*vz/2)
+
+    ϱ, vx, vy, vz, p
+end
+
+
 Base.@pure function conserved_variables(ϱ, vx, vy, p, model::Euler)
     @unpack γ = model
 
     variables(model)(ϱ, ϱ*vx, ϱ*vy, (ϱ*vx^2+ϱ*vy^2)/2+(γ-1)*p)
 end
+
+Base.@pure function conserved_variables(ϱ, vx, vy, vz, p, model::Euler)
+    @unpack γ = model
+
+    variables(model)(ϱ, ϱ*vx, ϱ*vy, ϱ*vz, (ϱ*vx^2+ϱ*vy^2+ϱ*vz^2)/2+(γ-1)*p)
+end
+
 
 Base.@pure function kinetic_energy(u::EulerVar2D, model::Euler)
     ϱ, vx, vy, p = primitive_variables(u, model)
@@ -62,12 +116,27 @@ Base.@pure function kinetic_energy(u::EulerVar2D, model::Euler)
     ϱ * (vx^2 + vy^2) / 2
 end
 
+Base.@pure function kinetic_energy(u::EulerVar3D, model::Euler)
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+
+    ϱ * (vx^2 + vy^2 + vz^2) / 2
+end
+
+
 Base.@pure function entropy(u::EulerVar2D, model::Euler)
     @unpack γ = model
     ϱ, vx, vy, p = primitive_variables(u, model)
 
     -ϱ*log(p/ϱ^γ) / (γ-1)
 end
+
+Base.@pure function entropy(u::EulerVar3D, model::Euler)
+    @unpack γ = model
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+
+    -ϱ*log(p/ϱ^γ) / (γ-1)
+end
+
 
 @inline function flux{T}(u::EulerVar2D{T}, model::Euler, dir::Val{:x})
     @unpack ϱvx, ϱvy, ϱe = u
@@ -82,6 +151,28 @@ end
 
     SVector{4,T}(ϱvy, ϱvy*vx, ϱvy*vy + p, (ϱe+p)*vy)
 end
+
+@inline function flux{T}(u::EulerVar3D{T}, model::Euler, dir::Val{:x})
+    @unpack ϱvx, ϱvy, ϱvz, ϱe = u
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+
+    SVector{5,T}(ϱvx, ϱvx*vx + p, ϱvy*vx, ϱvz*vx, (ϱe+p)*vx)
+end
+
+@inline function flux{T}(u::EulerVar3D{T}, model::Euler, dir::Val{:y})
+    @unpack ϱvx, ϱvy, ϱvz, ϱe = u
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+
+    SVector{5,T}(ϱvy, ϱvx*vy, ϱvy*vy + p, ϱvz*vy, (ϱe+p)*vy)
+end
+
+@inline function flux{T}(u::EulerVar3D{T}, model::Euler, dir::Val{:z})
+    @unpack ϱvx, ϱvy, ϱvz, ϱe = u
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+
+    SVector{5,T}(ϱvz, ϱvx*vz, ϱvy*vz, ϱvz*vz + p, (ϱe+p)*vz)
+end
+
 
 @inline function max_abs_speed(u::EulerVar2D, model::Euler)
     @unpack γ = model
@@ -102,6 +193,34 @@ end
     ϱ, vx, vy, p = primitive_variables(u, model)
 
     abs(vy) + sqrt(γ * p / ϱ)
+end
+
+@inline function max_abs_speed(u::EulerVar3D, model::Euler)
+    @unpack γ = model
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+
+    max(abs(vx),abs(vy),abs(vz)) + sqrt(γ * p / ϱ)
+end
+
+@inline function max_abs_speed(u::EulerVar3D, model::Euler, dir::Val{:x})
+    @unpack γ = model
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+
+    abs(vx) + sqrt(γ * p / ϱ)
+end
+
+@inline function max_abs_speed(u::EulerVar3D, model::Euler, dir::Val{:y})
+    @unpack γ = model
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+
+    abs(vy) + sqrt(γ * p / ϱ)
+end
+
+@inline function max_abs_speed(u::EulerVar3D, model::Euler, dir::Val{:z})
+    @unpack γ = model
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+
+    abs(vz) + sqrt(γ * p / ϱ)
 end
 
 
@@ -140,6 +259,7 @@ end
         x, y, vy
     end
 end
+
 
 
 ################################################################################

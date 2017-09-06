@@ -117,51 +117,34 @@ function compute_coefficients!(uval, u, meshx::AbstractMesh1D, meshy::AbstractMe
 end
 
 
-function evaluate_coefficients(u, meshx::AbstractMesh1D, meshy::AbstractMesh1D,
-                                basis::NodalBasis, npoints=2*length(basis.nodes))
-    xplot = zeros(npoints*numcells(meshx))
-    yplot = zeros(npoints*numcells(meshy))
-    uplot = zeros(eltype(u), npoints*numcells(meshy), npoints*numcells(meshx))
-
-    evaluate_coefficients!(xplot, yplot, uplot, u, meshx, meshy, basis)
+function compute_coefficients(u, meshx::AbstractMesh1D, meshy::AbstractMesh1D,
+                                 meshz::AbstractMesh1D, basis::NodalBasis)
+    xmin, xmax = bounds(meshx)
+    ymin, ymax = bounds(meshy)
+    zmin, zmax = bounds(meshz)
+    Pp1 = length(basis.nodes)
+    uval = zeros(typeof(u((xmin+xmax)/2,(ymin+ymax)/2,(zmin+zmax)/2)), Pp1, Pp1, Pp1,
+                    numcells(meshx), numcells(meshy), numcells(meshz))
+    compute_coefficients!(uval, u, meshx, meshy, meshz, basis)
+    uval
 end
 
-function evaluate_coefficients!(xplot, yplot, uplot, u, meshx::AbstractMesh1D,
-                                meshy::AbstractMesh1D, basis::NodalBasis)
-    npoints = length(xplot) ÷ numcells(meshx)
+function compute_coefficients!(uval, u, meshx::AbstractMesh1D, meshy::AbstractMesh1D,
+                                        meshz::AbstractMesh1D, basis::NodalBasis)
+    @unpack nodes = basis
+    Pp1 = length(nodes)
 
-    @assert length(xplot) == npoints*numcells(meshx)
-    @assert length(yplot) == npoints*numcells(meshy)
-    @assert length(xplot) == size(uplot,2)
-    @assert length(yplot) == size(uplot,1)
-
-    ξ = linspace(-1+eps(),1-eps(),npoints) |> collect
-    η = linspace(-1+eps(),1-eps(),npoints) |> collect
-    intX = Jacobi.interp_mat(ξ, basis.nodes)
-    intY = Jacobi.interp_mat(η, basis.nodes)
-
-    Nx = numcells(meshx)
-    Ny = numcells(meshy)
-    Pp1 = length(basis.nodes)
-    tmp = zeros(eltype(u), Pp1, npoints)
-    uval = zeros(eltype(u), npoints, npoints)
-    for iy in 1:Ny, ix in 1:Nx
+    for iz in cell_indices(meshz), iy in cell_indices(meshy), ix in cell_indices(meshx)
         xmin, xmax = bounds(ix, meshx)
         ymin, ymax = bounds(iy, meshy)
-        x = map_from_canonical(ξ, xmin, xmax, basis)
-        y = map_from_canonical(η, ymin, ymax, basis)
-
-        for nx in 1:Pp1
-            A_mul_B!(view(tmp,nx,:), intY, view(u,nx,:,ix,iy))
-        end
-        A_mul_B!(uval, intX, tmp)
-
-        for jy in 1:npoints, jx in 1:npoints
-            xplot[(ix-1)*npoints+(jx-1)+1] = x[jx]
-            yplot[(iy-1)*npoints+(jy-1)+1] = y[jy]
-            uplot[(iy-1)*npoints+(jy-1)+1, (ix-1)*npoints+(jx-1)+1] = uval[jx,jy]
+        zmin, zmax = bounds(iz, meshz)
+        for nz in 1:Pp1, ny in 1:Pp1, nx in 1:Pp1
+            x = map_from_canonical(nodes[nx], xmin, xmax, basis)
+            y = map_from_canonical(nodes[ny], ymin, ymax, basis)
+            z = map_from_canonical(nodes[nz], zmin, zmax, basis)
+            uval[nx,ny,nz,ix,iy,iz] = u(x,y,z)
         end
     end
 
-    xplot, yplot, uplot
+    nothing
 end

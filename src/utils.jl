@@ -55,9 +55,46 @@ end
 """
     integrate(u::AbstractArray{U,4}, meshx, meshy, basis::NodalBasis)
 
-Integrate the coefficients `u`with respect to the meshes `meshx, meshy` and the
+Integrate the coefficients `u` with respect to the meshes `meshx, meshy` and the
 polynomial basis `basis`.
 """
 function integrate(u::AbstractArray{U,4}, meshx, meshy, basis) where U
     integrate(identity, u, meshx, meshy, basis)
+end
+
+
+"""
+    integrate(func, u::AbstractArray{U,6}, meshx, meshy, meshz, basis::NodalBasis)
+
+Map the function `func` to the coefficients `u` and integrate with respect to
+the meshes `meshx, meshy, meshz` and the polynomial basis `basis`.
+"""
+function integrate(func, u::AbstractArray{U,6}, meshx, meshy, meshz, basis::NodalBasis) where U
+    @unpack weights = basis
+    Pp1 = length(weights)
+    @boundscheck begin
+        @assert Pp1 == size(u,1) == size(u,2) == size(u,3)
+        @assert numcells(meshx) == size(u,4)
+        @assert numcells(meshy) == size(u,5)
+        @assert numcells(meshz) == size(u,6)
+    end
+
+    res = zero(func(first(u)))
+    @inbounds for iz in cell_indices(meshz), iy in cell_indices(meshy), ix in cell_indices(meshx)
+        jac = volume(ix, meshx) * volume(iy, meshy) * volume(iz, meshz)  / 8
+        for nz in 1:Pp1, ny in 1:Pp1, nx in 1:Pp1
+            res += func(u[nx,ny,nz,ix,iy,iz]) * weights[nx] * weights[ny] * weights[nz] * jac
+        end
+    end
+    res
+end
+
+"""
+    integrate(u::AbstractArray{U,6}, meshx, meshy, meshz, basis::NodalBasis)
+
+Integrate the coefficients `u` with respect to the meshes `meshx, meshy, meshz`
+and the polynomial basis `basis`.
+"""
+function integrate(u::AbstractArray{U,6}, meshx, meshy, meshz, basis::NodalBasis) where U
+    integrate(identity, u, meshx, meshy, meshz, basis)
 end
