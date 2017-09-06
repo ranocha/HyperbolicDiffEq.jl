@@ -486,3 +486,142 @@ Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
+
+
+Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                            model::Euler{T,2}, dir::Val{:x}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    ϱvxₗ, ϱvyₗ, ϱeₗ = uₗ.ϱvx, uₗ.ϱvy, uₗ.ϱe
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    ϱvxᵣ, ϱvyᵣ, ϱeᵣ = uᵣ.ϱvx, uᵣ.ϱvy, uᵣ.ϱe
+
+    ϱ   = (ϱₗ + ϱᵣ) / 2
+    ϱvx = (ϱvxₗ + ϱvxᵣ) / 2
+    ϱvy = (ϱvyₗ + ϱvyᵣ) / 2
+    ϱe  = (ϱeₗ + ϱeᵣ) / 2
+    vx   = (vxₗ + vxᵣ) / 2
+    vy   = (vyₗ + vyᵣ) / 2
+    p    = (pₗ + pᵣ) / 2
+
+    fϱ   = ϱ*vx
+    fϱvx = ϱvx*vx + p
+    fϱvy = ϱvy*vx
+    fϱe  = (ϱe+p)*vx
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                            model::Euler{T,2}, dir::Val{:y}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    ϱvxₗ, ϱvyₗ, ϱeₗ = uₗ.ϱvx, uₗ.ϱvy, uₗ.ϱe
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    ϱvxᵣ, ϱvyᵣ, ϱeᵣ = uᵣ.ϱvx, uᵣ.ϱvy, uᵣ.ϱe
+
+    ϱ   = (ϱₗ + ϱᵣ) / 2
+    ϱvx = (ϱvxₗ + ϱvxᵣ) / 2
+    ϱvy = (ϱvyₗ + ϱvyᵣ) / 2
+    ϱe  = (ϱeₗ + ϱeᵣ) / 2
+    vx   = (vxₗ + vxᵣ) / 2
+    vy   = (vyₗ + vyᵣ) / 2
+    p    = (pₗ + pᵣ) / 2
+
+    fϱ   = ϱ*vy
+    fϱvx = ϱvx*vy
+    fϱvy = ϱvy*vy + p
+    fϱe  = (ϱe+p)*vy
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+
+Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                              model::Euler{T,2}, dir::Val{:x}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    eₗ = uₗ.ϱe / ϱₗ
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    eᵣ = uᵣ.ϱe / ϱᵣ
+
+    ϱ  = (ϱₗ + ϱᵣ) / 2
+    vx = (vxₗ + vxᵣ) / 2
+    vy = (vyₗ + vyᵣ) / 2
+    p  = (pₗ + pᵣ) / 2
+    e  = (eₗ + eᵣ) / 2
+
+    fϱ   = ϱ*vx
+    fϱvx = ϱ*vx^2 + p
+    fϱvy = ϱ*vx*vy
+    fϱe  = (ϱ*e+p)*vx
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                              model::Euler{T,2}, dir::Val{:y}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    eₗ = uₗ.ϱe / ϱₗ
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    eᵣ = uᵣ.ϱe / ϱᵣ
+
+    ϱ  = (ϱₗ + ϱᵣ) / 2
+    vx = (vxₗ + vxᵣ) / 2
+    vy = (vyₗ + vyᵣ) / 2
+    p  = (pₗ + pᵣ) / 2
+    e  = (eₗ + eᵣ) / 2
+
+    fϱ   = ϱ*vy
+    fϱvx = ϱ*vx*vy
+    fϱvy = ϱ*vy^2 + p
+    fϱe  = (ϱ*e+p)*vy
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+
+Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                          model::Euler{T,2}, dir::Val{:x}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    ϱeₗ = uₗ.ϱe
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    ϱeᵣ = uᵣ.ϱe
+
+    ϱ  = (ϱₗ + ϱᵣ) / 2
+    vx = (vxₗ + vxᵣ) / 2
+    vy = (vyₗ + vyᵣ) / 2
+    p  = (pₗ + pᵣ) / 2
+    h  = ((ϱeₗ+pₗ)/ϱₗ + (ϱeᵣ+pᵣ)/ϱᵣ) / 2
+
+    fϱ   = ϱ*vx
+    fϱvx = ϱ*vx^2 + p
+    fϱvy = ϱ*vx*vy
+    fϱe  = ϱ*h*vx
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
+
+Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                          model::Euler{T,2}, dir::Val{:y}) where T
+    @unpack γ = model
+    ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
+    ϱeₗ = uₗ.ϱe
+    ϱᵣ, vxᵣ, vyᵣ, pᵣ = primitive_variables(uᵣ, model)
+    ϱeᵣ = uᵣ.ϱe
+
+    ϱ  = (ϱₗ + ϱᵣ) / 2
+    vx = (vxₗ + vxᵣ) / 2
+    vy = (vyₗ + vyᵣ) / 2
+    p  = (pₗ + pᵣ) / 2
+    h  = ((ϱeₗ+pₗ)/ϱₗ + (ϱeᵣ+pᵣ)/ϱᵣ) / 2
+
+    fϱ   = ϱ*vy
+    fϱvx = ϱ*vx*vy
+    fϱvy = ϱ*vy^2 + p
+    fϱe  = ϱ*h*vy
+
+    SVector(fϱ, fϱvx, fϱvy, fϱe)
+end
