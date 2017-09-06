@@ -44,7 +44,7 @@ function integrate(func, u::AbstractArray{U,4}, meshx, meshy, basis::NodalBasis)
 
     res = zero(func(first(u)))
     @inbounds for iy in cell_indices(meshy), ix in cell_indices(meshx)
-        jac = volume(ix, meshx) * volume(iy, meshy) / 2
+        jac = volume(ix, meshx) * volume(iy, meshy) / 4
         for ny in 1:Pp1, nx in 1:Pp1
             res += func(u[nx,ny,ix,iy]) * weights[nx] * weights[ny] * jac
         end

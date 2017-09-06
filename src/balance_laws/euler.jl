@@ -411,11 +411,10 @@ Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::Euler
     p    = (pₗ + pᵣ) / 2
     ϱ_p_log = logmean(ϱₗ/pₗ, ϱᵣ/pᵣ)
 
-    #TODO: Test
     fϱ   = ϱlog*vx
     fϱvx = vx*fϱ + p
     fϱvy = vy*fϱ
-    fϱe  = vx*fϱvx - ϱlog*v2*vx/2 + ϱlog*vx/((γ-1)*ϱ_p_log) - (pᵣ-pₗ)*(vxᵣ-vxₗ)/4
+    fϱe  = (ϱlog/((γ-1)*ϱ_p_log) + p + ϱlog*(vx^2+vy^2-v2/2)) * vx - (pᵣ-pₗ)*(vxᵣ-vxₗ)/4
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
@@ -434,11 +433,10 @@ Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::Euler
     p    = (pₗ + pᵣ) / 2
     ϱ_p_log = logmean(ϱₗ/pₗ, ϱᵣ/pᵣ)
 
-    # TODO: Test
     fϱ   = ϱlog*vy
     fϱvx = vx*fϱ
     fϱvy = vy*fϱ + p
-    fϱe  = vy*fϱvy - ϱlog*v2*vy/2 + ϱlog*vy/((γ-1)*ϱ_p_log) - (pᵣ-pₗ)*(vyᵣ-vyₗ)/4
+    fϱe  = (ϱlog/((γ-1)*ϱ_p_log) + p + ϱlog*(vx^2+vy^2-v2/2)) * vy - (pᵣ-pₗ)*(vyᵣ-vyₗ)/4
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
