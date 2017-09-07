@@ -113,7 +113,7 @@ export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliF
 export EnergyConservativeFlux, IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
 
 # flux difference methods
-export UniformPeriodicFluxDiffDisc2D
+export UniformPeriodicFluxDiffDisc2D, UniformPeriodicFluxDiffDisc3D
 
 # utilities
 export integrate, kinetic_energy
