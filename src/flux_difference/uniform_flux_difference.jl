@@ -152,124 +152,14 @@ function add_numerical_fluxes!(du, u, semidisc::UniformPeriodicFluxDiffDisc2D)
     jacx = 2 / semidisc.meshx.Δx
     jacy = 2 / semidisc.meshy.Δx
 
-    add_numerical_fluxes_inner_loop!(du, fluxes, u, balance_law, fnum, Nx, Ny, Pp1, ω, jacx, jacy, usethreads)
+    add_numerical_fluxes_inner_loop1!(du, fluxes, u, balance_law, fnum, Nx, Ny, Pp1, ω, jacx, jacy, usethreads)
+    add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, fnum, Nx, Ny, Pp1, ω, jacx, jacy, usethreads)
 end
 
-@inline function add_numerical_fluxes_inner_loop!(du, u, balance_law, fnum, Nx, Ny, Pp1,
-                                                    ω, jacx, jacy, ::Val{true})
-    dirx = Val{:x}()
-    diry = Val{:y}()
-    i_ω1 = 1 / ω[1]
-    i_ωend = 1 / ω[end]
-    dims = (Pp1, Pp1, Nx, Ny)
-    @inbounds Threads.@threads for ixy in Base.OneTo(Nx*Ny)
-        ix, iy = ind2sub((Nx,Ny), ixy)
-        ixm1 = ix ==  1 ? Nx : ix-1
-        ixp1 = ix == Nx ?  1 : ix+1
-        iym1 = iy ==  1 ? Ny : iy-1
-        iyp1 = iy == Ny ?  1 : iy+1
-
-        # flux x
-        for ny in 1:Pp1
-            # flux x - left
-            idx = sub2ind(dims, 1, ny, ix, iy)
-            uₗ = u[end,ny,ixm1,iy]
-            uᵣ = u[idx]
-            du[idx] += ( fnum(uₗ, uᵣ, balance_law, dirx)
-                        - flux(uᵣ, balance_law, dirx) ) * jacx * i_ω1
-
-            # flux x - right
-            idx = sub2ind(dims, Pp1, ny, ix, iy)
-            uₗ = u[idx]
-            uᵣ = u[1,ny,ixp1,iy]
-            du[idx] -= ( fnum(uₗ, uᵣ, balance_law, dirx)
-                        - flux(uₗ, balance_law, dirx) ) * jacx * i_ωend
-        end
-
-        # flux y
-        for nx in 1:Pp1
-            # flux y - bottom
-            idx = sub2ind(dims, nx, 1, ix, iy)
-            uₗ = u[nx,end,ix,iym1]
-            uᵣ = u[idx]
-            du[idx] += ( fnum(uₗ, uᵣ, balance_law, diry)
-                        - flux(uᵣ, balance_law, diry) ) * jacy * i_ω1
-
-            # flux y - top
-            idx = sub2ind(dims, nx, Pp1, ix, iy)
-            uₗ = u[idx]
-            uᵣ = u[nx,1,ix,iyp1]
-            du[idx] -= ( fnum(uₗ, uᵣ, balance_law, diry)
-                        - flux(uₗ, balance_law, diry) ) * jacy * i_ωend
-        end
-    end
-    nothing
-end
-
-@inline function add_numerical_fluxes_inner_loop!(du, u, balance_law, fnum, Nx, Ny, Pp1,
-                                                    ω, jacx, jacy, ::Val{false})
-    dirx = Val{:x}()
-    diry = Val{:y}()
-    i_ω1 = 1 / ω[1]
-    i_ωend = 1 / ω[end]
-    dims = (Pp1, Pp1, Nx, Ny)
-    @inbounds for iy in Base.OneTo(Ny), ix in Base.OneTo(Nx)
-        ixm1 = ix ==  1 ? Nx : ix-1
-        ixp1 = ix == Nx ?  1 : ix+1
-        iym1 = iy ==  1 ? Ny : iy-1
-        iyp1 = iy == Ny ?  1 : iy+1
-
-        # flux x
-        for ny in 1:Pp1
-            # flux x - left
-            idx = sub2ind(dims, 1, ny, ix, iy)
-            uₗ = u[end,ny,ixm1,iy]
-            uᵣ = u[idx]
-            du[idx] += ( fnum(uₗ, uᵣ, balance_law, dirx)
-                        - flux(uᵣ, balance_law, dirx) ) * jacx * i_ω1
-
-            # flux x - right
-            idx = sub2ind(dims, Pp1, ny, ix, iy)
-            uₗ = u[idx]
-            uᵣ = u[1,ny,ixp1,iy]
-            du[idx] -= ( fnum(uₗ, uᵣ, balance_law, dirx)
-                        - flux(uₗ, balance_law, dirx) ) * jacx * i_ωend
-        end
-
-        # flux y
-        for nx in 1:Pp1
-            # flux y - bottom
-            idx = sub2ind(dims, nx, 1, ix, iy)
-            uₗ = u[nx,end,ix,iym1]
-            uᵣ = u[idx]
-            du[idx] += ( fnum(uₗ, uᵣ, balance_law, diry)
-                        - flux(uᵣ, balance_law, diry) ) * jacy * i_ω1
-
-            # flux y - top
-            idx = sub2ind(dims, nx, Pp1, ix, iy)
-            uₗ = u[idx]
-            uᵣ = u[nx,1,ix,iyp1]
-            du[idx] -= ( fnum(uₗ, uᵣ, balance_law, diry)
-                        - flux(uₗ, balance_law, diry) ) * jacy * i_ωend
-        end
-    end
-    nothing
-end
-
-@inline function add_numerical_fluxes_inner_loop!(du, fluxes, u, balance_law, fnum,
-                                                    Nx, Ny, Pp1, ω, jacx, jacy, usethreads::Val{true})
-    add_numerical_fluxes_inner_loop1!(du, fluxes, u, balance_law, fnum, Nx, Ny,
-                                        Pp1, ω, jacx, jacy, usethreads)
-    add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, fnum, Nx, Ny,
-                                        Pp1, ω, jacx, jacy, usethreads)
-    nothing
-end
 @inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, balance_law, fnum,
                                                     Nx, Ny, Pp1, ω, jacx, jacy, ::Val{true})
     dirx = Val{:x}()
     diry = Val{:y}()
-    i_ω1 = 1 / ω[1]
-    i_ωend = 1 / ω[end]
     dims = (Pp1, Pp1, Nx, Ny)
     # calculate numerical fluxes
     @inbounds Threads.@threads for ixy in Base.OneTo(Nx*Ny)
@@ -295,8 +185,8 @@ end
                                                     Nx, Ny, Pp1, ω, jacx, jacy, ::Val{true})
     dirx = Val{:x}()
     diry = Val{:y}()
-    i_ω1 = 1 / ω[1]
-    i_ωend = 1 / ω[end]
+    @inbounds i_ω1 = 1 / ω[1]
+    @inbounds i_ωend = 1 / ω[end]
     dims = (Pp1, Pp1, Nx, Ny)
     # add numerical fluxes
     @inbounds Threads.@threads for ixy in Base.OneTo(Nx*Ny)
@@ -329,15 +219,14 @@ end
     nothing
 end
 
-@inline function add_numerical_fluxes_inner_loop!(du, fluxes, u, balance_law, fnum,
+@inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, balance_law, fnum,
                                                     Nx, Ny, Pp1, ω, jacx, jacy, ::Val{false})
     dirx = Val{:x}()
     diry = Val{:y}()
-    i_ω1 = 1 / ω[1]
-    i_ωend = 1 / ω[end]
     dims = (Pp1, Pp1, Nx, Ny)
     # calculate numerical fluxes
-    @inbounds for iy in Base.OneTo(Ny), ix in Base.OneTo(Nx)
+    @inbounds for ixy in Base.OneTo(Nx*Ny)
+        ix, iy = ind2sub((Nx,Ny), ixy)
         ixm1 = ix ==  1 ? Nx : ix-1
         iym1 = iy ==  1 ? Ny : iy-1
 
@@ -353,8 +242,18 @@ end
             fluxes[nx,2,ix,iy] = fnum(u[nx,end,ix,iym1], u[nx,1,ix,iy], balance_law, diry)
         end
     end
+    nothing
+end
+@inline function add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, fnum,
+                                                    Nx, Ny, Pp1, ω, jacx, jacy, ::Val{false})
+    dirx = Val{:x}()
+    diry = Val{:y}()
+    @inbounds i_ω1 = 1 / ω[1]
+    @inbounds i_ωend = 1 / ω[end]
+    dims = (Pp1, Pp1, Nx, Ny)
     # add numerical fluxes
-    @inbounds for iy in Base.OneTo(Ny), ix in Base.OneTo(Nx)
+    @inbounds for ixy in Base.OneTo(Nx*Ny)
+        ix, iy = ind2sub((Nx,Ny), ixy)
         ixp1 = ix == Nx ?  1 : ix+1
         iyp1 = iy == Ny ?  1 : iy+1
 
