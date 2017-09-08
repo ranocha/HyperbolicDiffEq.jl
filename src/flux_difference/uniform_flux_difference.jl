@@ -15,7 +15,7 @@ function UniformPeriodicFluxDiffDisc2D(balance_law, meshx, meshy, basis, fvol, f
 end
 
 
-function (semidisc::UniformPeriodicFluxDiffDisc2D)(t, u, du)
+@noinline function (semidisc::UniformPeriodicFluxDiffDisc2D)(t, u, du)
   @boundscheck begin
     if size(u) != size(du)
       error("size(u) = $(size(u)) != $(size(du)) = size(du)")
@@ -253,7 +253,7 @@ function UniformPeriodicFluxDiffDisc3D(balance_law, meshx, meshy, meshz, basis, 
 end
 
 
-function (semidisc::UniformPeriodicFluxDiffDisc3D)(t, u, du)
+@noinline function (semidisc::UniformPeriodicFluxDiffDisc3D)(t, u, du)
   @boundscheck begin
     if size(u) != size(du)
       error("size(u) = $(size(u)) != $(size(du)) = size(du)")
