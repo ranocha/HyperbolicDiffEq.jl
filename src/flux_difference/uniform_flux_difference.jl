@@ -65,16 +65,26 @@ end
         for ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
             idx = sub2ind(dims, nx, ny, ixy)
             # compute x derivative
-            for k in Base.OneTo(Pp1)
+            # at first for different indices
+            for k in (nx+1):Pp1
                 idxk = sub2ind(dims, k, ny, ixy)
-                du[idx] -= 2*jacx*D[nx,k] * fvol(u[idx], u[idxk], balance_law, dirx)
+                f = fvol(u[idx], u[idxk], balance_law, dirx)
+                du[idx]  -= 2*jacx*D[nx,k] * f
+                du[idxk] -= 2*jacx*D[k,nx] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacx*D[nx,nx] * flux(u[idx], balance_law, dirx)
 
             # compute y derivative
-            for k in Base.OneTo(Pp1)
+            # at first for different indices
+            for k in (ny+1):Pp1
                 idxk = sub2ind(dims, nx, k, ixy)
-                du[idx] -= 2*jacy*D[ny,k] * fvol(u[idx], u[idxk], balance_law, diry)
+                f = fvol(u[idx], u[idxk], balance_law, diry)
+                du[idx]  -= 2*jacy*D[ny,k] * f
+                du[idxk] -= 2*jacy*D[k,ny] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacy*D[ny,ny] * flux(u[idx], balance_law, diry)
         end
     end
     nothing
@@ -90,16 +100,26 @@ end
         for ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
             idx = sub2ind(dims, nx, ny, ixy)
             # compute x derivative
-            for k in Base.OneTo(Pp1)
+            # at first for different indices
+            for k in (nx+1):Pp1
                 idxk = sub2ind(dims, k, ny, ixy)
-                du[idx] -= 2*jacx*D[nx,k] * fvol(u[idx], u[idxk], balance_law, dirx)
+                f = fvol(u[idx], u[idxk], balance_law, dirx)
+                du[idx]  -= 2*jacx*D[nx,k] * f
+                du[idxk] -= 2*jacx*D[k,nx] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacx*D[nx,nx] * flux(u[idx], balance_law, dirx)
 
             # compute y derivative
-            for k in Base.OneTo(Pp1)
+            # at first for different indices
+            for k in (ny+1):Pp1
                 idxk = sub2ind(dims, nx, k, ixy)
-                du[idx] -= 2*jacy*D[ny,k] * fvol(u[idx], u[idxk], balance_law, diry)
+                f = fvol(u[idx], u[idxk], balance_law, diry)
+                du[idx]  -= 2*jacy*D[ny,k] * f
+                du[idxk] -= 2*jacy*D[k,ny] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacy*D[ny,ny] * flux(u[idx], balance_law, diry)
         end
     end
     nothing
