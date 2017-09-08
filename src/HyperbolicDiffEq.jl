@@ -92,7 +92,7 @@ export Burgers, BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar2D
 
-export flux, max_abs_speed, variables
+export flux, max_abs_speed, variables, kinetic_energy, entropy
 
 export RiemannProblem
 
@@ -116,7 +116,7 @@ export EnergyConservativeFlux, IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFlux
 export UniformPeriodicFluxDiffDisc2D, UniformPeriodicFluxDiffDisc3D
 
 # utilities
-export integrate, kinetic_energy
+export integrate
 
 
 end # module
