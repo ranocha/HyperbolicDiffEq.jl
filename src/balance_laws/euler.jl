@@ -13,7 +13,7 @@ function Euler(γ=1., Dim=1)
 end
 
 function show{T,Dim}(io::IO, model::Euler{T,Dim})
-  pᵣint(io, "Compressible Euler equations with γ=", model.γ, " {T=", T, ", Dim=", Dim, "}")
+  print(io, "Compressible Euler equations with γ=", model.γ, " {T=", T, ", Dim=", Dim, "}")
 end
 
 
@@ -97,13 +97,13 @@ end
 end
 
 
-Base.@pure function conserved_variables(ϱ, vx, vy, p, model::Euler)
+@inline function conserved_variables(ϱ, vx, vy, p, model::Euler)
     @unpack γ = model
 
     variables(model)(ϱ, ϱ*vx, ϱ*vy, (ϱ*vx^2+ϱ*vy^2)/2+(γ-1)*p)
 end
 
-Base.@pure function conserved_variables(ϱ, vx, vy, vz, p, model::Euler)
+@inline function conserved_variables(ϱ, vx, vy, vz, p, model::Euler)
     @unpack γ = model
 
     variables(model)(ϱ, ϱ*vx, ϱ*vy, ϱ*vz, (ϱ*vx^2+ϱ*vy^2+ϱ*vz^2)/2+(γ-1)*p)
@@ -265,7 +265,7 @@ end
 ################################################################################
 
 
-Base.@pure function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+@inline function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
                                         model::Euler{T,2}, dir::Val{:x}) where T
     @unpack γ = model
     ϱeₗ = uₗ.ϱe
@@ -333,7 +333,7 @@ Base.@pure function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T}
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
 
-Base.@pure function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+@inline function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
                                         model::Euler{T,2}, dir::Val{:y}) where T
     @unpack γ = model
     ϱeₗ = uₗ.ϱe
@@ -406,7 +406,7 @@ end
 # TODO: (fnum::SuliciuFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T}, model::Euler{T,3}, dir::Val{:z}) where T
 
 
-Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+@inline function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
                                                 model::Euler{T,2}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
@@ -429,7 +429,7 @@ Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar2D{T}, uᵣ::Euler
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
-Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+@inline function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
                                                 model::Euler{T,2}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
@@ -453,7 +453,7 @@ Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar2D{T}, uᵣ::Euler
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
 
-Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+@inline function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
                                                 model::Euler{T,3}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
@@ -478,7 +478,7 @@ Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar3D{T}, uᵣ::Euler
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+@inline function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
                                                 model::Euler{T,3}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
@@ -503,7 +503,7 @@ Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar3D{T}, uᵣ::Euler
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+@inline function (fnum::ChandrashekarFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
                                                 model::Euler{T,3}, dir::Val{:z}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
@@ -551,7 +551,7 @@ Base.@pure function roe_variables(u::EulerVar3D, model::Euler)
     z1, z2, z3, z4, z5
 end
 
-Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+@inline function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
                                             model::Euler{T,2}, dir::Val{:x}) where T
     @unpack γ = model
     z1ₗ, z2ₗ, z3ₗ, z5ₗ = roe_variables(uₗ, model)
@@ -578,7 +578,7 @@ Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
-Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+@inline function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
                                             model::Euler{T,2}, dir::Val{:y}) where T
     @unpack γ = model
     z1ₗ, z2ₗ, z3ₗ, z5ₗ = roe_variables(uₗ, model)
@@ -606,7 +606,7 @@ Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
 
-Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+@inline function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
                                             model::Euler{T,3}, dir::Val{:x}) where T
     @unpack γ = model
     z1ₗ, z2ₗ, z3ₗ, z4ₗ, z5ₗ = roe_variables(uₗ, model)
@@ -636,7 +636,7 @@ Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+@inline function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
                                             model::Euler{T,3}, dir::Val{:y}) where T
     @unpack γ = model
     z1ₗ, z2ₗ, z3ₗ, z4ₗ, z5ₗ = roe_variables(uₗ, model)
@@ -666,7 +666,7 @@ Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+@inline function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
                                             model::Euler{T,3}, dir::Val{:z}) where T
     @unpack γ = model
     z1ₗ, z2ₗ, z3ₗ, z4ₗ, z5ₗ = roe_variables(uₗ, model)
@@ -698,7 +698,7 @@ Base.@pure function (fnum::IsmailRoeFluxEC)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3
 end
 
 
-Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+@inline function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
                                                 model::Euler{T,2}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
@@ -719,7 +719,7 @@ Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::Euler
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
-Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+@inline function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
                                                 model::Euler{T,2}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
@@ -741,7 +741,7 @@ Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar2D{T}, uᵣ::Euler
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
 
-Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+@inline function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
                                                 model::Euler{T,3}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
@@ -764,7 +764,7 @@ Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar3D{T}, uᵣ::Euler
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+@inline function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
                                                 model::Euler{T,3}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
@@ -787,7 +787,7 @@ Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar3D{T}, uᵣ::Euler
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+@inline function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
                                                 model::Euler{T,3}, dir::Val{:z}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
@@ -812,8 +812,8 @@ Base.@pure function (fnum::RanochaFluxECandKEP)(uₗ::EulerVar3D{T}, uᵣ::Euler
 end
 
 
-Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
-                                          model::Euler{T,2}, dir::Val{:x}) where T
+@inline function (fnum::MorinishiFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                        model::Euler{T,2}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
     ϱvxₗ = uₗ.ϱvx
@@ -836,8 +836,8 @@ Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
-Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
-                                          model::Euler{T,2}, dir::Val{:y}) where T
+@inline function (fnum::MorinishiFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                        model::Euler{T,2}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
     ϱvyₗ = uₗ.ϱvy
@@ -861,8 +861,8 @@ Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
 
-Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                          model::Euler{T,3}, dir::Val{:x}) where T
+@inline function (fnum::MorinishiFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                        model::Euler{T,3}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱvxₗ = uₗ.ϱvx
@@ -888,8 +888,8 @@ Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                          model::Euler{T,3}, dir::Val{:y}) where T
+@inline function (fnum::MorinishiFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                        model::Euler{T,3}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱvyₗ = uₗ.ϱvy
@@ -915,8 +915,8 @@ Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                          model::Euler{T,3}, dir::Val{:z}) where T
+@inline function (fnum::MorinishiFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                        model::Euler{T,3}, dir::Val{:z}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱvzₗ = uₗ.ϱvz
@@ -944,8 +944,8 @@ Base.@pure function (fnum::MorinishiFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{
 end
 
 
-Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
-                                            model::Euler{T,2}, dir::Val{:x}) where T
+@inline function (fnum::DucrosEtAlFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                        model::Euler{T,2}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
     ϱvxₗ, ϱvyₗ, ϱeₗ = uₗ.ϱvx, uₗ.ϱvy, uₗ.ϱe
@@ -967,8 +967,8 @@ Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
-Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
-                                            model::Euler{T,2}, dir::Val{:y}) where T
+@inline function (fnum::DucrosEtAlFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                        model::Euler{T,2}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
     ϱvxₗ, ϱvyₗ, ϱeₗ = uₗ.ϱvx, uₗ.ϱvy, uₗ.ϱe
@@ -991,8 +991,8 @@ Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
 
-Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                            model::Euler{T,3}, dir::Val{:x}) where T
+@inline function (fnum::DucrosEtAlFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                        model::Euler{T,3}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱvxₗ, ϱvyₗ, ϱvzₗ, ϱeₗ = uₗ.ϱvx, uₗ.ϱvy, uₗ. ϱvz, uₗ.ϱe
@@ -1017,8 +1017,8 @@ Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                            model::Euler{T,3}, dir::Val{:y}) where T
+@inline function (fnum::DucrosEtAlFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                        model::Euler{T,3}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱvxₗ, ϱvyₗ, ϱvzₗ, ϱeₗ = uₗ.ϱvx, uₗ.ϱvy, uₗ. ϱvz, uₗ.ϱe
@@ -1043,8 +1043,8 @@ Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                            model::Euler{T,3}, dir::Val{:z}) where T
+@inline function (fnum::DucrosEtAlFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                        model::Euler{T,3}, dir::Val{:z}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱvxₗ, ϱvyₗ, ϱvzₗ, ϱeₗ = uₗ.ϱvx, uₗ.ϱvy, uₗ. ϱvz, uₗ.ϱe
@@ -1071,8 +1071,8 @@ Base.@pure function (fnum::DucrosEtAlFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D
 end
 
 
-Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
-                                              model::Euler{T,2}, dir::Val{:x}) where T
+@inline function (fnum::KennedyGruberFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                            model::Euler{T,2}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
     eₗ = uₗ.ϱe / ϱₗ
@@ -1092,8 +1092,8 @@ Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVa
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
-Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
-                                              model::Euler{T,2}, dir::Val{:y}) where T
+@inline function (fnum::KennedyGruberFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                            model::Euler{T,2}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
     eₗ = uₗ.ϱe / ϱₗ
@@ -1114,8 +1114,8 @@ Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVa
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
 
-Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                              model::Euler{T,3}, dir::Val{:x}) where T
+@inline function (fnum::KennedyGruberFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                            model::Euler{T,3}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     eₗ = uₗ.ϱe / ϱₗ
@@ -1137,8 +1137,8 @@ Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVa
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                              model::Euler{T,3}, dir::Val{:y}) where T
+@inline function (fnum::KennedyGruberFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                            model::Euler{T,3}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     eₗ = uₗ.ϱe / ϱₗ
@@ -1160,8 +1160,8 @@ Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVa
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                              model::Euler{T,3}, dir::Val{:z}) where T
+@inline function (fnum::KennedyGruberFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                            model::Euler{T,3}, dir::Val{:z}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     eₗ = uₗ.ϱe / ϱₗ
@@ -1185,8 +1185,8 @@ Base.@pure function (fnum::KennedyGruberFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVa
 end
 
 
-Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
-                                          model::Euler{T,2}, dir::Val{:x}) where T
+@inline function (fnum::PirozzoliFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                        model::Euler{T,2}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
     ϱeₗ = uₗ.ϱe
@@ -1206,8 +1206,8 @@ Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{
 
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
-Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
-                                          model::Euler{T,2}, dir::Val{:y}) where T
+@inline function (fnum::PirozzoliFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
+                                        model::Euler{T,2}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, pₗ = primitive_variables(uₗ, model)
     ϱeₗ = uₗ.ϱe
@@ -1228,8 +1228,8 @@ Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{
     SVector(fϱ, fϱvx, fϱvy, fϱe)
 end
 
-Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                          model::Euler{T,3}, dir::Val{:x}) where T
+@inline function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                        model::Euler{T,3}, dir::Val{:x}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱeₗ = uₗ.ϱe
@@ -1251,8 +1251,8 @@ Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                          model::Euler{T,3}, dir::Val{:y}) where T
+@inline function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                        model::Euler{T,3}, dir::Val{:y}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱeₗ = uₗ.ϱe
@@ -1274,8 +1274,8 @@ Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
 end
-Base.@pure function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
-                                          model::Euler{T,3}, dir::Val{:z}) where T
+@inline function (fnum::PirozzoliFlux)(uₗ::EulerVar3D{T}, uᵣ::EulerVar3D{T},
+                                        model::Euler{T,3}, dir::Val{:z}) where T
     @unpack γ = model
     ϱₗ, vxₗ, vyₗ, vzₗ, pₗ = primitive_variables(uₗ, model)
     ϱeₗ = uₗ.ϱe

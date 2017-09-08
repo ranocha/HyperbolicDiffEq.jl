@@ -92,7 +92,7 @@ export Burgers, BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar2D
 
-export flux, max_abs_speed, variables, kinetic_energy, entropy
+export flux, max_abs_speed, variables, kinetic_energy, entropy, conserved_variables
 
 export RiemannProblem
 

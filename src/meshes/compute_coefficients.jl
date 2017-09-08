@@ -116,6 +116,55 @@ function compute_coefficients!(uval, u, meshx::AbstractMesh1D, meshy::AbstractMe
     nothing
 end
 
+function evaluate_coefficients(u, meshx::AbstractMesh1D, meshy::AbstractMesh1D,
+                                basis::NodalBasis, npoints=2*length(basis.nodes))
+    xplot = zeros(npoints*numcells(meshx))
+    yplot = zeros(npoints*numcells(meshy))
+    uplot = zeros(eltype(u), npoints*numcells(meshy), npoints*numcells(meshx))
+
+    evaluate_coefficients!(xplot, yplot, uplot, u, meshx, meshy, basis)
+end
+
+function evaluate_coefficients!(xplot, yplot, uplot, u, meshx::AbstractMesh1D,
+                                meshy::AbstractMesh1D, basis::NodalBasis)
+    npoints = length(xplot) ÷ numcells(meshx)
+
+    @assert length(xplot) == npoints*numcells(meshx)
+    @assert length(yplot) == npoints*numcells(meshy)
+    @assert length(xplot) == size(uplot,2)
+    @assert length(yplot) == size(uplot,1)
+
+    ξ = linspace(-1+eps(),1-eps(),npoints) |> collect
+    η = linspace(-1+eps(),1-eps(),npoints) |> collect
+    intX = Jacobi.interp_mat(ξ, basis.nodes)
+    intY = Jacobi.interp_mat(η, basis.nodes)
+
+    Nx = numcells(meshx)
+    Ny = numcells(meshy)
+    Pp1 = length(basis.nodes)
+    tmp = zeros(eltype(u), Pp1, npoints)
+    uval = zeros(eltype(u), npoints, npoints)
+    for iy in 1:Ny, ix in 1:Nx
+        xmin, xmax = bounds(ix, meshx)
+        ymin, ymax = bounds(iy, meshy)
+        x = map_from_canonical(ξ, xmin, xmax, basis)
+        y = map_from_canonical(η, ymin, ymax, basis)
+
+        for nx in 1:Pp1
+            A_mul_B!(view(tmp,nx,:), intY, view(u,nx,:,ix,iy))
+        end
+        A_mul_B!(uval, intX, tmp)
+
+        for jy in 1:npoints, jx in 1:npoints
+            xplot[(ix-1)*npoints+(jx-1)+1] = x[jx]
+            yplot[(iy-1)*npoints+(jy-1)+1] = y[jy]
+            uplot[(iy-1)*npoints+(jy-1)+1, (ix-1)*npoints+(jx-1)+1] = uval[jx,jy]
+        end
+    end
+
+    xplot, yplot, uplot
+end
+
 
 function compute_coefficients(u, meshx::AbstractMesh1D, meshy::AbstractMesh1D,
                                  meshz::AbstractMesh1D, basis::NodalBasis)

@@ -55,26 +55,25 @@ function add_flux_differences!(du, u, semidisc::UniformPeriodicFluxDiffDisc2D)
     add_flux_differences_inner_loop!(du, u, balance_law, fvol, Nx, Ny, Pp1, D, jacx, jacy, usethreads)
 end
 
-@inline function add_flux_differences_inner_loop!(du, u, balance_law, fvol, Nx, Ny, Pp1, D, jacx, jacy, ::Val{true})
+@inline function add_flux_differences_inner_loop!(du, u, balance_law, fvol, Nx, Ny, Pp1,
+                                                    D, jacx, jacy, ::Val{true})
     dirx = Val{:x}()
     diry = Val{:y}()
-    @inbounds Threads.@threads for ixy in Base.OneTo(Nx*Ny)
-        iy, ix = divrem(ixy-1, Nx) .+ 1
+    NxNy = Nx*Ny
+    dims = (Pp1,Pp1,Nx*Ny)
+    @inbounds Threads.@threads for ixy in Base.OneTo(NxNy)
         for ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
+            idx = sub2ind(dims, nx, ny, ixy)
             # compute x derivative
             for k in Base.OneTo(Pp1)
-                du[nx,ny,ix,iy] -= 2*jacx*D[nx,k] * fvol(u[nx,ny,ix,iy],
-                                                         u[k ,ny,ix,iy],
-                                                         balance_law,
-                                                         dirx)
+                idxk = sub2ind(dims, k, ny, ixy)
+                du[idx] -= 2*jacx*D[nx,k] * fvol(u[idx], u[idxk], balance_law, dirx)
             end
 
             # compute y derivative
             for k in Base.OneTo(Pp1)
-                du[nx,ny,ix,iy] -= 2*jacy*D[ny,k] * fvol(u[nx,ny,ix,iy],
-                                                         u[nx,k ,ix,iy],
-                                                         balance_law,
-                                                         diry)
+                idxk = sub2ind(dims, nx, k, ixy)
+                du[idx] -= 2*jacy*D[ny,k] * fvol(u[idx], u[idxk], balance_law, diry)
             end
         end
     end
@@ -82,25 +81,24 @@ end
 end
 
 @inline function add_flux_differences_inner_loop!(du, u, balance_law, fvol, Nx, Ny, Pp1,
-                                            D, jacx, jacy, ::Val{false})
+                                                    D, jacx, jacy, ::Val{false})
     dirx = Val{:x}()
     diry = Val{:y}()
-    @inbounds for iy in Base.OneTo(Ny), ix in Base.OneTo(Nx)
+    NxNy = Nx*Ny
+    dims = (Pp1,Pp1,Nx*Ny)
+    @inbounds for ixy in Base.OneTo(NxNy)
         for ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
+            idx = sub2ind(dims, nx, ny, ixy)
             # compute x derivative
             for k in Base.OneTo(Pp1)
-                du[nx,ny,ix,iy] -= 2*jacx*D[nx,k] * fvol(u[nx,ny,ix,iy],
-                                                         u[k ,ny,ix,iy],
-                                                         balance_law,
-                                                         dirx)
+                idxk = sub2ind(dims, k, ny, ixy)
+                du[idx] -= 2*jacx*D[nx,k] * fvol(u[idx], u[idxk], balance_law, dirx)
             end
 
             # compute y derivative
             for k in Base.OneTo(Pp1)
-                du[nx,ny,ix,iy] -= 2*jacy*D[ny,k] * fvol(u[nx,ny,ix,iy],
-                                                         u[nx,k ,ix,iy],
-                                                         balance_law,
-                                                         diry)
+                idxk = sub2ind(dims, nx, k, ixy)
+                du[idx] -= 2*jacy*D[ny,k] * fvol(u[idx], u[idxk], balance_law, diry)
             end
         end
     end
@@ -125,11 +123,14 @@ function add_numerical_fluxes!(du, u, semidisc::UniformPeriodicFluxDiffDisc2D)
 end
 
 @inline function add_numerical_fluxes_inner_loop!(du, u, balance_law, fnum, Nx, Ny, Pp1,
-                                            ω, jacx, jacy, ::Val{true})
+                                                    ω, jacx, jacy, ::Val{true})
     dirx = Val{:x}()
     diry = Val{:y}()
+    i_ω1 = 1 / ω[1]
+    i_ωend = 1 / ω[end]
+    dims = (Pp1, Pp1, Nx, Ny)
     @inbounds Threads.@threads for ixy in Base.OneTo(Nx*Ny)
-        iy, ix = divrem(ixy-1, Nx) .+ 1
+        ix, iy = ind2sub((Nx,Ny), ixy)
         ixm1 = ix ==  1 ? Nx : ix-1
         ixp1 = ix == Nx ?  1 : ix+1
         iym1 = iy ==  1 ? Ny : iy-1
@@ -138,36 +139,47 @@ end
         # flux x
         for ny in 1:Pp1
             # flux x - left
-            du[1,ny,ix,iy] += (
-                fnum(u[end,ny,ixm1,iy], u[1,ny,ix,iy], balance_law, dirx)
-                - flux(u[1,ny,ix,iy], balance_law, dirx) ) * jacx / ω[1]
+            idx = sub2ind(dims, 1, ny, ix, iy)
+            uₗ = u[end,ny,ixm1,iy]
+            uᵣ = u[idx]
+            du[idx] += ( fnum(uₗ, uᵣ, balance_law, dirx)
+                        - flux(uᵣ, balance_law, dirx) ) * jacx * i_ω1
 
             # flux x - right
-            du[end,ny,ix,iy] -= (
-                fnum(u[end,ny,ix,iy], u[1,ny,ixp1,iy], balance_law, dirx)
-                - flux(u[end,ny,ix,iy], balance_law, dirx) ) * jacx / ω[end]
+            idx = sub2ind(dims, Pp1, ny, ix, iy)
+            uₗ = u[idx]
+            uᵣ = u[1,ny,ixp1,iy]
+            du[idx] -= ( fnum(uₗ, uᵣ, balance_law, dirx)
+                        - flux(uₗ, balance_law, dirx) ) * jacx * i_ωend
         end
 
         # flux y
         for nx in 1:Pp1
             # flux y - bottom
-            du[nx,1,ix,iy] += (
-                fnum(u[nx,end,ix,iym1], u[nx,1,ix,iy], balance_law, diry)
-                - flux(u[nx,1,ix,iy], balance_law, diry) ) * jacy / ω[1]
+            idx = sub2ind(dims, nx, 1, ix, iy)
+            uₗ = u[nx,end,ix,iym1]
+            uᵣ = u[idx]
+            du[idx] += ( fnum(uₗ, uᵣ, balance_law, diry)
+                        - flux(uᵣ, balance_law, diry) ) * jacy * i_ω1
 
             # flux y - top
-            du[nx,end,ix,iy] -= (
-                fnum(u[nx,end,ix,iy], u[nx,1,ix,iyp1], balance_law, diry)
-                - flux(u[nx,end,ix,iy], balance_law, diry) ) * jacy / ω[end]
+            idx = sub2ind(dims, nx, Pp1, ix, iy)
+            uₗ = u[idx]
+            uᵣ = u[nx,1,ix,iyp1]
+            du[idx] -= ( fnum(uₗ, uᵣ, balance_law, diry)
+                        - flux(uₗ, balance_law, diry) ) * jacy * i_ωend
         end
     end
     nothing
 end
 
 @inline function add_numerical_fluxes_inner_loop!(du, u, balance_law, fnum, Nx, Ny, Pp1,
-                                            ω, jacx, jacy, ::Val{false})
+                                                    ω, jacx, jacy, ::Val{false})
     dirx = Val{:x}()
     diry = Val{:y}()
+    i_ω1 = 1 / ω[1]
+    i_ωend = 1 / ω[end]
+    dims = (Pp1, Pp1, Nx, Ny)
     @inbounds for iy in Base.OneTo(Ny), ix in Base.OneTo(Nx)
         ixm1 = ix ==  1 ? Nx : ix-1
         ixp1 = ix == Nx ?  1 : ix+1
@@ -177,27 +189,35 @@ end
         # flux x
         for ny in 1:Pp1
             # flux x - left
-            du[1,ny,ix,iy] += (
-                fnum(u[end,ny,ixm1,iy], u[1,ny,ix,iy], balance_law, dirx)
-                - flux(u[1,ny,ix,iy], balance_law, dirx) ) * jacx / ω[1]
+            idx = sub2ind(dims, 1, ny, ix, iy)
+            uₗ = u[end,ny,ixm1,iy]
+            uᵣ = u[idx]
+            du[idx] += ( fnum(uₗ, uᵣ, balance_law, dirx)
+                        - flux(uᵣ, balance_law, dirx) ) * jacx * i_ω1
 
             # flux x - right
-            du[end,ny,ix,iy] -= (
-                fnum(u[end,ny,ix,iy], u[1,ny,ixp1,iy], balance_law, dirx)
-                - flux(u[end,ny,ix,iy], balance_law, dirx) ) * jacx / ω[end]
+            idx = sub2ind(dims, Pp1, ny, ix, iy)
+            uₗ = u[idx]
+            uᵣ = u[1,ny,ixp1,iy]
+            du[idx] -= ( fnum(uₗ, uᵣ, balance_law, dirx)
+                        - flux(uₗ, balance_law, dirx) ) * jacx * i_ωend
         end
 
         # flux y
         for nx in 1:Pp1
             # flux y - bottom
-            du[nx,1,ix,iy] += (
-                fnum(u[nx,end,ix,iym1], u[nx,1,ix,iy], balance_law, diry)
-                - flux(u[nx,1,ix,iy], balance_law, diry) ) * jacy / ω[1]
+            idx = sub2ind(dims, nx, 1, ix, iy)
+            uₗ = u[nx,end,ix,iym1]
+            uᵣ = u[idx]
+            du[idx] += ( fnum(uₗ, uᵣ, balance_law, diry)
+                        - flux(uᵣ, balance_law, diry) ) * jacy * i_ω1
 
             # flux y - top
-            du[nx,end,ix,iy] -= (
-                fnum(u[nx,end,ix,iy], u[nx,1,ix,iyp1], balance_law, diry)
-                - flux(u[nx,end,ix,iy], balance_law, diry) ) * jacy / ω[end]
+            idx = sub2ind(dims, nx, Pp1, ix, iy)
+            uₗ = u[idx]
+            uᵣ = u[nx,1,ix,iyp1]
+            du[idx] -= ( fnum(uₗ, uᵣ, balance_law, diry)
+                        - flux(uₗ, balance_law, diry) ) * jacy * i_ωend
         end
     end
     nothing
