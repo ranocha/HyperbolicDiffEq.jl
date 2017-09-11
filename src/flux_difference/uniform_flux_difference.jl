@@ -360,32 +360,46 @@ end
     dirx = Val{:x}()
     diry = Val{:y}()
     dirz = Val{:z}()
-    @inbounds Threads.@threads for ixyz in Base.OneTo(Nx*Ny*Nz)
-        ix, iy, iz = ind2sub((Nx,Ny,Nz), ixyz)
+    NxNyNz = Nx*Ny*Nz
+    dims = (Pp1,Pp1,Pp1,NxNyNz)
+    @inbounds Threads.@threads for ixyz in Base.OneTo(NxNyNz)
         for nz in Base.OneTo(Pp1), ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
+            idx = sub2ind(dims, nx, ny, nz, ixyz)
+            u_idx = u[idx]
+
             # compute x derivative
-            for k in Base.OneTo(Pp1)
-                du[nx,ny,nz,ix,iy,iz] -= 2*jacx*D[nx,k] * fvol( u[nx,ny,nz,ix,iy,iz],
-                                                                u[k ,ny,nz,ix,iy,iz],
-                                                                balance_law,
-                                                                dirx)
+            # at first for different indices
+            for k in (nx+1):Pp1
+                idxk = sub2ind(dims, k, ny, nz, ixyz)
+                f = fvol(u_idx, u[idxk], balance_law, dirx)
+                du[idx]  -= 2*jacx*D[nx,k] * f
+                du[idxk] -= 2*jacx*D[k,nx] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacx*D[nx,nx] * flux(u_idx, balance_law, dirx)
+
 
             # compute y derivative
-            for k in Base.OneTo(Pp1)
-                du[nx,ny,nz,ix,iy,iz] -= 2*jacx*D[ny,k] * fvol( u[nx,ny,nz,ix,iy,iz],
-                                                                u[nx,k ,nz,ix,iy,iz],
-                                                                balance_law,
-                                                                diry)
+            # at first for different indices
+            for k in (ny+1):Pp1
+                idxk = sub2ind(dims, nx, k, nz, ixyz)
+                f = fvol(u_idx, u[idxk], balance_law, diry)
+                du[idx]  -= 2*jacy*D[ny,k] * f
+                du[idxk] -= 2*jacy*D[k,ny] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacy*D[ny,ny] * flux(u_idx, balance_law, diry)
 
             # compute z derivative
-            for k in Base.OneTo(Pp1)
-                du[nx,ny,nz,ix,iy,iz] -= 2*jacx*D[nz,k] * fvol( u[nx,ny,nz,ix,iy,iz],
-                                                                u[nx,ny,k ,ix,iy,iz],
-                                                                balance_law,
-                                                                dirz)
+            # at first for different indices
+            for k in (nz+1):Pp1
+                idxk = sub2ind(dims, nx, ny, k, ixyz)
+                f = fvol(u_idx, u[idxk], balance_law, dirz)
+                du[idx]  -= 2*jacz*D[nz,k] * f
+                du[idxk] -= 2*jacz*D[k,nz] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacz*D[nz,nz] * flux(u_idx, balance_law, dirz)
         end
     end
     nothing
@@ -396,32 +410,46 @@ end
     dirx = Val{:x}()
     diry = Val{:y}()
     dirz = Val{:z}()
-    @inbounds for ixyz in Base.OneTo(Nx*Ny*Nz)
-        ix, iy, iz = ind2sub((Nx,Ny,Nz), ixyz)
+    NxNyNz = Nx*Ny*Nz
+    dims = (Pp1,Pp1,Pp1,NxNyNz)
+    @inbounds for ixyz in Base.OneTo(NxNyNz)
         for nz in Base.OneTo(Pp1), ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
+            idx = sub2ind(dims, nx, ny, nz, ixyz)
+            u_idx = u[idx]
+
             # compute x derivative
-            for k in Base.OneTo(Pp1)
-                du[nx,ny,nz,ix,iy,iz] -= 2*jacx*D[nx,k] * fvol( u[nx,ny,nz,ix,iy,iz],
-                                                                u[k ,ny,nz,ix,iy,iz],
-                                                                balance_law,
-                                                                dirx)
+            # at first for different indices
+            for k in (nx+1):Pp1
+                idxk = sub2ind(dims, k, ny, nz, ixyz)
+                f = fvol(u_idx, u[idxk], balance_law, dirx)
+                du[idx]  -= 2*jacx*D[nx,k] * f
+                du[idxk] -= 2*jacx*D[k,nx] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacx*D[nx,nx] * flux(u_idx, balance_law, dirx)
+
 
             # compute y derivative
-            for k in Base.OneTo(Pp1)
-                du[nx,ny,nz,ix,iy,iz] -= 2*jacx*D[ny,k] * fvol( u[nx,ny,nz,ix,iy,iz],
-                                                                u[nx,k ,nz,ix,iy,iz],
-                                                                balance_law,
-                                                                diry)
+            # at first for different indices
+            for k in (ny+1):Pp1
+                idxk = sub2ind(dims, nx, k, nz, ixyz)
+                f = fvol(u_idx, u[idxk], balance_law, diry)
+                du[idx]  -= 2*jacy*D[ny,k] * f
+                du[idxk] -= 2*jacy*D[k,ny] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacy*D[ny,ny] * flux(u_idx, balance_law, diry)
 
             # compute z derivative
-            for k in Base.OneTo(Pp1)
-                du[nx,ny,nz,ix,iy,iz] -= 2*jacx*D[nz,k] * fvol( u[nx,ny,nz,ix,iy,iz],
-                                                                u[nx,ny,k ,ix,iy,iz],
-                                                                balance_law,
-                                                                dirz)
+            # at first for different indices
+            for k in (nz+1):Pp1
+                idxk = sub2ind(dims, nx, ny, k, ixyz)
+                f = fvol(u_idx, u[idxk], balance_law, dirz)
+                du[idx]  -= 2*jacz*D[nz,k] * f
+                du[idxk] -= 2*jacz*D[k,nz] * f
             end
+            # then for the diagonal element, using the consistency of the flux
+            du[idx] -= 2*jacz*D[nz,nz] * flux(u_idx, balance_law, dirz)
         end
     end
     nothing
