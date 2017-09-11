@@ -93,7 +93,7 @@ export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar2D
 
 export flux, max_abs_speed, variables, kinetic_energy, entropy, conserved_variables,
-        primitive_variables
+        primitive_variables, satisfies_physical_constraints
 
 export RiemannProblem
 
@@ -105,9 +105,11 @@ export UniformPeriodicMesh1D
 export compute_coefficients, compute_coefficients!
 export evaluate_coefficients, evaluate_coefficients!
 
+# general semidiscretisations
+export semidiscretise, max_dt
+
 # finite volume methods
 export FirstOrderFV
-export semidiscretise, max_dt
 export local_lax_friedrichs, godunov, suliciu
 export LocalLaxFriedrichsFlux, SuliciuFlux
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux

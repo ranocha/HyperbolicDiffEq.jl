@@ -290,6 +290,26 @@ function semidiscretise(semidisc::UniformPeriodicFluxDiffDisc2D, u₀func, tspan
     ODEProblem(semidisc, u₀, tspan)
 end
 
+"""
+    max_dt(t, u, semidisc::UniformPeriodicFluxDiffDisc2D, cfl)
+
+Compute the maximal time step `dt` satisfying the CFL condition `dt <= cfl * dx / ((2p+1)*λ)`,
+where `dx` is the length of a cell, `λ` the greatest absolute value of the
+speed in this cell, and `p` the polynomial degree.
+"""
+function max_dt(t, u, semidisc::UniformPeriodicFluxDiffDisc2D, cfl=0.5)
+    @unpack balance_law, meshx, meshy, basis = semidisc
+    Δx = min(meshx.Δx, meshy.Δx)
+    p = length(basis.nodes)-1
+    factor = Δx / (2p+1)
+
+    dt = mapreduce(u->factor/max_abs_speed(u, balance_law), min, typemax(t), u)
+    if dt == Inf
+        dt = factor
+    end
+    cfl * dt
+end
+
 
 
 ################################################################################

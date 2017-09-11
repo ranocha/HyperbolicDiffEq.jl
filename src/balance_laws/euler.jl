@@ -110,6 +110,17 @@ end
 end
 
 
+@inline function satisfies_physical_constraints(u::EulerVar2D, model::Euler)
+    ϱ, vx, vy, p = primitive_variables(u, model)
+    ϱ >= 0 && p >= 0
+end
+
+@inline function satisfies_physical_constraints(u::EulerVar3D, model::Euler)
+    ϱ, vx, vy, vz, p = primitive_variables(u, model)
+    ϱ >= 0 && p >= 0
+end
+
+
 Base.@pure function kinetic_energy(u::EulerVar2D, model::Euler)
     ϱ, vx, vy, p = primitive_variables(u, model)
 

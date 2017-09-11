@@ -115,9 +115,9 @@ function semidiscretise(fv::AbstractSemidiscretisation, u₀func, tspan)
 end
 
 """
-    max_dt(fv::FirstOrderFV, u)
+    max_dt(t, u, fv::FirstOrderFV, cfl=0.5)
 
-Compute the maximal time step `dt` satisfying the CFL condition `dt <= dx / 2λ`,
+Compute the maximal time step `dt` satisfying the CFL condition `dt <= cfl * dx / 2λ`,
 where `dx` is the length of a cell and `λ` the greatest absolute value of the
 speed in this cell.
 """
@@ -128,5 +128,5 @@ function max_dt(t, u, fv::FirstOrderFV)
     if dt == Inf
         dt = mapreduce(cell->volume(cell,mesh), min, dt, cell_indices(mesh))
     end
-    dt / 2
+    cfl * dt
 end
