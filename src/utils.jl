@@ -1,29 +1,43 @@
 
 """
-    logmean(a, b)
+    logmean(a::Real, b::Real)
 
 The logarithmic mean value (a - b) / ( log(a) - log(b) ).
 """
-@inline function logmean(a, b)
+function logmean(_a::T, _b::T) where T<:Real
+    a, b = minmax(_a,_b)
+    if a < 0
+        throw(DomainError("Cannot compute logarithmic mean of negative valuess."))
+    end
+
     if a == b
         a
     else
-        (a-b) / (log(a)-log(b))
+        (a-b) / (log(a/b))
     end
 end
+logmean(a::Real, b::Real) = logmean(promote(a,b)...)
 
-Base.@pure function logmean(a::Float64, b::Float64)
-  # see Ismail, Roe (2009): Affordable, entropy consistent...
-  const ɛ = 0.01
-  ζ = a/b
-  f = (ζ-1)/(ζ+1)
-  u = f*f
-  if u < ɛ
-    F = 1 + u/3 + u*u/5 + u*u*u/7
-  else
-    F = log(ζ)/(2f)
-  end
-  (a+b)/(2F)
+function logmean(_a::Float64, _b::Float64)
+    a, b = minmax(_a,_b)
+    if a < 0
+        throw(DomainError("Cannot compute logarithmic mean of negative valuess."))
+    end
+
+    if a == b
+        return a
+    end
+
+    # see Ismail, Roe (2009): Affordable, entropy consistent...
+    ζ = a / b
+    f = (ζ-1) / (ζ+1)
+    u = f*f
+    if u < 1.0e-2
+        F = @evalpoly(u, 1, 1/3, 1/5, 1/7)
+    else
+        F = log(ζ)/(2f)
+    end
+    (a+b)/(2F)
 end
 
 

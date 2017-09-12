@@ -119,7 +119,7 @@ export EnergyConservativeFlux, IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFlux
 export UniformPeriodicFluxDiffDisc2D, UniformPeriodicFluxDiffDisc3D
 
 # utilities
-export integrate
+export logmean, integrate
 
 
 end # module
