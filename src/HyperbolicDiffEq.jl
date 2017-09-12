@@ -90,7 +90,7 @@ include("utils.jl")
 # models
 export Burgers, BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
-export Euler, EulerVar2D
+export Euler, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
 
 export flux, max_abs_speed, variables, kinetic_energy, entropy, conserved_variables,
         primitive_variables, satisfies_physical_constraints

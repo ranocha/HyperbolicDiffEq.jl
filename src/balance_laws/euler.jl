@@ -64,6 +64,25 @@ end
 @inline variables{T}(model::Euler{T,3}) = EulerVar3D{T}
 
 
+"""
+    IntegralQuantitiesEuler{T<:Real}
+
+Some integrated quantities of interest for the Euler equations. Can be used in
+callbacks of DifferentialEquations.jl.
+"""
+struct IntegralQuantitiesEuler{T<:Real} <: FieldVector{2,T}
+    kinetic_energy::T
+    entropy::T
+end
+
+function IntegralQuantitiesEuler(u, model::Euler)
+    IntegralQuantitiesEuler(
+        kinetic_energy(u, model),
+        entropy(u, model)
+    )
+end
+
+
 @inline function primitive_variables(u::EulerVar2D, model::Euler)
     @unpack ϱ, ϱvx, ϱvy, ϱe = u
     @unpack γ = model
