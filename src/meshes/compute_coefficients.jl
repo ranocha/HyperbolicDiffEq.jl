@@ -69,8 +69,7 @@ end
 
 function compute_coefficients(u, mesh::AbstractMesh1D, basis::NodalBasis, parallel=Val{:serial}())
     xmin, xmax = bounds(mesh)
-    #uval = array_type(parallel)(typeof(u((xmin+xmax)/2)), length(basis.nodes), numcells(mesh))
-    uval = array_type(parallel){typeof(u((xmin+xmax)/2))}(length(basis.nodes), numcells(mesh))
+    uval = Array{typeof(u((xmin+xmax)/2))}(length(basis.nodes), numcells(mesh))
     compute_coefficients!(uval, u, mesh, basis)
     uval
 end
