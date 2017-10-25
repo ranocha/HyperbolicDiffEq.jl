@@ -182,22 +182,6 @@ end
 
     nothing
 end
-@inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
-                                                    fnumint, fnumext, left_bc, right_bc,
-                                                    Nx, basis, jacx, ::Val{:threads})
-    # calculate external numerical fluxes
-    @views @inbounds fluxes[1] = fnumext(left_bc(t), interpolate(-1, u[:,1], basis), balance_law)
-    @views @inbounds fluxes[end] = fnumext(interpolate(1, u[:,end], basis), right_bc(t), balance_law)
-
-    # calculate internal numerical fluxes
-    @views @inbounds Threads.@threads for ix in 2:Nx
-        # flux x - left
-        fluxes[ix] = fnumint(interpolate(-1, u[:,ix-1], basis),
-                             interpolate(-1, u[:,ix], basis), balance_law)
-    end
-
-    nothing
-end
 
 @inline function add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law,
                                                     Nx, basis::LobattoLegendre,
