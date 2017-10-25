@@ -105,15 +105,15 @@ function evaluate_coefficients!(xplot, uplot, u, meshx::AbstractMesh1D, basis::N
     @assert length(xplot) == length(uplot)
 
     ξ = linspace(-1+eps(), 1-eps(), npoints) |> collect
-    intX = Jacobi.interp_mat(ξ, basis.nodes)
+    x = zeros(ξ)
 
     Nx  = numcells(meshx)
     Pp1 = length(basis.nodes)
     uval = zeros(eltype(u), npoints)
     for ix in 1:Nx
         xmin, xmax = bounds(ix, meshx)
-        x = map_from_canonical(ξ, xmin, xmax, basis)
-        A_mul_B!(uval, intX, u[:,ix])
+        map_from_canonical!(x, ξ, xmin, xmax, basis)
+        interpolate!(uval, ξ, u[:,ix], basis)
 
         for jx in 1:npoints
             xplot[(ix-1)*npoints+(jx-1)+1] = x[jx]

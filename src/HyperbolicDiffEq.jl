@@ -2,7 +2,7 @@ __precompile__()
 
 module HyperbolicDiffEq
 
-import Jacobi
+@reexport using PolynomialBases
 
 using Roots
 using Parameters
@@ -62,14 +62,6 @@ An abstract type for a numerical flux.
 """
 abstract type NumericalFlux end
 
-"""
-An abstract type for a basis, e.g. a polynomial basis.
-"""
-abstract type AbstractBasis end
-abstract type NodalBasis <: AbstractBasis end
-
-include("bases/bases1d.jl")
-
 include("meshes/meshes1d.jl")
 include("meshes/compute_coefficients.jl")
 
@@ -89,7 +81,7 @@ include("utils.jl")
 
 
 # models
-export Burgers, BuckleyLeverette
+export Burgers, IntegralQuantitiesBurgers, BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
 
@@ -97,9 +89,6 @@ export flux, max_abs_speed, variables, kinetic_energy, entropy, conserved_variab
         primitive_variables, satisfies_physical_constraints
 
 export RiemannProblem
-
-# bases
-export LobattoLegendre
 
 # meshes
 export UniformMesh1D, UniformPeriodicMesh1D
