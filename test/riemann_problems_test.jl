@@ -4,6 +4,9 @@ using HyperbolicDiffEq
 #using Plots # Plots fails on win32 [appveyor]
 
 
+const godunov = GodunovFlux()
+
+
 # Burgers' equation
 model = Burgers()
 

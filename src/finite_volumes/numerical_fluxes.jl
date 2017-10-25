@@ -1,5 +1,14 @@
 
 doc"
+    GodunovFlux
+
+Godunovs flux $f(u(x/t = 0))$, i.e. the flux of the value at zero of the solution
+of the Riemann problem.
+"
+struct GodunovFlux <: NumericalFlux end
+
+
+doc"
     LocalLaxFriedrichsFlux{MaxAbsSpeed}
 
 The local Lax-Friedrichs flux $\frac{f(u_r) + f(u_l)}{2} - \frac{\lambda}{2} (u_r - u_l)$.

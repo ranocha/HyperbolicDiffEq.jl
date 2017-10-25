@@ -58,11 +58,11 @@ Compute the maximal absolute value of speed at `u` for `model`.
 ################################################################################
 
 """
-    godunov{T}(uₗ::T, uᵣ::T, model::Burgers{T,1})
+    (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Burgers{T,1})
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function godunov{T}(uₗ::T, uᵣ::T, model::Burgers{T,1})
+function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Burgers{T,1})
   if uₗ < uᵣ
     if uₗ < 0 && 0 < uᵣ
       zero(T)
@@ -75,7 +75,7 @@ function godunov{T}(uₗ::T, uᵣ::T, model::Burgers{T,1})
 end
 
 
-function godunov{T}(uₗ::T, uᵣ::T, model::Burgers{T,2}, direction)
+function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Burgers{T,2}, direction)
   if uₗ < uᵣ
     if uₗ < 0 && 0 < uᵣ
       zero(T)

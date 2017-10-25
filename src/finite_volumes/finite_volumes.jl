@@ -121,7 +121,7 @@ Compute the maximal time step `dt` satisfying the CFL condition `dt <= cfl * dx 
 where `dx` is the length of a cell and `λ` the greatest absolute value of the
 speed in this cell.
 """
-function max_dt(t, u, fv::FirstOrderFV)
+function max_dt(t, u, fv::FirstOrderFV, cfl=0.5)
     @unpack balance_law, mesh = fv
     dt = mapreduce(cell->volume(cell,mesh) / max_abs_speed(u[cell],balance_law),
                     min, typemax(t), cell_indices(mesh))

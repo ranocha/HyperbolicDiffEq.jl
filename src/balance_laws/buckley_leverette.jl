@@ -60,11 +60,11 @@ end
 ################################################################################
 
 """
-    godunov(uₗ, uᵣ, model::BuckleyLeverette)
+    (::GodunovFlux)(uₗ, uᵣ, model::BuckleyLeverette)
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function godunov(uₗ, uᵣ, model::BuckleyLeverette)
+function (::GodunovFlux)(uₗ, uᵣ, model::BuckleyLeverette)
   flux(uₗ, model)
 end
 

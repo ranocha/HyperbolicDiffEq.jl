@@ -2,6 +2,8 @@ __precompile__()
 
 module HyperbolicDiffEq
 
+using Reexport
+
 @reexport using PolynomialBases
 
 using Roots
@@ -12,7 +14,6 @@ using MappedArrays
 using RecipesBase
 using LaTeXStrings
 
-using Reexport
 @reexport using DiffEqBase
 @reexport using DiffEqPDEBase
 
@@ -100,8 +101,7 @@ export semidiscretise, max_dt
 
 # finite volume methods
 export FirstOrderFV
-export local_lax_friedrichs, godunov, suliciu
-export LocalLaxFriedrichsFlux, SuliciuFlux
+export GodunovFlux, LocalLaxFriedrichsFlux, SuliciuFlux
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
 export EnergyConservativeFlux, IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
 

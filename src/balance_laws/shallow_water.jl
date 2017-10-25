@@ -66,11 +66,11 @@ end
 
 
 """
-    suliciu(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1})
+    (::SuliciuFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1})
 
 The Suliciu relaxation solver / numerical flux.
 """
-function suliciu(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1}) where T
+function (::SuliciuFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1}) where T
     hl, vl = primitive_variables(uₗ, model)
     hr, vr = primitive_variables(uᵣ, model)
     @unpack g = model
