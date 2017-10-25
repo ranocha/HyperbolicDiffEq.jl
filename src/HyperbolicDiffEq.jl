@@ -101,7 +101,7 @@ export semidiscretise, max_dt
 
 # finite volume methods
 export FirstOrderFV
-export GodunovFlux, LocalLaxFriedrichsFlux, SuliciuFlux
+export GodunovFlux, LocalLaxFriedrichsFlux, HartenLaxVanLeerFlux, HLL, SuliciuFlux
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
 export EnergyConservativeFlux, IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
 

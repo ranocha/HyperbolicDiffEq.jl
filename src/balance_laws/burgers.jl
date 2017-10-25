@@ -44,12 +44,11 @@ Compute the flux of `u` for `model`.
 @inline flux{T}(u, model::Burgers{T,1}) = u^2/2
 
 """
-    max_abs_speed(u, model::Burgers)
+    speed(u::Real, model::Burgers)
 
-Compute the maximal absolute value of speed at `u` for `model`.
+Compute the speed f'(`u`) for `model`.
 """
-@inline max_abs_speed(u, model::Burgers) = abs(u)
-
+@inline speed(u, model::Burgers) = u
 
 
 @inline flux{T}(u, model::Burgers{T,2}, direction) = u^2 / (2*sqrt(2))

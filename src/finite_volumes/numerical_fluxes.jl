@@ -48,6 +48,81 @@ Base.@pure function max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw, directi
     max(max_abs_speed(uₗ,model,direction), max_abs_speed(uᵣ,model,direction))
 end
 
+"""
+    max_abs_speed{T}(u::T, model::ScalarBalanceLaw{T,1})
+
+Compute the maximal absolute value of speed at `u` for `model`.
+"""
+@inline max_abs_speed{T}(u::T, model::ScalarBalanceLaw{T,1}) = abs(speed(u, model))
+
+"""
+    min_max_speed{T}(u::T, model::ScalarBalanceLaw{T,1})
+
+Compute the minimal and maximal speed at `u` for `model`.
+"""
+@inline function min_max_speed{T}(u::T, model::ScalarBalanceLaw{T,1})
+    λ = speed(u, model)
+    λ, λ
+end
+
+
+doc"
+    HartenLaxVanLeerFlux{MinMaxSpeed}
+
+The HLL (Harten, Lax, van Leer) flux using `min_max_speed::MinMaxSpeed` to compute
+ the (approximate) minimal and maximal speed in the solution of a Riemann problem.
+"
+struct HartenLaxVanLeerFlux{MinMaxSpeed} <: NumericalFlux
+    min_max_speed::MinMaxSpeed
+end
+
+const HLL = HartenLaxVanLeerFlux
+
+HartenLaxVanLeerFlux() = HartenLaxVanLeerFlux(min_max_speed)
+
+@inline function (fnum::HartenLaxVanLeerFlux)(uₗ, uᵣ, model::AbstractBalanceLaw{1})
+    λ₋, λ₊ = fnum.min_max_speed(uₗ, uᵣ, model)
+
+    if 0 <= λ₋
+        flux(uₗ, model)
+    elseif 0 < λ₊
+        ( λ₊*flux(uₗ, model) - λ₋*flux(uᵣ, model) + λ₋*λ₊*(uᵣ-uₗ) ) / (λ₊ - λ₋)
+    else
+        flux(uᵣ, model)
+    end
+end
+
+@inline function (fnum::HartenLaxVanLeerFlux)(uₗ, uᵣ, model::AbstractBalanceLaw, direction)
+    λ₋, λ₊ = fnum.min_max_speed(uₗ, uᵣ, model, direction)
+
+    if 0 <= λ₋
+        flux(uₗ, model, direction)
+    elseif 0 < λ₊
+        ( λ₊*flux(uₗ, model, direction) - λ₋*flux(uᵣ, model, direction) + λ₋*λ₊*(uᵣ-uₗ) ) / (λ₊ - λ₋)
+    else
+        flux(uᵣ, model, direction)
+    end
+end
+
+
+"""
+    min_max_speed(uₗ, uᵣ, model::AbstractBalanceLaw{1})
+
+Compute the maximal absolute value of the speed in the solution of the Riemann
+problem with states `uₗ`, `uᵣ` for `model`.
+"""
+@inline function min_max_speed(uₗ, uᵣ, model::AbstractBalanceLaw{1})
+    λₗ₋, λₗ₊ = min_max_speed(uₗ, model)
+    λᵣ₋, λᵣ₊ = min_max_speed(uᵣ, model)
+    min(λₗ₋, λᵣ₋), max(λₗ₊, λᵣ₊)
+end
+
+@inline function min_max_speed(uₗ, uᵣ, model::AbstractBalanceLaw, direction)
+    λₗ₋, λₗ₊ = min_max_speed(uₗ, model, direction)
+    λᵣ₋, λᵣ₊ = min_max_speed(uᵣ, model, direction)
+    min(λₗ₋, λᵣ₋), max(λₗ₊, λᵣ₊)
+end
+
 
 """
     EnergyConservativeFlux

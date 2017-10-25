@@ -34,13 +34,6 @@ Compute the speed f'(`u`) for `model`.
 end
 
 """
-    max_abs_speed(u, model::BuckleyLeverette)
-
-Compute the maximal absolute value of speed at `u` for `model`.
-"""
-@inline max_abs_speed(u, model::BuckleyLeverette) = abs(speed(u, model))
-
-"""
     max_abs_speed(uₗ, uᵣ, model::BuckleyLeverette)
 
 Compute the maximal absolute value of the speed in the solution of the Riemann
@@ -56,6 +49,33 @@ problem with states `uₗ`, `uᵣ` for `model`.
     end
 end
 
+"""
+    min_max_speed(uₗ, uᵣ, model::BuckleyLeverette)
+
+Compute the minimal and maximal speed in the solution of the Riemann problem with
+states `uₗ`, `uᵣ` for `model`.
+"""
+@inline function min_max_speed(uₗ, uᵣ, model::BuckleyLeverette)
+    # the flux is not convex; the maximal speed is 0.5 at u=0.5
+    critical_u = one(uₗ) / 2
+    λ₋, λ₊ = minmax(speed(uₗ, model), speed(uᵣ, model))
+    λ₊ = max(speed(critical_u, model), λ₊)
+    λ₋, λ₊
+end
+#= TODO: Something else?
+@inline function min_max_speed(uₗ, uᵣ, model::BuckleyLeverette)
+    # the flux is not convex; the maximal speed is 0.5 at u=0.5
+    critical_u = one(uₗ) / 2
+    umin, umax = minmax(uₗ, uᵣ)
+    if umin < critical_u && umax > critical_u
+        λ₋ =
+        λ₊ = speed(critical_u, model)
+    else
+        λ₋, λ₊ = minmax(speed(uₗ, model), speed(uᵣ, model))
+    end
+    λ₋, λ₊
+end
+=#
 
 ################################################################################
 
