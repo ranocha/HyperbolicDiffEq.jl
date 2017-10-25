@@ -211,8 +211,8 @@ end
 
 
 function semidiscretise(semidisc::UniformFluxDiffDisc1D, u₀func, tspan)
-    @unpack meshx, basis = semidisc
-    u₀ = compute_coefficients(u₀func, meshx, basis)
+    @unpack meshx, basis, parallel = semidisc
+    u₀ = compute_coefficients(u₀func, meshx, basis, parallel)
 
     ODEProblem(semidisc, u₀, tspan)
 end

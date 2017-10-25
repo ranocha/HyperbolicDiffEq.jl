@@ -147,3 +147,20 @@ and the polynomial basis `basis`.
 function integrate(u::AbstractArray{U,6}, meshx, meshy, meshz, basis::NodalBasis) where U
     integrate(identity, u, meshx, meshy, meshz, basis)
 end
+
+
+"""
+    array_type(parallel)
+
+Returns the type of the arrays used in the computations if the parallelisation
+strategy `parallel` is used.
+"""
+@generated function array_type(parallel)
+    quote
+        if $parallel <: Val{:shared}
+            SharedArray
+        else
+            Array
+        end
+    end
+end
