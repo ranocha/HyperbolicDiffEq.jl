@@ -99,6 +99,35 @@ end
 
 ################################################################################
 
+@inline function add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law::Burgers,
+                                                    Nx, basis::GaussLegendre, jacx, parallel)
+    Rl = reshape(interpolation_matrix(-1, basis), length(basis.nodes))
+    Rr = reshape(interpolation_matrix(+1, basis), length(basis.nodes))
+    MinvRl = Rl ./ basis.weights
+    MinvRr = Rr ./ basis.weights
+    utmp = zeros(eltype(u), size(u,1))
+    one_3 = 1 / 3
+    one_6 = 1 / 6
+
+    # add numerical fluxes
+    @inbounds for ix in Base.OneTo(Nx)
+        @views @. utmp = u[:,ix]
+        Rul = dot(Rl, utmp)
+        Rur = dot(Rr, utmp)
+        @views @. utmp = u[:,ix]^2
+        Ru2l = dot(Rl, utmp)
+        Ru2r = dot(Rr, utmp)
+
+        @. du[:,ix] += ((fluxes[ix] - one_3 * Ru2l - one_6 * Rul^2) * MinvRl
+                        - (fluxes[ix+1] - one_3 * Ru2r - one_6 * Rur^2) * MinvRr
+                        ) * jacx
+    end
+
+    nothing
+end
+
+################################################################################
+
 """
     BurgersRiemannSolution{T,T1}
 
