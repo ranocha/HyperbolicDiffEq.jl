@@ -21,6 +21,22 @@ end
 
 
 """
+    IntegralQuantitiesBurgers{T<:Real}
+
+Some integrated quantities of interest for Burgers' equation. Can be used in
+callbacks of DifferentialEquations.jl.
+"""
+struct IntegralQuantitiesBurgers{T<:Real} <: FieldVector{2,T}
+    mass::T
+    energy::T
+end
+
+function IntegralQuantitiesBurgers(u, model::Burgers)
+    IntegralQuantitiesBurgers(u, u^2)
+end
+
+
+"""
     flux{T}(u, model::Burgers{T,1})
 
 Compute the flux of `u` for `model`.
@@ -71,6 +87,10 @@ function godunov{T}(uₗ::T, uᵣ::T, model::Burgers{T,2}, direction)
   end
 end
 
+
+function (flux::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Burgers{T,1}) where T<:Real
+    (uₗ^2 + uₗ*uᵣ + uᵣ^2) / 6
+end
 
 function (flux::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Burgers{T,2}, direction) where T<:Real
     (uₗ^2 + uₗ*uᵣ + uᵣ^2) / (6*sqrt(6))

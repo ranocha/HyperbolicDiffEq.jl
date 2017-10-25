@@ -135,7 +135,7 @@ end
 @inline volume(cell::Int, mesh::UniformPeriodicMesh1D) = mesh.Δx
 
 function bounds(cell::Int, mesh::UniformPeriodicMesh1D)
-  Δx = mesh.Δx
+  @unpack Δx = mesh
 
   xmin = mesh.xmin + (cell-1)*Δx
   xmin = xmin + eps(xmin)
@@ -147,3 +147,48 @@ function bounds(cell::Int, mesh::UniformPeriodicMesh1D)
 end
 
 @inline bounds(mesh::UniformPeriodicMesh1D) = mesh.xmin, mesh.xmax
+
+
+
+################################################################################
+
+"""
+A uniform mesh in one space dimension of `Nx` cells between `xmin` and `xmax`.
+"""
+immutable UniformMesh1D{T<:Real} <: AbstractMesh1D
+  xmin::T
+  xmax::T
+  Nx::Int
+
+  Δx::T
+
+  function UniformMesh1D{T}(xmin::T, xmax::T, Nx::Int) where T
+    Nx > 0 || error("The number of elements `Nx` must be positive [`Nx == $Nx`].")
+    xmin < xmax || error("`xmin` must be smaller than `xmax` [`xmin == $xmin, xmax == $xmax`].")
+
+    new(xmin, xmax, Nx, (xmax-xmin)/Nx)
+  end
+end
+
+function UniformMesh1D(xmin::Real, xmax::Real, Nx::Integer)
+  xmin, xmax = promote(xmin, xmax)
+  UniformMesh1D{typeof(xmin)}(xmin, xmax, Int(Nx))
+end
+
+@inline numcells(mesh::UniformMesh1D) = mesh.Nx
+@inline cell_indices(mesh::UniformMesh1D) = 1:numcells(mesh)
+@inline volume(cell::Int, mesh::UniformMesh1D) = mesh.Δx
+
+function bounds(cell::Int, mesh::UniformMesh1D)
+  @unpack Δx = mesh
+
+  xmin = mesh.xmin + (cell-1)*Δx
+  xmin = xmin + eps(xmin)
+
+  xmax = mesh.xmin + cell*Δx
+  xmax = xmax - eps(xmax)
+
+  xmin, xmax
+end
+
+@inline bounds(mesh::UniformMesh1D) = mesh.xmin, mesh.xmax

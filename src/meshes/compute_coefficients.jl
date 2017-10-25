@@ -70,7 +70,7 @@ end
 function compute_coefficients(u, mesh::AbstractMesh1D, basis::NodalBasis)
     xmin, xmax = bounds(mesh)
     uval = zeros(typeof(u((xmin+xmax)/2)), length(basis.nodes), numcells(mesh))
-    compute_coefficients!(uval, u, mesh)
+    compute_coefficients!(uval, u, mesh, basis)
     uval
 end
 
@@ -87,6 +87,40 @@ function compute_coefficients!(uval, u, mesh::AbstractMesh1D, basis::NodalBasis)
     end
 
     nothing
+end
+
+function evaluate_coefficients(u, meshx::AbstractMesh1D, basis::NodalBasis,
+                                npoints=2*length(basis.nodes))
+    xplot = zeros(npoints*numcells(meshx))
+    uplot = zeros(eltype(u), npoints*numcells(meshx))
+
+    evaluate_coefficients!(xplot, uplot, u, meshx, basis)
+end
+
+function evaluate_coefficients!(xplot, uplot, u, meshx::AbstractMesh1D, basis::NodalBasis)
+    npoints = length(xplot) ÷ numcells(meshx)
+
+    @assert length(xplot) == npoints*numcells(meshx)
+    @assert length(xplot) == length(uplot)
+
+    ξ = linspace(-1+eps(), 1-eps(), npoints) |> collect
+    intX = Jacobi.interp_mat(ξ, basis.nodes)
+
+    Nx  = numcells(meshx)
+    Pp1 = length(basis.nodes)
+    uval = zeros(eltype(u), npoints)
+    for ix in 1:Nx
+        xmin, xmax = bounds(ix, meshx)
+        x = map_from_canonical(ξ, xmin, xmax, basis)
+        A_mul_B!(uval, intX, u[:,ix])
+
+        for jx in 1:npoints
+            xplot[(ix-1)*npoints+(jx-1)+1] = x[jx]
+            uplot[(ix-1)*npoints+(jx-1)+1] = uval[jx]
+        end
+    end
+
+    xplot, uplot
 end
 
 

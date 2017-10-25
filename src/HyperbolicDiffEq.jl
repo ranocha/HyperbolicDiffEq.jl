@@ -77,6 +77,7 @@ include("finite_volumes/finite_volumes.jl")
 include("finite_volumes/numerical_fluxes.jl")
 
 include("flux_difference/uniform_flux_difference.jl")
+include("flux_difference/uniform_flux_difference_1d.jl")
 
 include("riemann_problems.jl")
 include("balance_laws/burgers.jl")
@@ -101,7 +102,7 @@ export RiemannProblem
 export LobattoLegendre
 
 # meshes
-export UniformPeriodicMesh1D
+export UniformMesh1D, UniformPeriodicMesh1D
 export compute_coefficients, compute_coefficients!
 export evaluate_coefficients, evaluate_coefficients!
 
@@ -116,7 +117,7 @@ export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliF
 export EnergyConservativeFlux, IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
 
 # flux difference methods
-export UniformPeriodicFluxDiffDisc2D, UniformPeriodicFluxDiffDisc3D
+export UniformFluxDiffDisc1D, UniformPeriodicFluxDiffDisc2D, UniformPeriodicFluxDiffDisc3D
 
 # utilities
 export logmean, integrate
