@@ -34,7 +34,6 @@ function UniformFluxDiffDisc1D(balance_law, meshx, basis, fvol, fnumint, fnumext
                             left_bc, right_bc, fluxes, parallel)
 end
 
-
 @noinline function (semidisc::UniformFluxDiffDisc1D)(t, u, du)
   @boundscheck begin
     if size(u) != size(du)
@@ -55,7 +54,58 @@ end
 end
 
 
-function add_flux_differences!(du, u, semidisc::UniformFluxDiffDisc1D)
+
+struct UniformPeriodicFluxDiffDisc1D{BalanceLaw, T, Basis, Fvol, Fnumint,
+                                    Fluxes, Parallel} <: AbstractSemidiscretisation
+    balance_law::BalanceLaw
+    meshx::UniformPeriodicMesh1D{T}
+    basis::Basis
+    fvol::Fvol
+    fnumint::Fnumint
+
+    fluxes::Fluxes
+    parallel::Parallel
+
+    function UniformPeriodicFluxDiffDisc1D(balance_law::BalanceLaw, meshx::UniformPeriodicMesh1D{T},
+                                            basis::Basis, fvol::Fvol, fnumint::Fnumint,
+                                            fluxes::Fluxes, parallel::Parallel) where
+                                            {BalanceLaw, T, Basis, Fvol, Fnumint,
+                                            Fluxes, Parallel}
+        @assert typeof(fluxes) <: AbstractArray{variables(balance_law), 1}
+        @assert size(fluxes, 1) == numedges(meshx)
+        new{BalanceLaw, T, Basis, Fvol, Fnumint, Fluxes, Parallel}(
+            balance_law, meshx, basis, fvol, fnumint, fluxes, parallel)
+    end
+end
+
+function UniformPeriodicFluxDiffDisc1D(balance_law, meshx, basis, fvol, fnumint,
+                                        parallel=Val{:serial}())
+    fluxes = Array{variables(balance_law)}(numedges(meshx))
+    UniformPeriodicFluxDiffDisc1D(balance_law, meshx, basis, fvol, fnumint,
+                                    fluxes, parallel)
+end
+
+@noinline function (semidisc::UniformPeriodicFluxDiffDisc1D)(t, u, du)
+  @boundscheck begin
+    if size(u) != size(du)
+      error("size(u) = $(size(u)) != $(size(du)) = size(du)")
+    end
+    @assert size(u,1) == length(semidisc.basis.nodes)
+    @assert size(u,2) == numcells(semidisc.meshx)
+    if eltype(u) != variables(semidisc.balance_law)
+      error("eltype(u) == $(eltype(u)) != $(variables(semidisc.balance_law)) == variables(semidisc.balance_law)")
+    end
+  end
+
+  fill!(du, zero(eltype(du)))
+  add_flux_differences!(du, u, semidisc)
+  add_numerical_fluxes!(du, u, semidisc, t)
+
+  nothing
+end
+
+
+function add_flux_differences!(du, u, semidisc::Union{UniformFluxDiffDisc1D,UniformPeriodicFluxDiffDisc1D})
     Nx  = size(u, 2)
     Pp1 = size(u, 1)
 
@@ -228,8 +278,70 @@ end
 # NOTE: add_numerical_fluxes_inner_loop2! has to be specialised for each balance_law
 # if no boundary nodes are included, e.g. for GaussLegendre bases.
 
+function add_numerical_fluxes!(du, u, semidisc::UniformPeriodicFluxDiffDisc1D, t)
+    Nx  = size(u, 2)
+    Pp1 = size(u, 1)
 
-function semidiscretise(semidisc::UniformFluxDiffDisc1D, u₀func, tspan)
+    @unpack balance_law, basis, fnumint, fluxes, parallel = semidisc
+    @boundscheck @assert Pp1 == length(basis.weights)
+
+    jacx = 2 / semidisc.meshx.Δx
+
+    add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law, fnumint,
+                                        Nx, basis, jacx, parallel)
+    add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, Nx, basis, jacx, parallel)
+end
+
+@inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
+                                                    fnumint, Nx, basis::LobattoLegendre,
+                                                    jacx, parallel)
+    # calculate boundary numerical fluxes
+    @inbounds fluxes[1] = fluxes[end] = fnumint(u[end,end], u[1,1], balance_law)
+
+    # calculate internal numerical fluxes
+    @inbounds for ix in 2:Nx
+        # flux x - left
+        fluxes[ix] = fnumint(u[end,ix-1], u[1,ix], balance_law)
+    end
+
+    nothing
+end
+@inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
+                                                    fnumint, Nx, basis::LobattoLegendre,
+                                                    jacx, parallel::Val{:threads})
+    # calculate boundary numerical fluxes
+    @inbounds fluxes[1] = fluxes[end] = fnumint(u[end,end], u[1,1], balance_law)
+
+    # calculate internal numerical fluxes
+    @inbounds Threads.@threads for ix in 2:Nx
+        # flux x - left
+        fluxes[ix] = fnumint(u[end,ix-1], u[1,ix], balance_law)
+    end
+
+    nothing
+end
+@inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
+                                                    fnumint, Nx, basis, jacx, parallel)
+    # calculate external numerical fluxes
+    @views @inbounds fluxes[1] = fluxes[end] = fnumint(interpolate(+1, u[:,end], basis),
+                                                       interpolate(-1, u[:,1], basis),
+                                                       balance_law)
+
+    # calculate internal numerical fluxes
+    @views @inbounds for ix in 2:Nx
+        # flux x - left
+        fluxes[ix] = fnumint(interpolate(+1, u[:,ix-1], basis),
+                             interpolate(-1, u[:,ix], basis),
+                             balance_law)
+    end
+
+    nothing
+end
+
+
+
+function semidiscretise(semidisc::Union{UniformFluxDiffDisc1D, UniformPeriodicFluxDiffDisc1D},
+                        u₀func, tspan)
     @unpack meshx, basis, parallel = semidisc
     u₀ = compute_coefficients(u₀func, meshx, basis, parallel)
 
@@ -243,7 +355,7 @@ Compute the maximal time step `dt` satisfying the CFL condition `dt <= cfl * dx 
 where `dx` is the length of a cell, `λ` the greatest absolute value of the
 speed in this cell, and `p` the polynomial degree.
 """
-function max_dt(t, u, semidisc::UniformFluxDiffDisc1D, cfl=0.5)
+function max_dt(t, u, semidisc::Union{UniformFluxDiffDisc1D, UniformPeriodicFluxDiffDisc1D}, cfl=0.5)
     @unpack balance_law, meshx, basis = semidisc
     @unpack Δx = meshx
     p = length(basis.nodes)-1

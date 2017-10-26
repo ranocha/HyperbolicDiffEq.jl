@@ -106,7 +106,8 @@ export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliF
 export EnergyConservativeFlux, IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
 
 # flux difference methods
-export UniformFluxDiffDisc1D, UniformPeriodicFluxDiffDisc2D, UniformPeriodicFluxDiffDisc3D
+export UniformFluxDiffDisc1D, UniformPeriodicFluxDiffDisc1D,
+        UniformPeriodicFluxDiffDisc2D, UniformPeriodicFluxDiffDisc3D
 
 # utilities
 export logmean, integrate
