@@ -79,6 +79,7 @@ include("balance_laws/quartic.jl")
 include("balance_laws/quintic.jl")
 include("balance_laws/sextic.jl")
 include("balance_laws/septic.jl")
+include("balance_laws/octic.jl")
 include("balance_laws/buckley_leverette.jl")
 include("balance_laws/shallow_water.jl")
 include("balance_laws/euler.jl")
@@ -88,7 +89,7 @@ include("utils.jl")
 
 # models
 export Burgers, IntegralQuantitiesBurgers,
-       Cubic, Quartic, Quintic, Sextic, Septic,
+       Cubic, Quartic, Quintic, Sextic, Septic, Octic,
        BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
