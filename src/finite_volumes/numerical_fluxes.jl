@@ -139,6 +139,10 @@ The central flux $\frac{f(u_r) + f(u_l)}{2}$.
 "
 struct CentralFlux <: NumericalFlux end
 
+Base.@pure function (fnum::CentralFlux)(uₗ, uᵣ, model)
+    (flux(uₗ, model) + flux(uᵣ, model)) / 2
+end
+
 Base.@pure function (fnum::CentralFlux)(uₗ, uᵣ, model, direction)
     (flux(uₗ, model, direction) + flux(uᵣ, model, direction)) / 2
 end
