@@ -31,7 +31,7 @@ struct IntegralQuantitiesBurgers{T<:Real} <: FieldVector{2,T}
     energy::T
 end
 
-function IntegralQuantitiesBurgers(u, model::Burgers)
+function IntegralQuantitiesBurgers(u, model::ScalarBalanceLaw)
     IntegralQuantitiesBurgers(u, u^2)
 end
 
