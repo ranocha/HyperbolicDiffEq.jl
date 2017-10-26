@@ -75,6 +75,10 @@ include("flux_difference/uniform_flux_difference_1d.jl")
 include("riemann_problems.jl")
 include("balance_laws/burgers.jl")
 include("balance_laws/cubic.jl")
+include("balance_laws/quartic.jl")
+include("balance_laws/quintic.jl")
+include("balance_laws/sextic.jl")
+include("balance_laws/septic.jl")
 include("balance_laws/buckley_leverette.jl")
 include("balance_laws/shallow_water.jl")
 include("balance_laws/euler.jl")
@@ -84,7 +88,7 @@ include("utils.jl")
 
 # models
 export Burgers, IntegralQuantitiesBurgers,
-       Cubic,
+       Cubic, Quartic, Quintic, Sextic, Septic,
        BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler

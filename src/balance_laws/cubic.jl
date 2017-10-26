@@ -2,7 +2,7 @@
 """
     Cubic{T}
 
-The scalar conservation law with cubic flux
+The scalar conservation law with flux
 ``
   \\partial_t u + \\partial_x u^3 = 0
 ``
@@ -15,7 +15,7 @@ function Cubic(T=Float64)
 end
 
 function show{T}(io::IO, model::Cubic{T})
-  print(io, "Scalar conservation law {T=", T, "} with cubic flux f(u) = u^3")
+  print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^3")
 end
 
 
