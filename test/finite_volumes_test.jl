@@ -37,6 +37,7 @@ uₐₙₐ = solve(RiemannProblem(balance_law, 0., 1., -0.5) *
                 RiemannProblem(balance_law, 1., 0., 0.5))
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, GodunovFlux(), Ns) > 0.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, HartenLaxVanLeerFlux(), Ns) > 0.8
 
 balance_law = BuckleyLeverette()
 tspan = (0., 0.5)
@@ -44,6 +45,7 @@ uₐₙₐ = solve(RiemannProblem(balance_law, 0., 1., -0.5) *
                 RiemannProblem(balance_law, 1., 0., 0.5))
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, GodunovFlux(), Ns) > 0.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, HartenLaxVanLeerFlux(), Ns) > 0.8
 
 balance_law = ShallowWater()
 tspan = (0., 0.1)
