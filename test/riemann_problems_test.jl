@@ -1,7 +1,13 @@
 using Base.Test
 using MappedArrays
 using HyperbolicDiffEq
-#using Plots # Plots fails on win32 [appveyor]
+@static if Int==Int64
+    # NOTE: Only on 64 bit machines due to
+    # - https://github.com/JuliaPlots/Plots.jl/issues/968
+    # - https://github.com/JuliaPlots/Plots.jl/issues/963
+    # Fixed for julia v0.7 (https://github.com/JuliaLang/julia/pull/22644)
+    using Plots; unicodeplots()
+end
 
 
 const godunov = GodunovFlux()
@@ -24,7 +30,9 @@ print(DevNull, sol)
 @test sol(2., -0.5) ≈ 0
 @test sol(2., 1.) ≈ 0.5
 @test sol(2., 2.) ≈ 1
-#plot(sol) # Plots fails on win32 [appveyor]
+@static if Int==Int64
+    plot(sol)
+end
 @test flux(sol(0), sol.prob.model) ≈ godunov(sol.prob.uₗ, sol.prob.uᵣ, sol.prob.model)
 
 # Stationary shock wave
@@ -36,7 +44,9 @@ sol = solve(prob2)
 print(DevNull, sol)
 @test sol(-1) ≈  1
 @test sol( 1) ≈ -1
-#plot(sol) # Plots fails on win32 [appveyor]
+@static if Int==Int64
+    plot(sol)
+end
 @test flux(sol(0), sol.prob.model) ≈ godunov(sol.prob.uₗ, sol.prob.uᵣ, sol.prob.model)
 
 # Tuples of Riemann problems
@@ -59,7 +69,9 @@ print(DevNull, sol)
 @test sol(1., 1-eps()) ≈ 1
 @test sol(1., 1+eps()) ≈ -1
 @test sol(1., 2.) ≈ -1
-#plot(sol) # Plots fails on win32 [appveyor]
+@static if Int==Int64
+    plot(sol)
+end
 
 us = linspace(-1, 1, 10)
 for (uₗ,uᵣ) in Iterators.product(us,us)
@@ -114,6 +126,9 @@ v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
 @test all(v[x .< -1] .≈ 0)
 @test all(v[-1 .< x .< 2] ≈ 2 .* (1 .+ x[-1 .< x .< 2]) ./ 3)
 @test all(v[x .> 2] .≈ 0)
+@static if Int==Int64
+    plot(sol)
+end
 
 uₗ, uᵣ = uᵣ, uₗ
 prob = RiemannProblem(model, uₗ, uᵣ)
@@ -128,6 +143,9 @@ v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
 @test all(v[x .< -2] .≈ 0)
 @test all(v[-2 .< x .< 1] ≈ -2 .* (1 .- x[-2 .< x .< 1]) ./ 3)
 @test all(v[x .> 1] .≈ 0)
+@static if Int==Int64
+    plot(sol)
+end
 
 uₗ = ShallowWaterVar1D(1., 0.)
 uᵣ = ShallowWaterVar1D(eps(), 0.)
@@ -143,6 +161,9 @@ v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
 @test all(v[x .< -1] .≈ 0)
 @test all(v[-1 .< x .< 2] ≈ 2 .* (1 .+ x[-1 .< x .< 2]) ./ 3)
 @test all(v[x .> 2] .≈ 0)
+@static if Int==Int64
+    plot(sol)
+end
 
 uₗ, uᵣ = uᵣ, uₗ
 prob = RiemannProblem(model, uₗ, uᵣ)
@@ -157,6 +178,9 @@ v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
 @test all(v[x .< -2] .≈ 0)
 @test all(v[-2 .< x .< 1] ≈ -2 .* (1 .- x[-2 .< x .< 1]) ./ 3)
 @test all(v[x .> 1] .≈ 0)
+@static if Int==Int64
+    plot(sol)
+end
 
 # Moses' First Problem
 # Example 5.21 of Holden & Risebro, "Front Tracking for Hyperbolic Conservation Laws", 2002
@@ -185,3 +209,6 @@ idx5 = (v₀+sqrt(h₀)) .< x
 @test all(v[idx3] .≈ 0)
 @test all(v[idx4] .≈ (v₀ .- 2 .* sqrt(h₀) .+ 2 .* x[idx4]) ./ 3)
 @test all(v[idx5] .≈ v₀)
+@static if Int==Int64
+    plot(sol)
+end
