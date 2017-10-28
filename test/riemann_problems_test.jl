@@ -83,6 +83,18 @@ end
 
 ################################################################################
 
+# Cubic conservation law
+model = Cubic()
+us = linspace(-5, 5, 100)
+for (uₗ,uᵣ) in Iterators.product(us,us)
+  prob = RiemannProblem(model, uₗ, uᵣ)
+  sol = solve(prob)
+  @test godunov(uₗ, uᵣ, model) ≈ flux(sol(0), model)
+end
+
+
+################################################################################
+
 # Shallow water equations
 model = ShallowWater()
 

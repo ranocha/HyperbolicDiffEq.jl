@@ -103,3 +103,113 @@ end
 
     nothing
 end
+
+
+################################################################################
+
+"""
+    CubicRiemannSolution{T,T1}
+
+The solution of a Riemann problem `prob` for the cubic conservation law.
+"""
+immutable CubicRiemannSolution{T,T1} <: ScalarRiemannSolution
+  prob::RiemannProblem{Cubic{T},T,T1}
+  σ⁻::T
+  σ⁺::T
+end
+
+
+"""
+    minmax_speeds(sol::CubicRiemannSolution)
+
+Return the minimal and maximal speeds `σ⁻, σ⁺` that appear in the solution `sol`.
+"""
+function minmax_speeds(sol::CubicRiemannSolution)
+  sol.σ⁻, sol.σ⁺
+end
+
+
+"""
+    (sol::CubicRiemannSolution)(ξ::Real)
+
+Evaluate the solution `sol` at the value `ξ` of the self-similarity variable
+`ξ = (x - x₀) / (t - t₀)`.
+"""
+function (sol::CubicRiemannSolution)(ξ::Real)
+  @unpack σ⁻, σ⁺ = sol
+  @unpack uₗ, uᵣ = sol.prob
+
+  if ξ < σ⁻
+    uₗ
+  elseif ξ < σ⁺
+    # rarefaction wave
+    sign(uᵣ)*sqrt(ξ/3)
+  else
+    uᵣ
+  end
+end
+
+
+"""
+    (sol::CubicRiemannSolution)(t::Real, x::Real)
+
+Evaluate the solution `sol` at the time and space coordinates `t` and `x`.
+"""
+function (sol::CubicRiemannSolution)(t::Real, x::Real)
+  @unpack x₀, t₀ = sol.prob
+
+  sol((x-x₀)/(t-t₀))
+end
+
+
+function shockspeed(uₗ, uᵣ, model::Cubic)
+  uₗ^2 + uₗ*uᵣ + uᵣ^2
+end
+
+
+"""
+    solve{T,T1}(prob::RiemannProblem{Cubic{T},T,T1})
+
+Compute the solution of the Riemann prolem `prob`.
+"""
+function solve{T,T1}(prob::RiemannProblem{Cubic{T},T,T1})
+  @unpack uₗ, uᵣ, model = prob
+  u_crit = zero(T)
+
+  # f(u) = u^3 is concave on (-Inf,0) and convex on (0,Inf)
+  if uₗ < uᵣ
+    # find the lower convex envelope
+    if uₗ < u_crit && uᵣ < u_crit
+      # f is concave
+      # the solutions contains a single shock
+      σ⁻ = σ⁺ = shockspeed(uₗ, uᵣ, model)
+    elseif uₗ > u_crit && uᵣ > u_crit
+      # f is convex
+      # the solutions contains a single rarefaction wave
+      σ⁻ = speed(uₗ, model)
+      σ⁺ = speed(uᵣ, model)
+    else
+      # f has both concave and convex parts
+      σ⁻ = speed(-uₗ/2, model)
+      σ⁺ = speed(uᵣ, model)
+    end
+  else
+    # find the upper concave envelope
+    if uₗ < u_crit && uᵣ < u_crit
+      # f is concave
+      # the solutions contains a single rarefaction wave
+      σ⁻ = speed(uₗ, model)
+      σ⁺ = speed(uᵣ, model)
+    elseif uₗ > u_crit && uᵣ > u_crit
+      # f is convex
+      # the solutions contains a single shock
+      σ⁻ = σ⁺ = shockspeed(uₗ, uᵣ, model)
+    else
+      # f has both convex and concave parts
+      σ⁻ = speed(-uₗ/2, model)
+      σ⁺ = speed(uᵣ, model)
+    end
+  end
+
+  CubicRiemannSolution(prob, σ⁻, σ⁺)
+end
