@@ -212,3 +212,32 @@ idx5 = (v₀+sqrt(h₀)) .< x
 @static if Int==Int64
     plot(sol)
 end
+
+
+################################################################################
+
+# Euler equations
+model = Euler()
+
+# intermediate values
+# Toro (2009), Riemann Solvers and Numerical Methods for Fluid Dynamics,
+# Table 4.3
+compute_pₘ_vₘ = (ϱₗ, vₗ, pₗ, ϱᵣ, vᵣ, pᵣ) -> begin
+    γ = 1.4
+    HyperbolicDiffEq.compute_pₘ_vₘ(ϱₗ, vₗ, pₗ, sqrt(γ*pₗ/ϱₗ), ϱᵣ, vᵣ, pᵣ, sqrt(γ*pᵣ/ϱᵣ), γ)
+end
+pₘ, vₘ = compute_pₘ_vₘ(1.0, 0.0, 1.0, 0.125, 0.0, 0.1)
+@test isapprox(pₘ, 0.30313, atol=1.e-5)
+@test isapprox(vₘ, 0.92745, atol=1.e-5)
+pₘ, vₘ = compute_pₘ_vₘ(1.0, -2.0, 0.4, 1.0, 2.0, 0.4)
+@test isapprox(pₘ, 0.00189, atol=1.e-5)
+@test isapprox(vₘ, 0.00000, atol=1.e-5)
+pₘ, vₘ = compute_pₘ_vₘ(1.0, 0.0, 1000.0, 1.0, 0.0, 0.01)
+@test isapprox(pₘ, 460.894, atol=1.e-3)
+@test isapprox(vₘ, 19.5975, atol=1.e-4)
+pₘ, vₘ = compute_pₘ_vₘ(1.0, 0.0, 0.01, 1.0, 0.0, 100.0)
+@test isapprox(pₘ, 46.0950, atol=1.e-4)
+@test isapprox(vₘ, -6.19633, atol=1.e-5)
+pₘ, vₘ = compute_pₘ_vₘ(5.99924, 19.5975, 460.894, 5.99242, -6.19633, 46.0950)
+@test isapprox(pₘ, 1691.64, atol=1.e-2)
+@test isapprox(vₘ, 8.68975, atol=3.e-5)

@@ -8,13 +8,35 @@ struct Euler{T<:Real,Dim} <: AbstractBalanceLaw{Dim}
     γ::T
 end
 
-function Euler(γ=1., Dim=1)
+function Euler(γ=1.4, Dim=1)
   Euler{typeof(γ), Dim}(γ)
 end
 
 function show{T,Dim}(io::IO, model::Euler{T,Dim})
   print(io, "Compressible Euler equations with γ=", model.γ, " {T=", T, ", Dim=", Dim, "}")
 end
+
+
+"""
+    EulerVar1D{T<:Real}
+
+Conserved variables (ϱ, ϱv, ϱe) of the Euler equations in one space dimension.
+"""
+struct EulerVar1D{T<:Real} <: FieldVector{3,T}
+  ϱ ::T
+  ϱv::T
+  ϱe::T
+end
+
+function (::Type{EulerVar1D{T}}){T}(val::Real)
+  EulerVar2D{T}(val, val, val)
+end
+
+function similar_type{T}(::EulerVar1D{T})
+  EulerVar1D{T}
+end
+
+@inline variables{T}(model::Euler{T,1}) = EulerVar1D{T}
 
 
 """
@@ -83,6 +105,19 @@ function IntegralQuantitiesEuler(u, model::Euler)
 end
 
 
+@inline function primitive_variables(u::EulerVar1D, model::Euler)
+    @unpack ϱ, ϱv, ϱe = u
+    @unpack γ = model
+    if ϱ ≈ 0
+        v = zero(ϱ)
+    else
+        v = ϱv / ϱ
+    end
+    p = (γ-1) * (ϱe - ϱv*v/2)
+
+    ϱ, v, p
+end
+
 @inline function primitive_variables(u::EulerVar2D, model::Euler)
     @unpack ϱ, ϱvx, ϱvy, ϱe = u
     @unpack γ = model
@@ -116,16 +151,22 @@ end
 end
 
 
+@inline function conserved_variables(ϱ, v, p, model::Euler)
+    @unpack γ = model
+
+    variables(model)(ϱ, ϱ*v, ϱ*v^2/2+p/(γ-1))
+end
+
 @inline function conserved_variables(ϱ, vx, vy, p, model::Euler)
     @unpack γ = model
 
-    variables(model)(ϱ, ϱ*vx, ϱ*vy, (ϱ*vx^2+ϱ*vy^2)/2+(γ-1)*p)
+    variables(model)(ϱ, ϱ*vx, ϱ*vy, (ϱ*vx^2+ϱ*vy^2)/2+p/(γ-1))
 end
 
 @inline function conserved_variables(ϱ, vx, vy, vz, p, model::Euler)
     @unpack γ = model
 
-    variables(model)(ϱ, ϱ*vx, ϱ*vy, ϱ*vz, (ϱ*vx^2+ϱ*vy^2+ϱ*vz^2)/2+(γ-1)*p)
+    variables(model)(ϱ, ϱ*vx, ϱ*vy, ϱ*vz, (ϱ*vx^2+ϱ*vy^2+ϱ*vz^2)/2+p/(γ-1))
 end
 
 
@@ -253,6 +294,36 @@ end
     abs(vz) + sqrt(γ * p / ϱ)
 end
 
+
+@recipe function f{Ξ,T}(ξumodel::Tuple{Ξ,Vector{EulerVar1D{T}},Euler{T,1}})
+  ξ, u, model = ξumodel
+
+  ϱ  = mappedarray(u->u.ϱ, u)
+  v  = mappedarray(u->primitive_variables(u,model)[2], u)
+  p  = mappedarray(u->primitive_variables(u,model)[3], u)
+
+  size   --> (1000,400)
+  layout --> (1,3)
+  legend --> false
+
+  @series begin
+      subplot := 1
+      yguide --> L"\varrho"
+      ξ, ϱ
+  end
+
+  @series begin
+      subplot := 2
+      yguide --> L"v"
+      ξ, v
+  end
+
+  @series begin
+      subplot := 3
+      yguide --> L"p"
+      ξ, p
+  end
+end
 
 @recipe function f{X,Y,T}(xyumodel::Tuple{X,Y,AbstractArray{EulerVar2D{T}},Euler})
     x, y, u, model = xyumodel
@@ -1326,4 +1397,142 @@ end
     fϱe  = ϱ*h*vz
 
     SVector(fϱ, fϱvx, fϱvy, fϱvz, fϱe)
+end
+
+
+################################################################################
+
+struct EulerRiemannSolution{T,T1} <: AbstractRiemannSolution
+    prob::RiemannProblem{Euler{T,1},EulerVar1D{T},T1}
+    uₘ⁻::EulerVar1D{T} # left middle state
+    uₘ⁺::EulerVar1D{T} # left middle state
+    σₗ⁻::T # slow speed of left wave
+    σₗ⁺::T # fast speed of left wave
+    σₘ::T  # speed of the middle (rarefaction) wave
+    σᵣ⁻::T # slow speed of second family
+    σᵣ⁺::T # fast speed of second family
+
+    function EulerRiemannSolution{T,T1}(prob::RiemannProblem{Euler{T,1},EulerVar1D{T},T1}) where {T,T1}
+        uₘ⁻, uₘ⁺, σₗ⁻, σₗ⁺, σₘ, σᵣ⁻, σᵣ⁺ = compute_state_and_speeds(prob.uₗ, prob.uᵣ, prob.model)
+        new(prob, uₘ⁻, uₘ⁺, σₗ⁻, σₗ⁺, σₘ, σᵣ⁻, σᵣ⁺)
+    end
+end
+
+function solve{T,T1}(prob::RiemannProblem{Euler{T,1},EulerVar1D{T},T1})
+    EulerRiemannSolution{T,T1}(prob)
+end
+
+function minmax_speeds(sol::EulerRiemannSolution)
+    sol.σₗ⁻, sol.σᵣ⁺
+end
+
+function (sol::EulerRiemannSolution)(ξ::Real)
+    @unpack uₘ⁻, uₘ⁺, σₗ⁻, σₗ⁺, σₘ, σᵣ⁻, σᵣ⁺ = sol
+    @unpack uₗ, uᵣ, model = sol.prob
+
+    if ξ <= σₗ⁻
+        uₗ
+    elseif ξ <= σₗ⁺
+        rarefaction_wave_1(ξ, uₗ, model)
+    elseif ξ <= σₘ
+        uₘ⁻
+    elseif ξ <= σᵣ⁻
+        uₘ⁺
+    elseif ξ <= σᵣ⁺
+        rarefaction_wave_2(ξ, uᵣ, model)
+    else # σᵣ⁺ < ξ
+        uᵣ
+    end
+end
+
+function rarefaction_wave_1{T}(ξ, uₗ::EulerVar1D, model::Euler{T,1})
+    @unpack γ = model
+    ϱₗ, vₗ, pₗ = primitive_variables(uₗ, model)
+    aₗ = sqrt(γ * pₗ / ϱₗ)
+    # Toro (2009), Riemann Solvers and Numerical Methods for Fluid Dynamics,
+    # equation (4.56)
+    ϱ = ϱₗ * ( 2/(γ+1) + (γ-1)/(aₗ*(γ+1))*(vₗ-ξ) )^(2/(γ-1))
+    v = (aₗ + (γ-1)/2*vₗ + ξ) * 2/(γ+1)
+    p = pₗ * ( 2/(γ+1) + (γ-1)/(aₗ*(γ+1))*(vₗ-ξ) )^(2γ/(γ-1))
+    conserved_variables(ϱ, v, p, model)
+end
+
+function rarefaction_wave_2{T}(ξ, uᵣ::EulerVar1D, model::Euler{T,1})
+    @unpack γ = model
+    ϱᵣ, vᵣ, pᵣ = primitive_variables(uᵣ, model)
+    aᵣ = sqrt(γ * pᵣ / ϱᵣ)
+    # Toro (2009), Riemann Solvers and Numerical Methods for Fluid Dynamics,
+    # equation (4.63)
+    ϱ = ϱᵣ * ( 2/(γ+1) - (γ-1)/(aᵣ*(γ+1))*(vᵣ-ξ) )^(2/(γ-1))
+    v = (-aᵣ + (γ-1)/2*vᵣ + ξ) * 2/(γ+1)
+    p = pᵣ * ( 2/(γ+1) - (γ-1)/(aᵣ*(γ+1))*(vᵣ-ξ) )^(2γ/(γ-1))
+    conserved_variables(ϱ, v, p, model)
+end
+
+
+function (sol::EulerRiemannSolution)(t::Real, x::Real)
+  @unpack x₀, t₀ = sol.prob
+
+  sol((x-x₀)/(t-t₀))
+end
+
+
+function compute_state_and_speeds{T}(uₗ::EulerVar1D{T}, uᵣ::EulerVar1D{T}, model::Euler)
+    @unpack γ = model
+    ϱₗ, vₗ, pₗ = primitive_variables(uₗ, model)
+    aₗ = sqrt(γ * pₗ / ϱₗ)
+    ϱᵣ, vᵣ, pᵣ = primitive_variables(uᵣ, model)
+    aᵣ = sqrt(γ * pᵣ / ϱᵣ)
+
+    pₘ, vₘ = compute_pₘ_vₘ(ϱₗ, vₗ, pₗ, aₗ, ϱᵣ, vᵣ, pᵣ, aᵣ, γ)
+
+    if pₘ > pₗ
+        # left shock wave
+        ϱₘ⁻ = ϱₗ * (pₘ/pₗ + (γ-1)/(γ+1)) / (1 + (γ-1)/(γ+1)*pₘ/pₗ)
+        σₗ⁻ = σₗ⁺ = vₗ - aₗ*sqrt((γ+1)/2γ * pₘ/pₗ + (γ-1)/2γ)
+    else
+        # left rarefaction wave
+        ϱₘ⁻ = ϱₗ * (pₘ/pₗ)^(1/γ)
+        aₘ⁻ = aₗ * (pₘ/pₗ)^((γ-1)/2γ)
+        σₗ⁻ = vₗ - aₗ
+        σₗ⁺ = vₘ - aₘ⁻
+    end
+
+    if pₘ > pᵣ
+        # right shock wave
+        ϱₘ⁺ = ϱᵣ * (pₘ/pᵣ + (γ-1)/(γ+1)) / (1 + (γ-1)/(γ+1)*pₘ/pᵣ)
+        σᵣ⁻ = σᵣ⁺ = vᵣ + aᵣ*sqrt((γ+1)/2γ * pₘ/pᵣ + (γ-1)/2γ)
+    else
+        # right rarefaction wave
+        ϱₘ⁺ = ϱᵣ * (pₘ/pᵣ)^(1/γ)
+        aₘ⁺ = aᵣ * (pₘ/pᵣ)^((γ-1)/2γ)
+        σᵣ⁻ = vₘ + aₘ⁺
+        σᵣ⁺ = vₗ + aₗ
+    end
+
+    uₘ⁻ = conserved_variables(ϱₘ⁻, vₘ, pₘ, model)
+    uₘ⁺ = conserved_variables(ϱₘ⁺, vₘ, pₘ, model)
+    σₘ = vₘ
+
+    uₘ⁻, uₘ⁺, σₗ⁻, σₗ⁺, σₘ, σᵣ⁻, σᵣ⁺
+end
+
+
+function compute_pₘ_vₘ(ϱₗ, vₗ, pₗ, aₗ, ϱᵣ, vᵣ, pᵣ, aᵣ, γ)
+    Aₗ = 2/((γ+1)*ϱₗ)
+    Bₗ = (γ-1)/(γ+1)*pₗ
+    Aᵣ =  2/((γ+1)*ϱᵣ)
+    Bᵣ = (γ-1)/(γ+1)*pᵣ
+
+    fₗ = p -> p > pₗ ? (p-pₗ)*sqrt(Aₗ/(p+Bₗ)) : 2aₗ/(γ-1) * ((p/pₗ)^((γ-1)/2γ) - 1)
+    fᵣ = p -> p > pᵣ ? (p-pᵣ)*sqrt(Aᵣ/(p+Bᵣ)) : 2aᵣ/(γ-1) * ((p/pᵣ)^((γ-1)/2γ) - 1)
+
+    # two rarefaction approximation
+    # Toro (2009), Riemann Solvers and Numerical Methods for Fluid Dynamics,
+    # equation (4.46)
+    p₀ = ( (aₗ + aᵣ - (γ-1)*(vᵣ-vₗ)/2) / (aₗ/pₗ^((γ-1)/2γ) + aᵣ/pᵣ^((γ-1)/2γ) ) )^(2γ/(γ-1))
+    # TODO: Improve; Newton with explicit derivative?
+    pₘ = Roots.fzero(p -> fₗ(p)+fᵣ(p)+vᵣ-vₗ, p₀)
+
+    pₘ, (vₗ+vᵣ)/2 + (fᵣ(pₘ) - fₗ(pₘ))/2
 end

@@ -8,7 +8,8 @@ function calc_error(balance_law, uₐₙₐ, tmin, tmax, numflux, N, usethreads=
     mesh = UniformPeriodicMesh1D(-2., 2., N)
     fv = FirstOrderFV(balance_law, mesh, numflux, usethreads)
     ode = semidiscretise(fv, u₀, tspan)
-    sol = solve(ode, OrdinaryDiffEq.Euler(), dt=max_dt(tspan[1], ode.u0, fv), save_everystep=false)
+    sol = solve(ode, OrdinaryDiffEq.Euler(), dt=max_dt(tspan[1], ode.u0, fv),
+                save_everystep=false, dense=false)
     uana = compute_coefficients(x->uₐₙₐ(tspan[end],x), mesh)
 
     N, norm(sol[end] - uana, 1) / N
@@ -55,3 +56,12 @@ uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
                 RiemannProblem(balance_law, u2, u1, 0.5))
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.75
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.75
+
+balance_law = HyperbolicDiffEq.Euler()
+tspan = (0., 0.25)
+u1 = conserved_variables(1.0, 0.0, 1.0, balance_law)
+u2 = conserved_variables(0.125, 0.0, 0.1, balance_law)
+uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
+                RiemannProblem(balance_law, u2, u1, 0.5))
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.75
+#@test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.75

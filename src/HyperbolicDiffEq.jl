@@ -92,7 +92,7 @@ export Burgers, IntegralQuantitiesBurgers,
        Cubic, Quartic, Quintic, Sextic, Septic, Octic,
        BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
-export Euler, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
+export Euler, EulerVar1D, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
 
 export flux, max_abs_speed, variables, kinetic_energy, entropy, conserved_variables,
         primitive_variables, satisfies_physical_constraints

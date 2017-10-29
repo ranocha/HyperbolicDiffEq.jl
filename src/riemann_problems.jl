@@ -66,9 +66,8 @@ function show(io::IO, sol::AbstractRiemannSolution)
 end
 
 
-@recipe function f(sol::ScalarRiemannSolution)
+@recipe function f(sol::AbstractRiemannSolution)
   xguide --> L"\xi"
-  yguide --> L"u"
   label  --> L"u"
   legend --> false
 
@@ -84,7 +83,13 @@ end
   ξ = linspace(σ⁻, σ⁺, 10^3)
   u = sol.(ξ)
 
-  ((ξ, u),)
+  ((ξ, u, sol.prob.model),)
+end
+
+
+@recipe function f{Ξ,U}(ξumodel::Tuple{Ξ,U,AbstractBalanceLaw{1}})
+    ξ, u, model = ξumodel
+    ((ξ, u), )
 end
 
 
@@ -252,5 +257,5 @@ end
   x = linspace(xmin, xmax, 10^3)
   u = sol.(t,x)
 
-  ((x, u),)
+  ((x, u, sol.tup[1].prob.model),)
 end

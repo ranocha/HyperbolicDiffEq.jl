@@ -268,28 +268,8 @@ v_S2_SWE(h, hₗ, vₗ) = vₗ + (h-hₗ) * sqrt(1/h+1/hₗ) / sqrt(2)
 
 
 
-@recipe function f(sol::ShallowWaterRiemannSolution)
-  xguide --> L"\xi"
-
-  σ⁻, σ⁺ =  minmax_speeds(sol)
-  if σ⁻ ≈ σ⁺
-    σ = one(σ⁻)
-  else
-    σ = min(abs(σ⁻ - σ⁺), max(abs(σ⁻), abs(σ⁺))/10)
-  end
-  σ⁻ = σ⁻ - σ
-  σ⁺ = σ⁺ + σ
-
-  ξ = linspace(σ⁻, σ⁺, 10^3)
-  u = sol.(ξ)
-
-  ((ξ, u),)
-end
-
-
 @recipe function f{Ξ,T}(ξu::Tuple{Ξ,Vector{ShallowWaterVar1D{T}}})
-  ξ = ξu[1]
-  u = ξu[2]
+  ξ, u = ξu
 
   h  = mappedarray(u->u.h, u)
   hv = mappedarray(u->u.hv, u)
