@@ -266,12 +266,15 @@ Estimate the maximal speed in the solution of the Riemann problem with left and
 right states `uₗ`, `uᵣ` for `model` via the two rarefaction approximation, see
 Guermond and Popov (2016) Fast Estimation from above of the maximum wave speed in
 the Riemann roblem for the Euler equations, Journal of Computational Physics 321,
-pp. 908-926.
+pp. 908-926, and
+Chen and Shu (2017) Entropy stable high order discontinuous Galerkin methods with
+suitable quadrature rules for hyperbolic conservation laws, Journal of Computational
+Physics 345, pp. 427-461.
 """
 @inline function max_abs_speed(uₗ::EulerVar1D, uᵣ::EulerVar1D, model::Euler)
     λ₋, λ₊ = min_max_speed(uₗ, uᵣ, model)
 
-    max(-min(zero(λ₋), λ₋), max(zero(λ₊), λ₊))
+    max(abs(λ₋), abs(λ₊))
 end
 
 """
