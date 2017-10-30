@@ -298,13 +298,17 @@ Physics 345, pp. 427-461.
 
     pₘ = ( (aₗ + aᵣ + (γ-1)*(vₗ-vᵣ)/2) / (aₗ/pₗ^((γ-1)/2γ) + aᵣ/pᵣ^((γ-1)/2γ)) )^(2γ/(γ-1))
     if pₘ <= pₗ
+        # approximated by rarefaction wave
         λ₋ = vₗ - aₗ
     else
+        # approximated by shock wave
         λ₋ = vₗ - aₗ*sqrt(1 + (γ+1)/2γ * (pₘ/pₗ - 1))
     end
     if pₘ <= pᵣ
+        # approximated by rarefaction wave
         λ₊ = vᵣ + aᵣ
     else
+        # approximated by shock wave
         λ₊ = vᵣ + aᵣ*sqrt(1 + (γ+1)/2γ * (pₘ/pᵣ - 1))
     end
 
