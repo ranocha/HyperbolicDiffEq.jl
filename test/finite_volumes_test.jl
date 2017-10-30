@@ -1,7 +1,7 @@
 using Base.Test, OrdinaryDiffEq, HyperbolicDiffEq
 
 
-function calc_error(balance_law, uₐₙₐ, tmin, tmax, numflux, N, usethreads=true)
+function calc_error(balance_law, uₐₙₐ, tmin, tmax, numflux, N, usethreads)
     u₀ = x -> uₐₙₐ(tspan[1], x)
 
     tspan = (tmin, tmax)
@@ -24,7 +24,7 @@ function calc_order_estimate(Ns_and_errors)
     mean(orders)
 end
 
-function calc_order_estimate(balance_law, uₐₙₐ, tspan, numflux, Ns, usethreads=true)
+function calc_order_estimate(balance_law, uₐₙₐ, tspan, numflux, Ns, usethreads=false)
     calc_order_estimate(calc_error.(balance_law, uₐₙₐ, tspan..., numflux, Ns, usethreads))
 end
 
@@ -63,5 +63,6 @@ u1 = conserved_variables(1.0, 0.0, 1.0, balance_law)
 u2 = conserved_variables(0.125, 0.0, 0.1, balance_law)
 uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
                 RiemannProblem(balance_law, u2, u1, 0.5))
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.75
-#@test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.75
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.55
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, HartenLaxVanLeerFlux(), Ns) > 0.55
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.55

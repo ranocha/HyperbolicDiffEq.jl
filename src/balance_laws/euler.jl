@@ -209,6 +209,13 @@ Base.@pure function entropy(u::EulerVar3D, model::Euler)
 end
 
 
+@inline function flux{T}(u::EulerVar1D{T}, model::Euler)
+    @unpack ϱv, ϱe = u
+    ϱ, v, p = primitive_variables(u, model)
+
+    SVector{3,T}(ϱv, ϱv*v + p, (ϱe+p)*v)
+end
+
 @inline function flux{T}(u::EulerVar2D{T}, model::Euler, dir::Val{:x})
     @unpack ϱvx, ϱvy, ϱe = u
     ϱ, vx, vy, p = primitive_variables(u, model)
@@ -242,6 +249,63 @@ end
     ϱ, vx, vy, vz, p = primitive_variables(u, model)
 
     SVector{5,T}(ϱvz, ϱvx*vz, ϱvy*vz, ϱvz*vz + p, (ϱe+p)*vz)
+end
+
+
+@inline function max_abs_speed(u::EulerVar1D, model::Euler)
+    @unpack γ = model
+    ϱ, v, p = primitive_variables(u, model)
+
+    abs(v) + sqrt(γ * p / ϱ)
+end
+
+"""
+    max_abs_speed(uₗ::EulerVar1D, uᵣ::EulerVar1D, model::Euler)
+
+Estimate the maximal speed in the solution of the Riemann problem with left and
+right states `uₗ`, `uᵣ` for `model` via the two rarefaction approximation, see
+Guermond and Popov (2016) Fast Estimation from above of the maximum wave speed in
+the Riemann roblem for the Euler equations, Journal of Computational Physics 321,
+pp. 908-926.
+"""
+@inline function max_abs_speed(uₗ::EulerVar1D, uᵣ::EulerVar1D, model::Euler)
+    λ₋, λ₊ = min_max_speed(uₗ, uᵣ, model)
+
+    max(-min(zero(λ₋), λ₋), max(zero(λ₊), λ₊))
+end
+
+"""
+    min_max_speed(uₗ::EulerVar1D, uᵣ::EulerVar1D, model::Euler)
+
+Estimate the maximal speed in the solution of the Riemann problem with left and
+right states `uₗ`, `uᵣ` for `model` via the two rarefaction approximation, see
+Guermond and Popov (2016) Fast Estimation from above of the maximum wave speed in
+the Riemann roblem for the Euler equations, Journal of Computational Physics 321,
+pp. 908-926, and
+Chen and Shu (2017) Entropy stable high order discontinuous Galerkin methods with
+suitable quadrature rules for hyperbolic conservation laws, Journal of Computational
+Physics 345, pp. 427-461.
+"""
+@inline function min_max_speed(uₗ::EulerVar1D, uᵣ::EulerVar1D, model::Euler)
+    @unpack γ = model
+    ϱₗ, vₗ, pₗ = primitive_variables(uₗ, model)
+    aₗ = sqrt(γ * pₗ / ϱₗ)
+    ϱᵣ, vᵣ, pᵣ = primitive_variables(uᵣ, model)
+    aᵣ = sqrt(γ * pᵣ / ϱᵣ)
+
+    pₘ = ( (aₗ + aᵣ + (γ-1)*(vₗ-vᵣ)/2) / (aₗ/pₗ^((γ-1)/2γ) + aᵣ/pᵣ^((γ-1)/2γ)) )^(2γ/(γ-1))
+    if pₘ <= pₗ
+        λ₋ = vₗ - aₗ
+    else
+        λ₋ = vₗ - aₗ*sqrt(1 + (γ+1)/2γ * (pₘ/pₗ - 1))
+    end
+    if pₘ <= pᵣ
+        λ₊ = vᵣ + aᵣ
+    else
+        λ₊ = vᵣ + aᵣ*sqrt(1 + (γ+1)/2γ * (pₘ/pᵣ - 1))
+    end
+
+    λ₋, λ₊
 end
 
 
@@ -365,6 +429,68 @@ end
 
 ################################################################################
 
+
+@inline function (fnum::SuliciuFlux)(uₗ::EulerVar1D{T}, uᵣ::EulerVar1D{T}, model::Euler{T,1}) where T
+    @unpack γ = model
+    ϱeₗ = uₗ.ϱe
+    ϱeᵣ = uᵣ.ϱe
+    ϱₗ, vₗ, pₗ = primitive_variables(uₗ, model)
+    cₗ = sqrt(γ * pₗ / ϱₗ)
+    ɛₗ = ϱeₗ/ϱₗ - vₗ*vₗ/2
+    ϱᵣ, vᵣ, pᵣ = primitive_variables(uᵣ, model)
+    cᵣ = sqrt(γ * pᵣ / ϱᵣ)
+    ɛᵣ = ϱeᵣ/ϱᵣ - vᵣ*vᵣ/2
+    α = (γ+1)/2
+
+    # compute speeds
+    cₗ_ϱₗ = zero(T)
+    cᵣ_ϱᵣ = zero(T)
+    if pₗ <= pᵣ && 0 < pᵣ
+      cₗ_ϱₗ = cₗ + α*max( zero(T), (pᵣ-pₗ)/(ϱᵣ*cᵣ) + vₗ - vᵣ )
+      cᵣ_ϱᵣ = cᵣ + α*max( zero(T), (pₗ-pᵣ)/(cₗ_ϱₗ*ϱₗ) + vₗ - vᵣ )
+    elseif pᵣ <= pₗ && 0 < pₗ
+      cᵣ_ϱᵣ = cᵣ + α*max( zero(T), (pₗ-pᵣ)/(ϱₗ*cₗ) + vₗ - vᵣ )
+      cₗ_ϱₗ = cₗ + α*max( zero(T), (pᵣ-pₗ)/(cᵣ_ϱᵣ*ϱᵣ) + vₗ - vᵣ )
+    end
+
+    # compute intermediate values
+    cₗ = cₗ_ϱₗ*ϱₗ
+    cᵣ = cᵣ_ϱᵣ*ϱᵣ
+    vs = ( cₗ*vₗ + cᵣ*vᵣ + pₗ - pᵣ ) / ( cₗ+cᵣ )
+    vs = ifelse(isnan(vs), zero(T), vs)
+    pₗs = pᵣs = ( cᵣ*pₗ + cₗ*pᵣ - cₗ*cᵣ*(vᵣ-vₗ) ) / (cₗ+cᵣ)
+    pₗs = pᵣs = ifelse(isnan(pₗs), zero(T), pₗs)
+    ϱₗs = 1 / ( 1/ϱₗ + (cᵣ*(vᵣ-vₗ) + pₗ - pᵣ ) / (cₗ*(cₗ+cᵣ)) )
+    ϱₗs = ifelse(isnan(ϱₗs), zero(T), ϱₗs)
+    ϱᵣs = 1 / ( 1/ϱᵣ + (cₗ*(vᵣ-vₗ) + pᵣ - pₗ ) / (cᵣ*(cₗ+cᵣ)) )
+    ϱᵣs = ifelse(isnan(ϱᵣs), zero(T), ϱᵣs)
+    ɛₗs = ɛₗ + (pₗs*pₗs - pₗ*pₗ)/(2*cₗ*cₗ)
+    ɛᵣs = ɛᵣ + (pᵣs*pᵣs - pᵣ*pᵣ)/(2*cᵣ*cᵣ)
+
+    # compute fluxes
+    fϱ  = zero(T)
+    fϱv = zero(T)
+    fϱe = zero(T)
+    if 0 <= vₗ-cₗ_ϱₗ
+        fϱ  = ϱₗ*vₗ
+        fϱv = ϱₗ*vₗ*vₗ + pₗ
+        fϱe = (ϱₗ*vₗ*vₗ/2 + ϱₗ*ɛₗ + pₗ)*vₗ
+    elseif 0 <= vs
+        fϱ  = ϱₗs*vs
+        fϱv = ϱₗs*vs*vs + pₗs
+        fϱe = (ϱₗs*vs*vs/2 + ϱₗs*ɛₗs + pₗs)*vs
+    elseif 0 <= vᵣ+cᵣ_ϱᵣ
+        fϱ  = ϱᵣs*vs
+        fϱv = ϱᵣs*vs*vs + pᵣs
+        fϱe = (ϱᵣs*vs*vs/2 + ϱᵣs*ɛᵣs + pᵣs)*vs
+    else
+        fϱ  = ϱᵣ*vᵣ
+        fϱv = ϱᵣ*vᵣ*vᵣ + pᵣ
+        fϱe = (ϱᵣ*vᵣ*vᵣ/2 + ϱᵣ*ɛᵣ + pᵣ)*vᵣ
+    end
+
+    SVector(fϱ, fϱv, fϱe)
+end
 
 @inline function (fnum::SuliciuFlux)(uₗ::EulerVar2D{T}, uᵣ::EulerVar2D{T},
                                         model::Euler{T,2}, dir::Val{:x}) where T

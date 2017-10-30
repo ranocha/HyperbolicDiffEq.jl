@@ -241,3 +241,44 @@ pₘ, vₘ = compute_pₘ_vₘ(1.0, 0.0, 0.01, 1.0, 0.0, 100.0)
 pₘ, vₘ = compute_pₘ_vₘ(5.99924, 19.5975, 460.894, 5.99242, -6.19633, 46.0950)
 @test isapprox(pₘ, 1691.64, atol=1.e-2)
 @test isapprox(vₘ, 8.68975, atol=3.e-5)
+
+# Toro (2009), Riemann Solvers and Numerical Methods for Fluid Dynamics:
+# Test 1 on page 129
+uₗ = conserved_variables(1.0, 0.0, 1.0, model)
+uᵣ = conserved_variables(0.125, 0.0, 0.1, model)
+sol = solve(RiemannProblem(model, uₗ, uᵣ))
+@static if Int==Int64
+    plot(sol)
+end
+
+# Test 2 on page 129
+uₗ = conserved_variables(1.0, -2.0, 0.4, model)
+uᵣ = conserved_variables(1.0,  2.0, 0.4, model)
+sol = solve(RiemannProblem(model, uₗ, uᵣ))
+@static if Int==Int64
+    plot(sol)
+end
+
+# Test 3 on page 129
+uₗ = conserved_variables(1.0, 0.0, 1000.0, model)
+uᵣ = conserved_variables(1.0, 0.0, 0.01, model)
+sol = solve(RiemannProblem(model, uₗ, uᵣ))
+@static if Int==Int64
+    plot(sol)
+end
+
+# Test 4 on page 129
+uₗ = conserved_variables(1.0, 0.0, 0.01, model)
+uᵣ = conserved_variables(1.0, 0.0, 100.0, model)
+sol = solve(RiemannProblem(model, uₗ, uᵣ))
+@static if Int==Int64
+    plot(sol)
+end
+
+# Test 1 on page 129
+uₗ = conserved_variables(5.99924, 19.5975, 460.894, model)
+uᵣ = conserved_variables(5.99242, -6.19633, 46.0950, model)
+sol = solve(RiemannProblem(model, uₗ, uᵣ))
+@static if Int==Int64
+    plot(sol)
+end
