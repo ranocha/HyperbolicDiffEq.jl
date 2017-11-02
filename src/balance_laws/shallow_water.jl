@@ -125,7 +125,9 @@ end
 """
     (::SuliciuFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1})
 
-The Suliciu relaxation solver / numerical flux.
+The Suliciu relaxation solver / numerical flux, see
+Bouchut (2004) Nonlinear Stability of Finite Volume Methods for Hyperbolic
+Conservation Laws and Well-Balanced Schemes for Sources.
 """
 function (::SuliciuFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1}) where T
     hl, vl = primitive_variables(uₗ, model)
@@ -181,13 +183,12 @@ function (::SuliciuFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model
 end
 
 
-
-
-
 """
     (::KineticFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1})
 
-The kinetic relaxation solver / numerical flux.
+The kinetic relaxation solver / numerical flux, see
+Perthame and Simeoni (2001) A kinetic scheme for the Saint-Venant system with a
+source term, Calcolo 38(4), pp. 201-231.
 """
 function (::KineticFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1}) where T
     hₗ, vₗ = primitive_variables(uₗ, model)

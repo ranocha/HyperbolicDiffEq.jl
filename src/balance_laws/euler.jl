@@ -436,7 +436,13 @@ end
 
 ################################################################################
 
+"""
+    (fnum::SuliciuFlux)(uₗ::EulerVar1D{T}, uᵣ::EulerVar1D{T}, model::Euler{T,1}) where T
 
+The Suliciu relaxation solver / numerical flux, see
+Bouchut (2004) Nonlinear Stability of Finite Volume Methods for Hyperbolic
+Conservation Laws and Well-Balanced Schemes for Sources.
+"""
 @inline function (fnum::SuliciuFlux)(uₗ::EulerVar1D{T}, uᵣ::EulerVar1D{T}, model::Euler{T,1}) where T
     @unpack γ = model
     ϱeₗ = uₗ.ϱe
