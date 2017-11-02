@@ -188,6 +188,13 @@ The Suliciu relaxation solver.
 struct SuliciuFlux <: NumericalFlux end
 
 """
+    KineticFlux
+
+A kinetic relaxation solver.
+"""
+struct KineticFlux <: NumericalFlux end
+
+"""
     ChandrashekarFluxEC
 
 The entropy conservative flux of Chandrashekar (2013).
