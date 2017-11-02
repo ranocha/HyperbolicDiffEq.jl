@@ -124,6 +124,58 @@ function (::SuliciuFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model
 end
 
 
+
+
+
+"""
+    (::KineticFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1})
+
+The kinetic relaxation solver / numerical flux.
+"""
+function (::KineticFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1}) where T
+    hₗ, vₗ = primitive_variables(uₗ, model)
+    hᵣ, vᵣ = primitive_variables(uᵣ, model)
+    @unpack g = model
+
+    # integrals for \xi \geq 0
+    fnum_h, fnum_hv = kinetic_integrals_ξ_geq_0(hₗ, vₗ, g)
+    # use symmetry for \xi \leq 0
+    val_h, val_hv   = kinetic_integrals_ξ_geq_0(hᵣ, -vᵣ, g)
+    fnum_h  -= val_h
+    fnum_hv += val_hv
+
+    SVector(fnum_h, fnum_hv)
+end
+
+# \int_{\xi \geq 0} (\xi, xi^2)  M_l(\xi) \dif \xi  for (fnum_h, fnum_hv)
+function kinetic_integrals_ξ_geq_0(h, v, g)
+    val_h  = zero(h)
+    val_hv = zero(h)
+    sqrt_2gh = sqrt(2g*h)
+
+    if h > 0 && v >= sqrt_2gh
+        val_h += h*v
+
+        val_hv += h*v*v + g*h*h/2
+    elseif h > 0 && sqrt_2gh+v > 0 && sqrt_2gh-v > 0
+        sqrt_2ghmv2 = sqrt(2g*h-v^2)
+        atan_v_sqrt_2ghmv2 = atan(v/sqrt_2ghmv2)
+
+        val_h += h * v / 2
+        val_h += h * sqrt_2ghmv2 * 2 / (3π)
+        val_h += v^2 * sqrt_2ghmv2 / (6g*π)
+        val_h += h*v * atan_v_sqrt_2ghmv2 / π
+
+        val_hv += ( h*v*v + g*h*h/2 ) / 2
+        val_hv += h*v*sqrt_2ghmv2 * 13 / (12π)
+        val_hv += v^3*sqrt_2ghmv2 / (12g*π)
+        val_hv += ( h*v^2 + g*h^2/2 ) * atan_v_sqrt_2ghmv2 / π
+    end
+
+    val_h, val_hv
+end
+
+
 ################################################################################
 
 struct ShallowWaterRiemannSolution{T,T1} <: AbstractRiemannSolution
