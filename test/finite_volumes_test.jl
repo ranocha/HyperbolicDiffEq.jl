@@ -30,7 +30,7 @@ end
 
 
 # test convergence orders
-Ns = 100 .* 2 .^ (1:7)
+Ns = 100 .* 2 .^ (1:6)
 
 balance_law = Burgers()
 tspan = (0., 0.5)
@@ -54,10 +54,10 @@ u1 = variables(balance_law)(1., 2.)
 u2 = variables(balance_law)(2., 0.)
 uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
                 RiemannProblem(balance_law, u2, u1, 0.5))
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.75
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, HartenLaxVanLeerFlux(), Ns) > 0.75
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.75
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, KineticFlux(), Ns) > 0.75
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.7
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, HartenLaxVanLeerFlux(), Ns) > 0.7
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.7
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, KineticFlux(), Ns) > 0.7
 
 balance_law = ShallowWater(10.)
 tspan = (0., 0.1)
@@ -65,10 +65,10 @@ u1 = variables(balance_law)(1., 2.)
 u2 = variables(balance_law)(2., 0.)
 uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
                 RiemannProblem(balance_law, u2, u1, 0.5))
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.75
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, HartenLaxVanLeerFlux(), Ns) > 0.75
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.75
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, KineticFlux(), Ns) > 0.75
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.7
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, HartenLaxVanLeerFlux(), Ns) > 0.7
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.7
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, KineticFlux(), Ns) > 0.7
 
 balance_law = HyperbolicDiffEq.Euler()
 tspan = (0., 0.25)
