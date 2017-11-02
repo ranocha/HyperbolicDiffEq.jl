@@ -64,6 +64,63 @@ end
   abs(v) + sqrt(g*h)
 end
 
+"""
+    max_abs_speed(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+
+Estimate the maximal speed in the solution of the Riemann problem with left and
+right states `uₗ`, `uᵣ` for `model` via the two rarefaction approximation, see
+Guermond and Popov (2016) Fast Estimation from above of the maximum wave speed in
+the Riemann roblem for the Euler equations, Journal of Computational Physics 321,
+pp. 908-926, and
+Chen and Shu (2017) Entropy stable high order discontinuous Galerkin methods with
+suitable quadrature rules for hyperbolic conservation laws, Journal of Computational
+Physics 345, pp. 427-461.
+"""
+@inline function max_abs_speed(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+    λ₋, λ₊ = min_max_speed(uₗ, uᵣ, model)
+
+    max(abs(λ₋), abs(λ₊))
+end
+
+"""
+    min_max_speed(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+
+Estimate the maximal speed in the solution of the Riemann problem with left and
+right states `uₗ`, `uᵣ` for `model` via the two rarefaction approximation, see
+Guermond and Popov (2016) Fast Estimation from above of the maximum wave speed in
+the Riemann roblem for the Euler equations, Journal of Computational Physics 321,
+pp. 908-926, and
+Chen and Shu (2017) Entropy stable high order discontinuous Galerkin methods with
+suitable quadrature rules for hyperbolic conservation laws, Journal of Computational
+Physics 345, pp. 427-461.
+"""
+@inline function min_max_speed(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+    @unpack g = model
+    hₗ, vₗ = primitive_variables(uₗ, model)
+    aₗ = sqrt(g * hₗ)
+    hᵣ, vᵣ = primitive_variables(uᵣ, model)
+    aᵣ = sqrt(g * hᵣ)
+
+    # TODO
+    hₘ = (2*(sqrt(hᵣ)+sqrt(hₗ)) - (vᵣ-vₗ))^2 / 16
+    if hₘ <= hₗ
+        # approximated by rarefaction wave
+        λ₋ = vₗ - aₗ
+    else
+        # approximated by shock wave
+        λ₋ = vₗ - aₗ*sqrt(1 + (γ+1)/2γ * (pₘ/pₗ - 1))
+    end
+    if pₘ <= pᵣ
+        # approximated by rarefaction wave
+        λ₊ = vᵣ + aᵣ
+    else
+        # approximated by shock wave
+        λ₊ = vᵣ + aᵣ*sqrt(1 + (γ+1)/2γ * (pₘ/pᵣ - 1))
+    end
+
+    λ₋, λ₊
+end
+
 
 """
     (::SuliciuFlux)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater{T,1})
