@@ -100,22 +100,21 @@ Physics 345, pp. 427-461.
     aₗ = sqrt(g * hₗ)
     hᵣ, vᵣ = primitive_variables(uᵣ, model)
     aᵣ = sqrt(g * hᵣ)
-
-    # TODO
-    hₘ = (2*(sqrt(hᵣ)+sqrt(hₗ)) - (vᵣ-vₗ))^2 / 16
+    
+    hₘ = (2*(aᵣ+aₗ) - (vᵣ-vₗ))^2 / 16g
     if hₘ <= hₗ
         # approximated by rarefaction wave
         λ₋ = vₗ - aₗ
     else
         # approximated by shock wave
-        λ₋ = vₗ - aₗ*sqrt(1 + (γ+1)/2γ * (pₘ/pₗ - 1))
+        λ₋ = vₗ - hₘ * sqrt( g*(hₘ+hₗ) / (2*hₘ*hₗ) )
     end
-    if pₘ <= pᵣ
+    if hₘ <= hᵣ
         # approximated by rarefaction wave
         λ₊ = vᵣ + aᵣ
     else
         # approximated by shock wave
-        λ₊ = vᵣ + aᵣ*sqrt(1 + (γ+1)/2γ * (pₘ/pᵣ - 1))
+        λ₊ = vᵣ + hₘ * sqrt( g*(hₘ+hᵣ) / (2*hₘ*hᵣ) )
     end
 
     λ₋, λ₊
