@@ -241,7 +241,7 @@ function compute_state_and_speeds{T}(uₗ::ShallowWaterVar1D{T}, uᵣ::ShallowWa
       σ₁⁺ = vₘ - sqrt(g*hₘ)
       σ₂⁻ = σ₂⁺ = vₘ + sqrt(g*hᵣ)
     else
-      hₘ = Roots.fzero(h->vᵣ-v_S2_SWE(hᵣ,h,v_R1_SWE(h,hₗ,vₗ,g)), hᵣ, hₗ, g)
+      hₘ = Roots.fzero(h->vᵣ-v_S2_SWE(hᵣ,h,v_R1_SWE(h,hₗ,vₗ,g),g), hᵣ, hₗ)
       vₘ = v_R1_SWE(hₘ,hₗ,vₗ,g)
       uₘ = ShallowWaterVar1D{T}(hₘ,hₘ*vₘ)
       σ₁⁻ = vₗ - sqrt(g*hₗ)

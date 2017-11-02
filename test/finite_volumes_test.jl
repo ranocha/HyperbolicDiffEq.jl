@@ -57,6 +57,15 @@ uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.75
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.75
 
+balance_law = ShallowWater(10.)
+tspan = (0., 0.1)
+u1 = variables(balance_law)(1., 2.)
+u2 = variables(balance_law)(2., 0.)
+uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
+                RiemannProblem(balance_law, u2, u1, 0.5))
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.75
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.75
+
 balance_law = HyperbolicDiffEq.Euler()
 tspan = (0., 0.25)
 u1 = conserved_variables(1.0, 0.0, 1.0, balance_law)
