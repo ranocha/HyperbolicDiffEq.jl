@@ -275,7 +275,7 @@ sol = solve(RiemannProblem(model, uₗ, uᵣ))
     plot(sol)
 end
 
-# Test 1 on page 129
+# Test 5 on page 129
 uₗ = conserved_variables(5.99924, 19.5975, 460.894, model)
 uᵣ = conserved_variables(5.99242, -6.19633, 46.0950, model)
 sol = solve(RiemannProblem(model, uₗ, uᵣ))
