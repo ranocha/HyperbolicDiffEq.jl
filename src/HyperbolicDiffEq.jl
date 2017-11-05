@@ -63,6 +63,12 @@ An abstract type for a numerical flux.
 """
 abstract type NumericalFlux end
 
+"""
+An abstract type for a dissipation operator.
+"""
+abstract type DissipationOperator end
+
+
 include("meshes/meshes1d.jl")
 include("meshes/compute_coefficients.jl")
 
@@ -94,8 +100,8 @@ export Burgers, IntegralQuantitiesBurgers,
 export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar1D, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
 
-export flux, max_abs_speed, variables, kinetic_energy, entropy, conserved_variables,
-        primitive_variables, satisfies_physical_constraints
+export flux, max_abs_speed, naive_max_abs_speed, variables, kinetic_energy,
+       entropy, conserved_variables, primitive_variables, satisfies_physical_constraints
 
 export RiemannProblem
 
@@ -112,7 +118,9 @@ export FirstOrderFV
 export GodunovFlux, LocalLaxFriedrichsFlux, HartenLaxVanLeerFlux, HLL, SuliciuFlux,
        KineticFlux
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
-export EnergyConservativeFlux, IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
+export EnergyConservativeFlux, EnergyConservativeFlux1Param,
+       IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
+export FluxPlusDissipation, LocalLaxFriedrichsDissipation
 
 # flux difference methods
 export UniformFluxDiffDisc1D, UniformPeriodicFluxDiffDisc1D,

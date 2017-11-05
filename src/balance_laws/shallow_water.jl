@@ -100,7 +100,7 @@ Physics 345, pp. 427-461.
     aₗ = sqrt(g * hₗ)
     hᵣ, vᵣ = primitive_variables(uᵣ, model)
     aᵣ = sqrt(g * hᵣ)
-    
+
     hₘ = (2*(aᵣ+aₗ) - (vᵣ-vₗ))^2 / 16g
     if hₘ <= hₗ
         # approximated by rarefaction wave
@@ -118,6 +118,31 @@ Physics 345, pp. 427-461.
     end
 
     λ₋, λ₊
+end
+
+
+"""
+    (::EnergyConservativeFlux1Param)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+
+The one-parameter family of energy conservative numerical fluxes for the shallow
+water equations, see
+Ranocha (2017) Shallow water equations: Split-form, entropy stable, well-balanced,
+and positivity-preserving numerical methods, GEM - International Journal on
+Geomathematics 8(1), pp. 85-133.
+"""
+function (fvol::EnergyConservativeFlux1Param)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D,
+                                              model::ShallowWater)
+    h₋, v₋ = primitive_variables(uₗ, model)
+    h₊, v₊ = primitive_variables(uᵣ, model)
+    @unpack g = model
+    @unpack a₁ = fvol
+
+    fnum_h  = ( (3-a₁)*(h₋*v₋ + h₊*v₊) + (1+a₁)*(h₊*v₋ + h₋*v₊) ) / 8
+    fnum_hv = g * ( (1+a₁)*(h₊^2 + h₋^2) + (2-2a₁)*(h₊*h₋) ) / 8 +
+                ( (3-a₁)*(h₊*v₊^2 + h₋*v₋^2) + (1+a₁)*(h₊*v₋^2 + h₋*v₊^2) ) / 16 +
+                (h₊*v₊*v₋ + h₋*v₊*v₋) / 4
+
+    SVector(fnum_h, fnum_hv)
 end
 
 

@@ -35,16 +35,24 @@ end
 
 
 """
-    max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw{1})
+    max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw)
 
 Compute the maximal absolute value of the speed in the solution of the Riemann
 problem with states `uₗ`, `uᵣ` for `model`.
 """
-Base.@pure function max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw{1})
+@inline function max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw)
+    naive_max_abs_speed(uₗ, uᵣ, model)
+end
+
+@inline function max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw, direction)
+    naive_max_abs_speed(uₗ, uᵣ, model, direction)
+end
+
+@inline function naive_max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw)
     max(max_abs_speed(uₗ,model), max_abs_speed(uᵣ,model))
 end
 
-Base.@pure function max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw, direction)
+@inline function naive_max_abs_speed(uₗ, uᵣ, model::AbstractBalanceLaw, direction)
     max(max_abs_speed(uₗ,model,direction), max_abs_speed(uᵣ,model,direction))
 end
 
@@ -131,6 +139,15 @@ The "standard" energy conservative flux.
 """
 struct EnergyConservativeFlux <: NumericalFlux end
 
+"""
+    EnergyConservativeFlux1Param
+
+A one-parameter family of energy conservative fluxes.
+"""
+struct EnergyConservativeFlux1Param{T} <: NumericalFlux
+    a₁::T
+end
+
 
 doc"
     CentralFlux
@@ -214,3 +231,42 @@ struct IsmailRoeFluxEC <: NumericalFlux end
 The entropy conservative and kinetic energy preserving flux of Ranocha (2017).
 """
 struct RanochaFluxECandKEP <: NumericalFlux end
+
+
+
+"""
+    FluxPlusDissipation{Fnum::NumericalFlux, Diss} <: NumericalFlux
+
+A numerical flux given by the (possibly central / symmetric) numerical flux
+`fnum` and the dissipation operator `diss`.
+"""
+struct FluxPlusDissipation{Fnum<:NumericalFlux, Diss<:DissipationOperator} <: NumericalFlux
+    fnum::Fnum
+    diss::Diss
+end
+
+@inline function (fnumdiss::FluxPlusDissipation)(uₗ, uᵣ, model::AbstractBalanceLaw)
+    @unpack fnum, diss = fnumdiss
+
+    fnum(uₗ, uᵣ, model) + diss(uₗ, uᵣ, model)
+end
+
+
+doc"
+    LocalLaxFriedrichsDissipation{MaxAbsSpeed}
+
+The local Lax-Friedrichs dissipation $- \frac{\lambda}{2} (u_r - u_l)$.
+$\lambda$ is the approximate maximal absolute value of the speed in the solution
+of a Riemann problem, computed by `max_abs_speed::MaxAbsSpeed`.
+"
+struct LocalLaxFriedrichsDissipation{MaxAbsSpeed} <: DissipationOperator
+    max_abs_speed::MaxAbsSpeed
+end
+
+LocalLaxFriedrichsDissipation() = LocalLaxFriedrichsDissipation(naive_max_abs_speed)
+
+@inline function (diss::LocalLaxFriedrichsDissipation)(uₗ, uᵣ, model::AbstractBalanceLaw)
+    λ = diss.max_abs_speed(uₗ, uᵣ, model)
+
+    -λ * (uᵣ - uₗ) / 2
+end
