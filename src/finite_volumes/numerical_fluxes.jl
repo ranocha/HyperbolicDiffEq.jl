@@ -270,3 +270,26 @@ LocalLaxFriedrichsDissipation() = LocalLaxFriedrichsDissipation(naive_max_abs_sp
 
     -λ * (uᵣ - uₗ) / 2
 end
+
+
+
+doc"
+    ScalarDissipation{MaxAbsSpeed}
+
+The scalar dissipation $- \frac{\lambda}{2} R \cdot R^T \cdot  (w_r - w_l)$.
+$\lambda$ is the approximate maximal absolute value of the speed, computed by
+`max_abs_speed::MaxAbsSpeed`.
+"
+struct ScalarDissipation{MaxAbsSpeed} <: DissipationOperator
+    max_abs_speed::MaxAbsSpeed
+end
+
+ScalarDissipation() = ScalarDissipation(naive_max_abs_speed)
+
+
+doc"
+    MatrixDissipation
+
+The matrix dissipation $- \frac{1}{2} R \cdot |\Lambda| \cdot R^T \cdot  (w_r - w_l)$.
+"
+struct MatrixDissipation <: DissipationOperator end

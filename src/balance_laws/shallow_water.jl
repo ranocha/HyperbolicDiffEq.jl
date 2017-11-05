@@ -5,7 +5,7 @@
 The shallow water equations with gravitational constant `g`
 in `Dim` dimensions using `T` as scalar type.
 """
-struct ShallowWater{T<:Real,Dim} <: AbstractBalanceLaw{1}
+struct ShallowWater{T,Dim} <: AbstractBalanceLaw{1}
   g::T
 end
 
@@ -48,6 +48,15 @@ end
 
 @inline function primitive_variables(u::ShallowWaterVar1D, model::ShallowWater)
   primitive_variables(u)
+end
+
+@inline function entropy_variables(u::ShallowWaterVar1D, model::ShallowWater)
+    entropy_variables(primitive_variables(u, model)..., model)
+end
+
+@inline function entropy_variables(h, v, model::ShallowWater)
+    @unpack g = model
+    SVector(g*h - v^2/2, v)
 end
 
 @inline function flux{T}(u::ShallowWaterVar1D{T}, model::ShallowWater{T,1})
@@ -143,6 +152,55 @@ function (fvol::EnergyConservativeFlux1Param)(uₗ::ShallowWaterVar1D, uᵣ::Sha
                 (h₊*v₊*v₋ + h₋*v₊*v₋) / 4
 
     SVector(fnum_h, fnum_hv)
+end
+
+
+doc"
+    (diss::ScalarDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+
+The scalar dissipation operator $- \frac{\lambda}{2} R \cdot R^T \cdot  (w_r - w_l)$
+for the shallow water equations, where $\partial_w u = R \cdot R^T$ is evaluated
+at the arithmetic mean values $h = (h_- + h_+) / 2$, $v = (v_- + v_+) / 2$.
+"
+function (diss::ScalarDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+    h₋, v₋ = primitive_variables(uₗ, model)
+    h₊, v₊ = primitive_variables(uᵣ, model)
+    @unpack g = model
+
+    w₋ = entropy_variables(h₋, v₋, model)
+    w₊ = entropy_variables(h₊, v₊, model)
+
+    h = (h₋ + h₊) / 2
+    v = (v₋ + v₊) / 2
+    du_dw = SArray{Tuple{2,2}}(1, v, v, g*h+v) / g
+
+    λ = diss.max_abs_speed(uₗ, uᵣ, model)
+
+    -λ/2 * du_dw * (w₊ - w₋)
+end
+
+doc"
+    (diss::MatrixDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+
+The scalar dissipation operator $- \frac{1}{2} R \cdot |\Lambda| \cdot R^T \cdot  (w_r - w_l)$
+for the shallow water equations, where $f'(u) = R \cdot \Lambda \cdot R^{-1}$ is
+evaluated at the arithmetic mean values $h = (h_- + h_+) / 2$, $v = (v_- + v_+) / 2$.
+"
+function (diss::MatrixDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+    h₋, v₋ = primitive_variables(uₗ, model)
+    h₊, v₊ = primitive_variables(uᵣ, model)
+    @unpack g = model
+
+    w₋ = entropy_variables(h₋, v₋, model)
+    w₊ = entropy_variables(h₊, v₊, model)
+
+    h = (h₋ + h₊) / 2
+    v = (v₋ + v₊) / 2
+    sqrt_gh = sqrt(g*h)
+    R = SArray{Tuple{2,2}}(1, v-sqrt_gh, 1, v+sqrt_gh) / sqrt(2g)
+    Λ = SArray{Tuple{2,2}}(abs(v-sqrt_gh), 0, 0, abs(v+sqrt_gh))
+
+    -R * Λ * R' * (w₊ - w₋) / 2
 end
 
 

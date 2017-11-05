@@ -101,7 +101,8 @@ export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar1D, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
 
 export flux, max_abs_speed, naive_max_abs_speed, variables, kinetic_energy,
-       entropy, conserved_variables, primitive_variables, satisfies_physical_constraints
+       entropy, conserved_variables, primitive_variables, entropy_variables,
+       satisfies_physical_constraints
 
 export RiemannProblem
 
@@ -120,7 +121,8 @@ export GodunovFlux, LocalLaxFriedrichsFlux, HartenLaxVanLeerFlux, HLL, SuliciuFl
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
 export EnergyConservativeFlux, EnergyConservativeFlux1Param,
        IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
-export FluxPlusDissipation, LocalLaxFriedrichsDissipation
+export FluxPlusDissipation, LocalLaxFriedrichsDissipation, ScalarDissipation,
+       MatrixDissipation
 
 # flux difference methods
 export UniformFluxDiffDisc1D, UniformPeriodicFluxDiffDisc1D,

@@ -58,6 +58,10 @@ uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
                                                         EnergyConservativeFlux1Param(-1.),
                                                         LocalLaxFriedrichsDissipation()
                                                     ), Ns) > 0.7
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, FluxPlusDissipation(
+                                                        EnergyConservativeFlux1Param(-1.),
+                                                        ScalarDissipation()
+                                                    ), Ns) > 0.7
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.7
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, HartenLaxVanLeerFlux(), Ns) > 0.7
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, SuliciuFlux(), Ns) > 0.7
@@ -72,6 +76,10 @@ uₐₙₐ = solve(RiemannProblem(balance_law, u1, u2, -1.) *
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, FluxPlusDissipation(
                                                         EnergyConservativeFlux1Param(-1.),
                                                         LocalLaxFriedrichsDissipation()
+                                                    ), Ns) > 0.7
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, FluxPlusDissipation(
+                                                        EnergyConservativeFlux1Param(-1.),
+                                                        ScalarDissipation()
                                                     ), Ns) > 0.7
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, LocalLaxFriedrichsFlux(), Ns) > 0.7
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, HartenLaxVanLeerFlux(), Ns) > 0.7
