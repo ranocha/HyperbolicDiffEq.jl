@@ -172,7 +172,7 @@ function (diss::ScalarDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVa
 
     h = (h₋ + h₊) / 2
     v = (v₋ + v₊) / 2
-    du_dw = SArray{Tuple{2,2}}(1, v, v, g*h+v) / g
+    du_dw = SArray{Tuple{2,2}}(1, v, v, g*h+v^2) / g
 
     λ = diss.max_abs_speed(uₗ, uᵣ, model)
 
