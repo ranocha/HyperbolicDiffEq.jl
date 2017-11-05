@@ -119,7 +119,7 @@ export FirstOrderFV
 export GodunovFlux, LocalLaxFriedrichsFlux, HartenLaxVanLeerFlux, HLL, SuliciuFlux,
        KineticFlux
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
-export EnergyConservativeFlux, EnergyConservativeFlux1Param,
+export EnergyConservativeFlux, EnergyConservativeFlux1Param, EnergyConservativeFlux2Param,
        IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
 export FluxPlusDissipation, LocalLaxFriedrichsDissipation, ScalarDissipation,
        MatrixDissipation

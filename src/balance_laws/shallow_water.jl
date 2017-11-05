@@ -154,6 +154,33 @@ function (fvol::EnergyConservativeFlux1Param)(uₗ::ShallowWaterVar1D, uᵣ::Sha
     SVector(fnum_h, fnum_hv)
 end
 
+"""
+    (::EnergyConservativeFlux2Param)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
+
+The two-parameter family of energy conservative numerical fluxes for the shallow
+water equations, see
+Ranocha (2017) Shallow water equations: Split-form, entropy stable, well-balanced,
+and positivity-preserving numerical methods, GEM - International Journal on
+Geomathematics 8(1), pp. 85-133.
+"""
+function (fvol::EnergyConservativeFlux2Param)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D,
+                                              model::ShallowWater)
+    h₋, v₋ = primitive_variables(uₗ, model)
+    h₊, v₊ = primitive_variables(uᵣ, model)
+    @unpack g = model
+    @unpack a₁, a₂ = fvol
+
+    fnum_h  = ( (3-a₁)*(h₋*v₋ + h₊*v₊) + (1+a₁)*(h₊*v₋ + h₋*v₊) ) / 8 +
+                (a₁+3a₂-2) * (v₊^3 - v₊^2*v₋ - v₊*v₋^2 + v₋^3) / 16g
+    fnum_hv = g * ( (1+a₁)*(h₊^2 + h₋^2) + (2-2a₁)*(h₊*h₋) ) / 8 -
+                (2a₁+3a₂-5) * (h₊*v₊^2 + h₋*v₋^2) / 16 +
+                (2a₁+3a₂-1) * (h₊*v₋^2 + h₋*v₊^2) / 16 +
+                (h₊*v₊*v₋ + h₋*v₊*v₋) / 4 +
+                (a₁+3a₂-2) * ((v₊^2)^2 - 2*v₊^2*v₋^2 + (v₋^2)^2)
+
+    SVector(fnum_h, fnum_hv)
+end
+
 
 doc"
     (diss::ScalarDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)

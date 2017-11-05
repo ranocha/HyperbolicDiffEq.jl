@@ -148,6 +148,16 @@ struct EnergyConservativeFlux1Param{T} <: NumericalFlux
     a₁::T
 end
 
+"""
+    EnergyConservativeFlux2Param
+
+A two-parameter family of energy conservative fluxes.
+"""
+struct EnergyConservativeFlux2Param{T} <: NumericalFlux
+    a₁::T
+    a₂::T
+end
+
 
 doc"
     CentralFlux
