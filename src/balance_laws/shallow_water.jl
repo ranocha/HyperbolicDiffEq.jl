@@ -59,6 +59,15 @@ end
     SVector(g*h - v^2/2, v)
 end
 
+@inline function flux_potential(u::ShallowWaterVar1D, model::ShallowWater)
+    flux_potential(primitive_variables(u, model)..., model)
+end
+
+@inline function flux_potential(h, v, model::ShallowWater)
+    @unpack g = model
+    g*h^2*v/2
+end
+
 @inline function flux{T}(u::ShallowWaterVar1D{T}, model::ShallowWater{T,1})
   h, v = primitive_variables(u)
   @unpack g = model

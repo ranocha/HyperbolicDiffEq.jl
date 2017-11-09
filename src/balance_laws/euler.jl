@@ -170,6 +170,24 @@ end
 end
 
 
+@inline function entropy_variables(u::EulerVar1D, model::Euler)
+    entropy_variables(primitive_variables(u, model)..., model)
+end
+@inline function entropy_variables(ϱ, v, p, model::Euler)
+    @unpack γ = model
+
+    SVector((γ-log(p/ϱ^γ))/(γ-1)-ϱ*v^2/2p, ϱ*v/p, -ϱ/p)
+end
+
+
+@inline function flux_potential(u::EulerVar1D, model::Euler)
+    flux_potential(primitive_variables(u, model)..., model)
+end
+@inline function flux_potential(ϱ, v, p, model::Euler)
+    ϱ*v
+end
+
+
 @inline function satisfies_physical_constraints(u::EulerVar2D, model::Euler)
     ϱ, vx, vy, p = primitive_variables(u, model)
     ϱ >= 0 && p >= 0
@@ -193,6 +211,13 @@ Base.@pure function kinetic_energy(u::EulerVar3D, model::Euler)
     ϱ * (vx^2 + vy^2 + vz^2) / 2
 end
 
+
+Base.@pure function entropy(u::EulerVar1D, model::Euler)
+    @unpack γ = model
+    ϱ, v, p = primitive_variables(u, model)
+
+    -ϱ*log(p/ϱ^γ) / (γ-1)
+end
 
 Base.@pure function entropy(u::EulerVar2D, model::Euler)
     @unpack γ = model

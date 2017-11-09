@@ -102,7 +102,7 @@ export Euler, EulerVar1D, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
 
 export flux, max_abs_speed, naive_max_abs_speed, variables, kinetic_energy,
        entropy, conserved_variables, primitive_variables, entropy_variables,
-       satisfies_physical_constraints
+       satisfies_physical_constraints, flux_potential
 
 export RiemannProblem
 
