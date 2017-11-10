@@ -66,7 +66,6 @@ function add_numerical_fluxes!(du, u, fv::UniformPeriodicReconstructedFV1D, t)
 end
 
 
-#TODO: parallel
 function compute_numerical_fluxes!(fluxes, edge_u, balance_law, meshx::UniformPeriodicMesh1D,
                                   fnum, parallel)
     @inbounds fluxes[1] = fnum(edge_u[2,end], edge_u[1,1], balance_law)
@@ -76,16 +75,31 @@ function compute_numerical_fluxes!(fluxes, edge_u, balance_law, meshx::UniformPe
     nothing
 end
 
+function compute_numerical_fluxes!(fluxes, edge_u, balance_law, meshx::UniformPeriodicMesh1D,
+                                  fnum, parallel::Val{:threads})
+    @inbounds fluxes[1] = fnum(edge_u[2,end], edge_u[1,1], balance_law)
+    @inbounds Threads.@threads for edge in 2:length(fluxes)
+        fluxes[edge] = fnum(edge_u[2,edge-1], edge_u[1,edge], balance_law)
+    end
+    nothing
+end
 
-#TODO: parallel
+
 function compute_du!(du, fluxes, meshx::UniformPeriodicMesh1D, parallel)
     @inbounds for cell in 1:numcells(meshx)-1
         du[cell] -= ( fluxes[cell+1] - fluxes[cell] ) / volume(cell, meshx)
     end
-    @inbounds du[end] = -( fluxes[1] - fluxes[end] ) / volume(numcells(meshx), meshx)
+    @inbounds du[end] -= ( fluxes[1] - fluxes[end] ) / volume(numcells(meshx), meshx)
     nothing
 end
 
+function compute_du!(du, fluxes, meshx::UniformPeriodicMesh1D, parallel::Val{:threads})
+    @inbounds Threads.@threads for cell in 1:numcells(meshx)-1
+        du[cell] -= ( fluxes[cell+1] - fluxes[cell] ) / volume(cell, meshx)
+    end
+    @inbounds du[end] -= ( fluxes[1] - fluxes[end] ) / volume(numcells(meshx), meshx)
+    nothing
+end
 
 ################################################################################
 
