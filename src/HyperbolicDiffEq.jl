@@ -59,6 +59,11 @@ An abstract type for a semidiscretisation.
 abstract type AbstractSemidiscretisation end
 
 """
+An abstract type for a reconstruction.
+"""
+abstract type AbstractReconstruction end
+
+"""
 An abstract type for a numerical flux.
 """
 abstract type NumericalFlux end
@@ -74,6 +79,9 @@ include("meshes/compute_coefficients.jl")
 
 include("finite_volumes/finite_volumes.jl")
 include("finite_volumes/numerical_fluxes.jl")
+include("finite_volumes/periodic_fv_1d.jl")
+include("finite_volumes/reconstructions.jl")
+include("finite_volumes/modified_eno.jl")
 
 include("flux_difference/uniform_flux_difference.jl")
 include("flux_difference/uniform_flux_difference_1d.jl")
@@ -115,7 +123,8 @@ export evaluate_coefficients, evaluate_coefficients!
 export semidiscretise, max_dt
 
 # finite volume methods
-export FirstOrderFV
+export FirstOrderFV, UniformPeriodicReconstructedFV1D
+export ModifiedENO
 export GodunovFlux, LocalLaxFriedrichsFlux, HartenLaxVanLeerFlux, HLL, SuliciuFlux,
        KineticFlux
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
