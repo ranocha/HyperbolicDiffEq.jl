@@ -13,7 +13,7 @@ function ShallowWater(g=1., Dim=1)
   ShallowWater{typeof(g), Dim}(g)
 end
 
-function show{T,Dim}(io::IO, model::ShallowWater{T,Dim})
+function Base.show{T,Dim}(io::IO, model::ShallowWater{T,Dim})
   print(io, "Shallow water equations with g=", model.g, " {T=", T, ", Dim=", Dim, "}")
 end
 

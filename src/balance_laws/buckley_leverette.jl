@@ -11,7 +11,7 @@ function BuckleyLeverette(T=Float64)
   BuckleyLeverette{T}()
 end
 
-function show{T}(io::IO, model::BuckleyLeverette{T})
+function Base.show{T}(io::IO, model::BuckleyLeverette{T})
   print(io, "Buckley-Leverette equation {T=", T, "}",
             " with flux f(u) = u^2 / (u^2 + (1-u)^2)")
 end

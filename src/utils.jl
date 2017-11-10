@@ -42,12 +42,12 @@ end
 
 
 """
-    integrate(func, u::AbstractArray{U,2}, meshx, basis::NodalBasis)
+    integrate(func, u::AbstractArray{U,2}, meshx::AbstractMesh1D, basis::NodalBasis)
 
 Map the function `func` to the coefficients `u` and integrate with respect to
 the mesh `meshx` and the polynomial basis `basis`.
 """
-function integrate(func, u::AbstractArray{U,2}, meshx, basis::NodalBasis) where U
+function integrate(func, u::AbstractArray{U,2}, meshx::AbstractMesh1D, basis::NodalBasis) where U
     @unpack weights = basis
     Pp1 = length(weights)
     @boundscheck begin
@@ -66,23 +66,23 @@ function integrate(func, u::AbstractArray{U,2}, meshx, basis::NodalBasis) where 
 end
 
 """
-    integrate(u::AbstractArray{U,2}, meshx, basis::NodalBasis)
+    integrate(u::AbstractArray{U,2}, meshx::AbstractMesh1D, basis::NodalBasis)
 
 Integrate the coefficients `u` with respect to the mesh `meshx` and the
 polynomial basis `basis`.
 """
-function integrate(u::AbstractArray{U,2}, meshx, basis) where U
+function integrate(u::AbstractArray{U,2}, meshx::AbstractMesh1D, basis::NodalBasis) where U
     integrate(identity, u, meshx, basis)
 end
 
 
 """
-    integrate(func, u::AbstractArray{U,4}, meshx, meshy, basis::NodalBasis)
+    integrate(func, u::AbstractArray{U,4}, meshx::AbstractMesh1D, meshy::AbstractMesh1D, basis::NodalBasis)
 
 Map the function `func` to the coefficients `u` and integrate with respect to
 the meshes `meshx, meshy` and the polynomial basis `basis`.
 """
-function integrate(func, u::AbstractArray{U,4}, meshx, meshy, basis::NodalBasis) where U
+function integrate(func, u::AbstractArray{U,4}, meshx::AbstractMesh1D, meshy::AbstractMesh1D, basis::NodalBasis) where U
     @unpack weights = basis
     Pp1 = length(weights)
     @boundscheck begin
@@ -102,12 +102,12 @@ function integrate(func, u::AbstractArray{U,4}, meshx, meshy, basis::NodalBasis)
 end
 
 """
-    integrate(u::AbstractArray{U,4}, meshx, meshy, basis::NodalBasis)
+    integrate(u::AbstractArray{U,4}, meshx::AbstractMesh1D, meshy::AbstractMesh1D, basis::NodalBasis)
 
 Integrate the coefficients `u` with respect to the meshes `meshx, meshy` and the
 polynomial basis `basis`.
 """
-function integrate(u::AbstractArray{U,4}, meshx, meshy, basis) where U
+function integrate(u::AbstractArray{U,4}, meshx::AbstractMesh1D, meshy::AbstractMesh1D, basis::NodalBasis) where U
     integrate(identity, u, meshx, meshy, basis)
 end
 
@@ -118,7 +118,7 @@ end
 Map the function `func` to the coefficients `u` and integrate with respect to
 the meshes `meshx, meshy, meshz` and the polynomial basis `basis`.
 """
-function integrate(func, u::AbstractArray{U,6}, meshx, meshy, meshz, basis::NodalBasis) where U
+function integrate(func, u::AbstractArray{U,6}, meshx::AbstractMesh1D, meshy::AbstractMesh1D, meshz::AbstractMesh1D, basis::NodalBasis) where U
     @unpack weights = basis
     Pp1 = length(weights)
     @boundscheck begin
@@ -144,6 +144,6 @@ end
 Integrate the coefficients `u` with respect to the meshes `meshx, meshy, meshz`
 and the polynomial basis `basis`.
 """
-function integrate(u::AbstractArray{U,6}, meshx, meshy, meshz, basis::NodalBasis) where U
+function integrate(u::AbstractArray{U,6}, meshx::AbstractMesh1D, meshy::AbstractMesh1D, meshz::AbstractMesh1D, basis::NodalBasis) where U
     integrate(identity, u, meshx, meshy, meshz, basis)
 end

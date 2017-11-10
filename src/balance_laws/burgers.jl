@@ -14,7 +14,7 @@ function Burgers(T=Float64, Dim=1)
   Burgers{T,Dim}()
 end
 
-function show{T,Dim}(io::IO, model::Burgers{T,Dim})
+function Base.show{T,Dim}(io::IO, model::Burgers{T,Dim})
   print(io, "Burgers' equation {T=", T, ", Dim=", Dim, "}",
             " with flux f(u) = u^2 / 2 * (1,...,1)/sqrt(Dim)")
 end

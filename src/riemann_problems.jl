@@ -26,11 +26,11 @@ function RiemannProblem(model::AbstractBalanceLaw{1}, uₗ, uᵣ, x₀::Real=0, 
 end
 
 
-function convert{Model,U,T1,T2}(::Type{RiemannProblem{Model,U,T1}}, prob::RiemannProblem{Model,U,T2})
+function Base.convert{Model,U,T1,T2}(::Type{RiemannProblem{Model,U,T1}}, prob::RiemannProblem{Model,U,T2})
   RiemannProblem{Model,U,T1}(prob.model, prob.uₗ, prob.uᵣ, convert(T1,prob.x₀), convert(T1,prob.t₀))
 end
 
-function promote_rule{Model,U,T1,T2}(::Type{RiemannProblem{Model,U,T1}}, ::Type{RiemannProblem{Model,U,T2}})
+function Base.promote_rule{Model,U,T1,T2}(::Type{RiemannProblem{Model,U,T1}}, ::Type{RiemannProblem{Model,U,T2}})
   RiemannProblem{Model,U,promote_type(T1,T2)}
 end
 
@@ -42,7 +42,7 @@ function (prob::RiemannProblem)(x::Real)
 end
 
 
-function show(io::IO, prob::RiemannProblem)
+function Base.show(io::IO, prob::RiemannProblem)
   print(io,
     "Riemann problem for ", prob.model, "\n  ",
     "with uₗ = ", prob.uₗ, " and uᵣ = ", prob.uᵣ, "\n  ",
@@ -59,7 +59,7 @@ An abstract type representing the solution of a scalar Riemann problem.
 abstract type ScalarRiemannSolution <: AbstractRiemannSolution end
 
 
-function show(io::IO, sol::AbstractRiemannSolution)
+function Base.show(io::IO, sol::AbstractRiemannSolution)
   σ⁻, σ⁺ =  minmax_speeds(sol)
   print(io, "Solution  of the ", sol.prob,
         "\n  speeds: σ⁻ = ", σ⁻, ", σ⁺ = ", σ⁺ )
@@ -124,9 +124,9 @@ function RiemannProblemTuple{N,Model,U,T}(tup::NTuple{N,RiemannProblem{Model,U,T
   RiemannProblemTuple{N,Model,U,T}(tup)
 end
 
-start(tup::RiemannProblemTuple) = start(tup.tup)
-done(tup::RiemannProblemTuple, i) = done(tup.tup, i)
-next(tup::RiemannProblemTuple, i) = next(tup.tup, i)
+Base.start(tup::RiemannProblemTuple) = start(tup.tup)
+Base.done(tup::RiemannProblemTuple, i) = done(tup.tup, i)
+Base.next(tup::RiemannProblemTuple, i) = next(tup.tup, i)
 
 
 function *{Model,U}(prob1::RiemannProblem{Model,U}, prob2::RiemannProblem{Model,U})
@@ -147,7 +147,7 @@ function *{N,M,Model,U}(tup1::RiemannProblemTuple{N,Model,U},
 end
 
 
-function show{N,Model,U,T}(io::IO, prob::RiemannProblemTuple{N,Model,U,T})
+function Base.show{N,Model,U,T}(io::IO, prob::RiemannProblemTuple{N,Model,U,T})
   println(io, "Tuple of ", N, " consecutive Riemann problems:")
   for i in 1:N
     print(io, prob.tup[i], "\n")
@@ -179,7 +179,7 @@ function RiemannSolutionTuple{N,Sol<:AbstractRiemannSolution}(tup::NTuple{N,Sol}
 end
 
 
-function show{N,Sol}(io::IO, prob::RiemannSolutionTuple{N,Sol})
+function Base.show{N,Sol}(io::IO, prob::RiemannSolutionTuple{N,Sol})
   println(io, "Tuple of ", N, " solutions to consecutive Riemann problems:")
   for i in 1:N
     println(io, prob.tup[i])

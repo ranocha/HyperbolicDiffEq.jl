@@ -14,7 +14,7 @@ function Quintic(T=Float64)
   Quintic{T}()
 end
 
-function show{T}(io::IO, model::Quintic{T})
+function Base.show{T}(io::IO, model::Quintic{T})
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^5")
 end
 

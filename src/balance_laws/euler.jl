@@ -12,7 +12,7 @@ function Euler(γ=1.4, Dim=1)
   Euler{typeof(γ), Dim}(γ)
 end
 
-function show{T,Dim}(io::IO, model::Euler{T,Dim})
+function Base.show{T,Dim}(io::IO, model::Euler{T,Dim})
   print(io, "Compressible Euler equations with γ=", model.γ, " {T=", T, ", Dim=", Dim, "}")
 end
 

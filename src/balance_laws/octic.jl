@@ -14,7 +14,7 @@ function Octic(T=Float64)
   Octic{T}()
 end
 
-function show{T}(io::IO, model::Octic{T})
+function Base.show{T}(io::IO, model::Octic{T})
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^8")
 end
 

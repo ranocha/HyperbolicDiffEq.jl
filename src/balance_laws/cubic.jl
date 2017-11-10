@@ -14,7 +14,7 @@ function Cubic(T=Float64)
   Cubic{T}()
 end
 
-function show{T}(io::IO, model::Cubic{T})
+function Base.show{T}(io::IO, model::Cubic{T})
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^3")
 end
 

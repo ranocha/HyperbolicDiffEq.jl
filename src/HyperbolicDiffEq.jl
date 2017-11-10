@@ -5,6 +5,7 @@ module HyperbolicDiffEq
 using Reexport
 
 @reexport using PolynomialBases
+import PolynomialBases: integrate
 
 using Roots
 using Parameters
@@ -20,7 +21,7 @@ using LaTeXStrings
 # interfaces
 import DiffEqBase: solve
 
-import Base: show, *, start, done, next, promote_rule, convert
+import Base: *
 
 import StaticArrays: similar_type
 
@@ -87,6 +88,7 @@ include("flux_difference/uniform_flux_difference.jl")
 include("flux_difference/uniform_flux_difference_1d.jl")
 
 include("riemann_problems.jl")
+include("balance_laws/constant_linear_advection.jl")
 include("balance_laws/burgers.jl")
 include("balance_laws/cubic.jl")
 include("balance_laws/quartic.jl")
@@ -102,7 +104,7 @@ include("utils.jl")
 
 
 # models
-export Burgers, IntegralQuantitiesBurgers,
+export ConstantLinearAdvection, Burgers, IntegralQuantitiesBurgers,
        Cubic, Quartic, Quintic, Sextic, Septic, Octic,
        BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
@@ -138,7 +140,7 @@ export UniformFluxDiffDisc1D, UniformPeriodicFluxDiffDisc1D,
         UniformPeriodicFluxDiffDisc2D, UniformPeriodicFluxDiffDisc3D
 
 # utilities
-export logmean, integrate
+export logmean, integrate, order
 
 
 end # module

@@ -14,7 +14,7 @@ function Septic(T=Float64)
   Septic{T}()
 end
 
-function show{T}(io::IO, model::Septic{T})
+function Base.show{T}(io::IO, model::Septic{T})
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^7")
 end
 

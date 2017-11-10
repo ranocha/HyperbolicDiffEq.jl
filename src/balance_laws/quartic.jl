@@ -14,7 +14,7 @@ function Quartic(T=Float64)
   Quartic{T}()
 end
 
-function show{T}(io::IO, model::Quartic{T})
+function Base.show{T}(io::IO, model::Quartic{T})
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^4")
 end
 

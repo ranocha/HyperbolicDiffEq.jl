@@ -14,7 +14,7 @@ function Sextic(T=Float64)
   Sextic{T}()
 end
 
-function show{T}(io::IO, model::Sextic{T})
+function Base.show{T}(io::IO, model::Sextic{T})
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^6")
 end
 
