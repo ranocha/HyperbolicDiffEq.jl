@@ -75,7 +75,7 @@ end
 
 
 
-function show(io::IO, mesh::AbstractMesh1D)
+function Base.show(io::IO, mesh::AbstractMesh1D)
   print(io,
     typeof(mesh), " with ", numcells(mesh), " cells in ", bounds(mesh))
 end

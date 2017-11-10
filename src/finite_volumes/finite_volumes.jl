@@ -2,16 +2,17 @@
 abstract type FiniteVolumeSemidiscretisation <: AbstractSemidiscretisation end
 
 struct FirstOrderFV{BalanceLaw, Mesh, NumFlux,
-                    Fluxes, UseThreads} <: FiniteVolumeSemidiscretisation
+                    Fluxes, Parallel} <: FiniteVolumeSemidiscretisation
     balance_law::BalanceLaw
     mesh::Mesh
     numflux::NumFlux
 
     fluxes::Fluxes
+    parallel::Parallel
 end
 
 function FirstOrderFV(balance_law::AbstractBalanceLaw{1}, mesh::AbstractMesh1D,
-                        numflux, usethreads=false)
+                        numflux, parallel=Val{:serial}())
     if !isperiodic(mesh)
         error("The mesh must be periodic in order to infer boundary conditions.")
     end
@@ -23,23 +24,13 @@ function FirstOrderFV(balance_law::AbstractBalanceLaw{1}, mesh::AbstractMesh1D,
     fluxes = zeros(F, numedges(mesh))
 
     FirstOrderFV{typeof(balance_law), typeof(mesh), typeof(numflux),
-                    typeof(fluxes), Val{usethreads}}(
-        balance_law, mesh, numflux, fluxes
+                 typeof(fluxes), typeof(parallel)}(
+        balance_law, mesh, numflux, fluxes, parallel
     )
 end
 
 
-@inline function usethreads{BalanceLaw, Mesh, NumFLux, Fluxes}(
-    fv::FirstOrderFV{BalanceLaw, Mesh, NumFLux, Fluxes, Val{false}})
-  false
-end
-
-@inline function usethreads{BalanceLaw, Mesh, NumFLux, Fluxes}(
-    fv::FirstOrderFV{BalanceLaw, Mesh, NumFLux, Fluxes, Val{true}})
-  true
-end
-
-function show(io::IO, fv::FirstOrderFV)
+function Base.show(io::IO, fv::FirstOrderFV)
   print(io, "First order finite volume method ",
         "\n  Balance law:   ", fv.balance_law,
         "\n  Mesh:          ", fv.mesh,
@@ -64,16 +55,16 @@ function (fv::FirstOrderFV)(t, u, du)
     end
   end
 
-  @unpack balance_law, mesh, numflux, fluxes = fv
+  @unpack balance_law, mesh, numflux, fluxes, parallel = fv
 
-  compute_fluxes!(fluxes, numflux, u, mesh, balance_law, Val{usethreads(fv)})
-  compute_du!(du, fluxes, mesh, Val{usethreads(fv)})
+  compute_fluxes!(fluxes, numflux, u, mesh, balance_law, parallel)
+  compute_du!(du, fluxes, mesh, parallel)
 
   nothing
 end
 
 
-function compute_fluxes!(fluxes, numflux, u, mesh::AbstractMesh1D, balance_law, ::Type{Val{true}})
+function compute_fluxes!(fluxes, numflux, u, mesh::AbstractMesh1D, balance_law, ::Val{:threads})
     Threads.@threads for edge in edge_indices(mesh)
         @inbounds left = left_cell(edge, mesh)
         @inbounds right = right_cell(edge, mesh)
@@ -81,7 +72,7 @@ function compute_fluxes!(fluxes, numflux, u, mesh::AbstractMesh1D, balance_law, 
     end
 end
 
-function compute_fluxes!(fluxes, numflux, u, mesh::AbstractMesh1D, balance_law, ::Type{Val{false}})
+function compute_fluxes!(fluxes, numflux, u, mesh::AbstractMesh1D, balance_law, parallel)
     for edge in edge_indices(mesh)
         @inbounds left = left_cell(edge, mesh)
         @inbounds right = right_cell(edge, mesh)
@@ -90,7 +81,7 @@ function compute_fluxes!(fluxes, numflux, u, mesh::AbstractMesh1D, balance_law, 
 end
 
 
-function compute_du!(du, fluxes, mesh::AbstractMesh1D, ::Type{Val{true}})
+function compute_du!(du, fluxes, mesh::AbstractMesh1D, ::Val{:threads})
     Threads.@threads for cell in cell_indices(mesh)
         @inbounds left = left_edge(cell, mesh)
         @inbounds right = right_edge(cell, mesh)
@@ -98,7 +89,7 @@ function compute_du!(du, fluxes, mesh::AbstractMesh1D, ::Type{Val{true}})
     end
 end
 
-function compute_du!(du, fluxes, mesh::AbstractMesh1D, ::Type{Val{false}})
+function compute_du!(du, fluxes, mesh::AbstractMesh1D, parallel)
     for cell in cell_indices(mesh)
         @inbounds left = left_edge(cell, mesh)
         @inbounds right = right_edge(cell, mesh)

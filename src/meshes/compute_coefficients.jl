@@ -5,10 +5,10 @@
 Computse the coefficients of the function `u` in a first order finite volume
 method on the `mesh`.
 """
-function compute_coefficients(u, mesh::AbstractMesh1D)
+function compute_coefficients(u, mesh::AbstractMesh1D, order::Integer=1)
     xmin, xmax = bounds(mesh)
     uval = zeros(typeof(u((xmin+xmax)/2)), numcells(mesh))
-    compute_coefficients!(uval, u, mesh)
+    compute_coefficients!(uval, u, mesh, order)
     uval
 end
 
@@ -18,10 +18,18 @@ end
 Computse the coefficients of the function `u` in a first order finite volume
 method on the `mesh` and stores them in `uval`.
 """
-function compute_coefficients!(uval, u, mesh::AbstractMesh1D)
+function compute_coefficients!(uval, u, mesh::AbstractMesh1D, order::Integer=1)
+    if eltype(uval) <: AbstractArray
+        basis = GaussLegendre(order-1, eltype(eltype(uval)))
+    else
+        basis = GaussLegendre(order-1, eltype(uval))
+    end
+    x = similar(basis.nodes)
+
     for cell in cell_indices(mesh)
         xmin, xmax = bounds(cell, mesh)
-        uval[cell] = u((xmin+xmax)/2)
+        map_from_canonical!(x, basis.nodes, xmin, xmax, basis)
+        uval[cell] = integrate(u, x, basis.weights) / 2
     end
     nothing
 end

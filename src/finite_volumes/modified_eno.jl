@@ -20,14 +20,17 @@ end
 
 # ENO{K} uses K different polynomials of degree K-1
 # -> the total stencil width is 2K-1
-@inline stencil_width(::ModifiedENO{1}) = Val{1}()
-@inline stencil_width(::ModifiedENO{2}) = Val{3}()
-@inline stencil_width(::ModifiedENO{3}) = Val{5}()
-@inline stencil_width(::ModifiedENO{4}) = Val{7}()
-@inline stencil_width(::ModifiedENO{5}) = Val{9}()
-@inline stencil_width(::ModifiedENO{6}) = Val{11}()
-@inline stencil_width(::ModifiedENO{7}) = Val{13}()
-@inline stencil_width(::ModifiedENO{8}) = Val{15}()
+@inline stencil_width{K}(::ModifiedENO{K}) = 2K-1
+@inline stencil_width_val(::ModifiedENO{1}) = Val{1}()
+@inline stencil_width_val(::ModifiedENO{2}) = Val{3}()
+@inline stencil_width_val(::ModifiedENO{3}) = Val{5}()
+@inline stencil_width_val(::ModifiedENO{4}) = Val{7}()
+@inline stencil_width_val(::ModifiedENO{5}) = Val{9}()
+@inline stencil_width_val(::ModifiedENO{6}) = Val{11}()
+@inline stencil_width_val(::ModifiedENO{7}) = Val{13}()
+@inline stencil_width_val(::ModifiedENO{8}) = Val{15}()
+
+@inline order{K}(::ModifiedENO{K}) = K
 
 
 function (eno::ModifiedENO{2})(edge_u, cell, u_m1, u_0, u_p1, balance_law, meshx)
@@ -190,6 +193,8 @@ end
 ################################################################################
 
 """
+    ClassicalChoiceENO
+
 Classical choice of the stencil in an ENO reconstruction, minimising the absolute
 values of the divided differences lexicographically.
 """

@@ -31,52 +31,53 @@ function UniformPeriodicReconstructedFV1D(balance_law, meshx, fnum, reconstructi
                                      edge_u, fluxes, parallel)
 end
 
-function show(io::IO, fv::UniformPeriodicReconstructedFV1D)
-  print(io, "Finite volume method ",
-        "\n  Balance law:    ", fv.balance_law,
-        "\n  Mesh:           ", fv.meshx,
-        "\n  Numerical flux: ", fv.fnum,
-        "\n  Reconstruction: ", fv.reconstruction)
+function Base.show(io::IO, fv::UniformPeriodicReconstructedFV1D)
+    print(io, "Finite volume method ",
+            "\n  Balance law:    ", fv.balance_law,
+            "\n  Mesh:           ", fv.meshx,
+            "\n  Numerical flux: ", fv.fnum,
+            "\n  Reconstruction: ", fv.reconstruction)
 end
 
 
 @noinline function (semidisc::UniformPeriodicReconstructedFV1D)(t, u, du)
-  @boundscheck begin
-    if size(u) != size(du)
-      error("size(u) = $(size(u)) != $(size(du)) = size(du)")
+    @boundscheck begin
+        if size(u) != size(du)
+            error("size(u) = $(size(u)) != $(size(du)) = size(du)")
+        end
+        @assert length(u) == numcells(semidisc.meshx)
+        @assert length(u) >= stencil_width(semidisc.reconstruction) ÷ 2
+        if eltype(u) != variables(semidisc.balance_law)
+            error("eltype(u) == $(eltype(u)) != $(variables(semidisc.balance_law)) == variables(semidisc.balance_law)")
+        end
     end
-    @assert length(u) == numcells(semidisc.meshx)
-    if eltype(u) != variables(semidisc.balance_law)
-      error("eltype(u) == $(eltype(u)) != $(variables(semidisc.balance_law)) == variables(semidisc.balance_law)")
-    end
-  end
 
-  fill!(du, zero(eltype(du)))
-  add_numerical_fluxes!(du, u, semidisc, t)
+    fill!(du, zero(eltype(du)))
+    add_numerical_fluxes!(du, u, semidisc, t)
 
-  nothing
+    nothing
 end
 
 function add_numerical_fluxes!(du, u, fv::UniformPeriodicReconstructedFV1D, t)
     @unpack balance_law, meshx, fnum, reconstruction, edge_u, fluxes, parallel = fv
 
-    reconstruct!(edge_u, u, balance_law, meshx, reconstruction, stencil_width(reconstruction), parallel)
+    reconstruct!(edge_u, u, balance_law, meshx, reconstruction, stencil_width_val(reconstruction), parallel)
     compute_numerical_fluxes!(fluxes, edge_u, balance_law, meshx, fnum, parallel)
     compute_du!(du, fluxes, meshx, parallel)
 end
 
 
 function compute_numerical_fluxes!(fluxes, edge_u, balance_law, meshx::UniformPeriodicMesh1D,
-                                  fnum, parallel)
-    @inbounds fluxes[1] = fnum(edge_u[2,end], edge_u[1,1], balance_law)
-    @inbounds for edge in 2:length(fluxes)
+                                   fnum, parallel)
+    fluxes[1] = fnum(edge_u[2,end], edge_u[1,1], balance_law)
+    for edge in 2:length(fluxes)
         fluxes[edge] = fnum(edge_u[2,edge-1], edge_u[1,edge], balance_law)
     end
     nothing
 end
 
 function compute_numerical_fluxes!(fluxes, edge_u, balance_law, meshx::UniformPeriodicMesh1D,
-                                  fnum, parallel::Val{:threads})
+                                   fnum, parallel::Val{:threads})
     @inbounds fluxes[1] = fnum(edge_u[2,end], edge_u[1,1], balance_law)
     @inbounds Threads.@threads for edge in 2:length(fluxes)
         fluxes[edge] = fnum(edge_u[2,edge-1], edge_u[1,edge], balance_law)
@@ -85,7 +86,7 @@ function compute_numerical_fluxes!(fluxes, edge_u, balance_law, meshx::UniformPe
 end
 
 
-function compute_du!(du, fluxes, meshx::UniformPeriodicMesh1D, parallel)
+function compute_du!(du, fluxes, meshx::UniformPeriodicMesh1D, parallel::Val{:serial})
     @inbounds for cell in 1:numcells(meshx)-1
         du[cell] -= ( fluxes[cell+1] - fluxes[cell] ) / volume(cell, meshx)
     end
@@ -104,8 +105,7 @@ end
 ################################################################################
 
 function semidiscretise(fv::UniformPeriodicReconstructedFV1D, u₀func, tspan)
-    #TODO: Higher order evaluation of the cell means via quadrature
-    u₀ = compute_coefficients(u₀func, fv.meshx)
+    u₀ = compute_coefficients(u₀func, fv.meshx, order(fv.reconstruction))
 
     ODEProblem(fv, u₀, tspan)
 end
