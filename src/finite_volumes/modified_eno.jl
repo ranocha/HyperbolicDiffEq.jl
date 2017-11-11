@@ -1457,3 +1457,115 @@ end
 
     idx
 end
+
+################################################################################
+
+"""
+    LexMinLegendreChoice
+
+Choice of the stencil in a modified ENO reconstruction minimising the Legendre
+coefficients of the reconstructed polynomial lexicographically.
+"""
+struct LexMinLegendreChoice end
+
+@inline function (::LexMinLegendreChoice)(u_m1, u_0, u_p1)
+    idx = -1
+    val_old = ( (-u_m1 + u_0)^2,)
+    # first coefficient 4*u_0^2
+
+    val_new = ( (-u_0 + u_p1)^2,)
+    # first coefficient 4*u_0^2
+    if val_new < val_old
+        idx = 0
+        val_old = val_new
+    end
+
+    idx
+end
+
+@inline function (::LexMinLegendreChoice)(u_m2, u_m1, u_0, u_p1, u_p2)
+    idx = -2
+    val_old = ( (-12*u_m1 + 3*u_m2 + 9*u_0)^2, (-2*u_m1 + u_m2 + u_0)^2,)
+    # first coefficient 144*u_0^2
+
+    val_new = ( (-3*u_m1 + 3*u_p1)^2, (u_m1 - 2*u_0 + u_p1)^2,)
+    # first coefficient 144*u_0^2
+    if val_new < val_old
+        idx = -1
+        val_old = val_new
+    end
+
+    val_new = ( (-9*u_0 + 12*u_p1 - 3*u_p2)^2, (u_0 - 2*u_p1 + u_p2)^2,)
+    # first coefficient 144*u_0^2
+    if val_new < val_old
+        idx = 0
+        val_old = val_new
+    end
+
+    idx
+end
+
+@inline function (::LexMinLegendreChoice)(u_m3, u_m2, u_m1, u_0, u_p1, u_p2, u_p3)
+    idx = -3
+    val_old = ( (-177*u_m1 + 87*u_m2 - 19*u_m3 + 109*u_0)^2, (-50*u_m1 + 40*u_m2 - 10*u_m3 + 20*u_0)^2, (-3*u_m1 + 3*u_m2 - u_m3 + u_0)^2,)
+    # first coefficient 14400*u_0^2
+
+    val_new = ( (-63*u_m1 + 11*u_m2 + 33*u_0 + 19*u_p1)^2, (10*u_m1 - 20*u_0 + 10*u_p1)^2, (3*u_m1 - u_m2 - 3*u_0 + u_p1)^2,)
+    # first coefficient 14400*u_0^2
+    if val_new < val_old
+        idx = -2
+        val_old = val_new
+    end
+
+    val_new = ( (-19*u_m1 - 33*u_0 + 63*u_p1 - 11*u_p2)^2, (10*u_m1 - 20*u_0 + 10*u_p1)^2, (-u_m1 + 3*u_0 - 3*u_p1 + u_p2)^2,)
+    # first coefficient 14400*u_0^2
+    if val_new < val_old
+        idx = -1
+        val_old = val_new
+    end
+
+    val_new = ( (-109*u_0 + 177*u_p1 - 87*u_p2 + 19*u_p3)^2, (20*u_0 - 50*u_p1 + 40*u_p2 - 10*u_p3)^2, (-u_0 + 3*u_p1 - 3*u_p2 + u_p3)^2,)
+    # first coefficient 14400*u_0^2
+    if val_new < val_old
+        idx = 0
+        val_old = val_new
+    end
+
+    idx
+end
+
+@inline function (::LexMinLegendreChoice)(u_m4, u_m3, u_m2, u_m1, u_0, u_p1, u_p2, u_p3, u_p4)
+    idx = -4
+    val_old = ( (-3234*u_m1 + 2352*u_m2 - 1022*u_m3 + 189*u_m4 + 1715*u_0)^2, (-1200*u_m1 + 1310*u_m2 - 640*u_m3 + 125*u_m4 + 405*u_0)^2, (-126*u_m1 + 168*u_m2 - 98*u_m3 + 21*u_m4 + 35*u_0)^2, (-4*u_m1 + 6*u_m2 - 4*u_m3 + u_m4 + u_0)^2,)
+    # first coefficient 2822400*u_0^2
+
+    val_new = ( (-1344*u_m1 + 462*u_m2 - 77*u_m3 + 770*u_0 + 189*u_p1)^2, (50*u_m1 + 60*u_m2 - 15*u_m3 - 220*u_0 + 125*u_p1)^2, (84*u_m1 - 42*u_m2 + 7*u_m3 - 70*u_0 + 21*u_p1)^2, (6*u_m1 - 4*u_m2 + u_m3 - 4*u_0 + u_p1)^2,)
+    # first coefficient 2822400*u_0^2
+    if val_new < val_old
+        idx = -3
+        val_old = val_new
+    end
+
+    val_new = ( (-574*u_m1 + 77*u_m2 + 574*u_p1 - 77*u_p2)^2, (200*u_m1 - 15*u_m2 - 370*u_0 + 200*u_p1 - 15*u_p2)^2, (14*u_m1 - 7*u_m2 - 14*u_p1 + 7*u_p2)^2, (-4*u_m1 + u_m2 + 6*u_0 - 4*u_p1 + u_p2)^2,)
+    # first coefficient 2822400*u_0^2
+    if val_new < val_old
+        idx = -2
+        val_old = val_new
+    end
+
+    val_new = ( (-189*u_m1 - 770*u_0 + 1344*u_p1 - 462*u_p2 + 77*u_p3)^2, (125*u_m1 - 220*u_0 + 50*u_p1 + 60*u_p2 - 15*u_p3)^2, (-21*u_m1 + 70*u_0 - 84*u_p1 + 42*u_p2 - 7*u_p3)^2, (u_m1 - 4*u_0 + 6*u_p1 - 4*u_p2 + u_p3)^2,)
+    # first coefficient 2822400*u_0^2
+    if val_new < val_old
+        idx = -1
+        val_old = val_new
+    end
+
+    val_new = ( (-1715*u_0 + 3234*u_p1 - 2352*u_p2 + 1022*u_p3 - 189*u_p4)^2, (405*u_0 - 1200*u_p1 + 1310*u_p2 - 640*u_p3 + 125*u_p4)^2, (-35*u_0 + 126*u_p1 - 168*u_p2 + 98*u_p3 - 21*u_p4)^2, (u_0 - 4*u_p1 + 6*u_p2 - 4*u_p3 + u_p4)^2,)
+    # first coefficient 2822400*u_0^2
+    if val_new < val_old
+        idx = 0
+        val_old = val_new
+    end
+
+    idx
+end
