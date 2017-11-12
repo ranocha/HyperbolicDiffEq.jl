@@ -35,7 +35,7 @@ end
 
 # test convergence orders
 Ns_lo = 10 .* 2 .^ (2:6)
-Ns_hi =  2 .* 2 .^ (2:6)
+Ns_hi =  4 .* 2 .^ (2:5)
 
 
 balance_law = ConstantLinearAdvection()
@@ -50,7 +50,7 @@ uₐₙₐ = (t,x) -> sinpi(x-t)
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(5), Ns_lo, Val{:serial}()) > 4.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(6), Ns_hi, Val{:serial}()) > 5.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(7), Ns_hi, Val{:serial}()) > 6.8
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(8), Ns_hi, Val{:serial}()) > 7.6
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(8), Ns_hi, Val{:serial}()) > 7.5
 
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(1), Ns_lo, Val{:threads}()) > 0.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(2), Ns_lo, Val{:threads}()) > 1.6
@@ -59,4 +59,4 @@ uₐₙₐ = (t,x) -> sinpi(x-t)
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(5), Ns_lo, Val{:threads}()) > 4.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(6), Ns_hi, Val{:threads}()) > 5.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(7), Ns_hi, Val{:threads}()) > 6.8
-@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(8), Ns_hi, Val{:threads}()) > 7.6
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(8), Ns_hi, Val{:threads}()) > 7.5

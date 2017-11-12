@@ -46,7 +46,7 @@ end
             error("size(u) = $(size(u)) != $(size(du)) = size(du)")
         end
         @assert length(u) == numcells(semidisc.meshx)
-        @assert length(u) >= stencil_width(semidisc.reconstruction) ÷ 2
+        @assert length(u) >= stencil_width(semidisc.reconstruction) - 1
         if eltype(u) != variables(semidisc.balance_law)
             error("eltype(u) == $(eltype(u)) != $(variables(semidisc.balance_law)) == variables(semidisc.balance_law)")
         end
