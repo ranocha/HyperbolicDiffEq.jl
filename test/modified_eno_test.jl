@@ -60,3 +60,13 @@ uₐₙₐ = (t,x) -> sinpi(x-t)
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(6), Ns_hi, Val{:threads}()) > 5.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(7), Ns_hi, Val{:threads}()) > 6.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(8), Ns_hi, Val{:threads}()) > 7.5
+
+
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{1}(), MinL2Choice()), Ns_lo, Val{:serial}()) > 0.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{2}(), MinL2Choice()), Ns_lo, Val{:serial}()) > 1.6
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), MinL2Choice()), Ns_lo, Val{:serial}()) > 2.8
+@test 0.2 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{4}(), MinL2Choice()), Ns_lo, Val{:serial}()) < 0.4
+@test 0.2 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{5}(), MinL2Choice()), Ns_lo, Val{:serial}()) < 0.4
+@test 0.9 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{6}(), MinL2Choice()), Ns_hi, Val{:serial}()) < 1.1
+@test 0.9 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{7}(), MinL2Choice()), Ns_hi, Val{:serial}()) < 1.1
+@test 0.9 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{8}(), MinL2Choice()), Ns_hi, Val{:serial}()) < 1.1
