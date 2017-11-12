@@ -48,3 +48,67 @@ Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::ConstantLinearAdvection{T,1})
     uₗ
 end
+
+
+################################################################################
+
+"""
+    ConstantLinearAdvectionRiemannSolution{T,T1}
+
+The solution of a Riemann problem `prob` for the linear advection equation with
+constant coefficients.
+"""
+struct ConstantLinearAdvectionRiemannSolution{T,T1} <: ScalarRiemannSolution
+    prob::RiemannProblem{ConstantLinearAdvection{T,1},T,T1}
+    σ::T
+end
+
+
+"""
+    minmax_speeds(sol::ConstantLinearAdvectionRiemannSolution)
+
+Return the minimal and maximal speeds `σ⁻, σ⁺` that appear in the solution `sol`.
+"""
+function minmax_speeds(sol::ConstantLinearAdvectionRiemannSolution)
+    sol.σ, sol.σ
+end
+
+
+"""
+    (sol::ConstantLinearAdvectionRiemannSolution)(ξ::Real)
+
+Evaluate the solution `sol` at the value `ξ` of the self-similarity variable
+`ξ = (x - x₀) / (t - t₀)`.
+"""
+function (sol::ConstantLinearAdvectionRiemannSolution)(ξ::Real)
+    @unpack σ = sol
+    @unpack uₗ, uᵣ = sol.prob
+
+    if ξ < σ
+        uₗ
+    else
+        uᵣ
+    end
+end
+
+
+"""
+    (sol::ConstantLinearAdvectionRiemannSolution)(t::Real, x::Real)
+
+Evaluate the solution `sol` at the time and space coordinates `t` and `x`.
+"""
+function (sol::ConstantLinearAdvectionRiemannSolution)(t::Real, x::Real)
+    @unpack x₀, t₀ = sol.prob
+
+    sol((x-x₀)/(t-t₀))
+end
+
+
+"""
+    solve{T,T1}(prob::RiemannProblem{ConstantLinearAdvection{T,1},T,T1})
+
+Compute the solution of the Riemann prolem `prob`.
+"""
+function solve{T,T1}(prob::RiemannProblem{ConstantLinearAdvection{T,1},T,T1})
+    ConstantLinearAdvectionRiemannSolution(prob, one(T))
+end
