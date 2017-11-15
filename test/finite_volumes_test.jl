@@ -12,7 +12,7 @@ function calc_error(balance_law, uₐₙₐ, tmin, tmax, numflux, N, usethreads)
                 save_everystep=false, dense=false)
     uana = compute_coefficients(x->uₐₙₐ(tspan[end],x), mesh)
 
-    N, norm(sol[end] - uana, 1) / N
+    N, integrate(u->sum(abs.(u)), sol[end]-uana, mesh)
 end
 
 function calc_order_estimate(Ns_and_errors)

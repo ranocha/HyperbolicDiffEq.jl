@@ -17,7 +17,7 @@ function calc_error(balance_law, uₐₙₐ, tmin, tmax, fnum, reconstruction, N
     end
     uana = compute_coefficients(x->uₐₙₐ(tspan[end],x), mesh, order(reconstruction))
 
-    N, norm(sol[end] - uana, 1) / N
+    N, integrate(u->sum(abs.(u)), sol[end]-uana, mesh)
 end
 
 function calc_order_estimate(Ns_and_errors)
