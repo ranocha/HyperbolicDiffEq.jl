@@ -40,6 +40,33 @@ function logmean(_a::Float64, _b::Float64)
     (a+b)/(2F)
 end
 
+"""
+    integrate(func, u::AbstractArray{U,1}, meshx::AbstractMesh1D)
+
+Map the function `func` to the coefficients `u` and integrate with respect to
+the mesh `meshx`.
+"""
+function integrate(func, u::AbstractArray{U,1}, meshx::AbstractMesh1D) where U
+    @boundscheck begin
+        @assert numcells(meshx) == size(u,1)
+    end
+
+    res = zero(func(first(u)))
+    @inbounds for ix in cell_indices(meshx)
+        res += func(u[ix]) * volume(ix, meshx)
+    end
+    res
+end
+
+"""
+    integrate(u::AbstractArray{U,1}, meshx::AbstractMesh1D)
+
+Integrate the coefficients `u` with respect to the mesh `meshx`.
+"""
+function integrate(u::AbstractArray{U,1}, meshx::AbstractMesh1D) where U
+    integrate(identity, u, meshx)
+end
+
 
 """
     integrate(func, u::AbstractArray{U,2}, meshx::AbstractMesh1D, basis::NodalBasis)
