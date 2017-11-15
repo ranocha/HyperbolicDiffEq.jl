@@ -37,11 +37,11 @@ function (eno::ModifiedENO{2})(edge_u, cell, u_m1, u_0, u_p1, balance_law, meshx
     idx = eno.choose_stencil(u_m1, u_0, u_p1)
 
     @inbounds if idx == -1
-        edge_u[1,cell] = u_0/2 + u_m1/2
-        edge_u[2,cell] = 3*u_0/2 - u_m1/2
+        edge_u[1,cell] = ( u_0 + u_m1 ) / 2
+        edge_u[2,cell] = ( 3*u_0 - u_m1 ) / 2
     else # idx == 0
-        edge_u[1,cell] = 3*u_0/2 - u_p1/2
-        edge_u[2,cell] = u_0/2 + u_p1/2
+        edge_u[1,cell] = ( 3*u_0 - u_p1 ) / 2
+        edge_u[2,cell] = ( u_0 + u_p1 ) / 2
     end
     nothing
 end
@@ -50,14 +50,14 @@ function (eno::ModifiedENO{3})(edge_u, cell, u_m2, u_m1, u_0, u_p1, u_p2, balanc
     idx = eno.choose_stencil(u_m2, u_m1, u_0, u_p1, u_p2)
 
     @inbounds if idx == -2
-        edge_u[1,cell] = u_0/3 + 5*u_m1/6 - u_m2/6
-        edge_u[2,cell] = 11*u_0/6 - 7*u_m1/6 + u_m2/3
+        edge_u[1,cell] = ( 2*u_0 + 5*u_m1 - u_m2 ) / 6
+        edge_u[2,cell] = ( 11*u_0 - 7*u_m1 + 2*u_m2 ) / 6
     elseif idx == -1
-        edge_u[1,cell] = 5*u_0/6 - u_p1/6 + u_m1/3
-        edge_u[2,cell] = 5*u_0/6 + u_p1/3 - u_m1/6
+        edge_u[1,cell] = ( 5*u_0 - u_p1 + 2*u_m1 ) / 6
+        edge_u[2,cell] = ( 5*u_0 + 2*u_p1 - u_m1 ) / 6
     else # idx == 0
-        edge_u[1,cell] = 11*u_0/6 - 7*u_p1/6 + u_p2/3
-        edge_u[2,cell] = u_0/3 + 5*u_p1/6 - u_p2/6
+        edge_u[1,cell] = ( 11*u_0 - 7*u_p1 + 2*u_p2 ) / 6
+        edge_u[2,cell] = ( 2*u_0 + 5*u_p1 - u_p2 ) / 6
     end
     nothing
 end
@@ -66,17 +66,17 @@ function (eno::ModifiedENO{4})(edge_u, cell, u_m3, u_m2, u_m1, u_0, u_p1, u_p2, 
     idx = eno.choose_stencil(u_m3, u_m2, u_m1, u_0, u_p1, u_p2, u_p3)
 
     @inbounds if idx == -3
-        edge_u[1,cell] = u_0/4 + 13*u_m1/12 - 5*u_m2/12 + u_m3/12
-        edge_u[2,cell] = 25*u_0/12 - 23*u_m1/12 + 13*u_m2/12 - u_m3/4
+        edge_u[1,cell] = ( 3*u_0 + 13*u_m1 - 5*u_m2 + u_m3 ) / 12
+        edge_u[2,cell] = ( 25*u_0 - 23*u_m1 + 13*u_m2 - 3*u_m3 ) / 12
     elseif idx == -2
-        edge_u[1,cell] = 7*u_0/12 - u_p1/12 + 7*u_m1/12 - u_m2/12
-        edge_u[2,cell] = 13*u_0/12 + u_p1/4 - 5*u_m1/12 + u_m2/12
+        edge_u[1,cell] = ( 7*u_0 - u_p1 + 7*u_m1 - u_m2 ) / 12
+        edge_u[2,cell] = ( 13*u_0 + 3*u_p1 - 5*u_m1 + u_m2 ) / 12
     elseif idx == -1
-        edge_u[1,cell] = 13*u_0/12 - 5*u_p1/12 + u_p2/12 + u_m1/4
-        edge_u[2,cell] = 7*u_0/12 + 7*u_p1/12 - u_p2/12 - u_m1/12
+        edge_u[1,cell] = ( 13*u_0 - 5*u_p1 + u_p2 + 3*u_m1 ) / 12
+        edge_u[2,cell] = ( 7*u_0 + 7*u_p1 - u_p2 - u_m1 ) / 12
     else # idx == 0
-        edge_u[1,cell] = 25*u_0/12 - 23*u_p1/12 + 13*u_p2/12 - u_p3/4
-        edge_u[2,cell] = u_0/4 + 13*u_p1/12 - 5*u_p2/12 + u_p3/12
+        edge_u[1,cell] = ( 25*u_0 - 23*u_p1 + 13*u_p2 - 3*u_p3 ) / 12
+        edge_u[2,cell] = ( 3*u_0 + 13*u_p1 - 5*u_p2 + u_p3 ) / 12
     end
     nothing
 end
@@ -85,20 +85,20 @@ function (eno::ModifiedENO{5})(edge_u, cell, u_m4, u_m3, u_m2, u_m1, u_0, u_p1, 
     idx = eno.choose_stencil(u_m4, u_m3, u_m2, u_m1, u_0, u_p1, u_p2, u_p3, u_p4)
 
     @inbounds if idx == -4
-        edge_u[1,cell] = u_0/5 + 77*u_m1/60 - 43*u_m2/60 + 17*u_m3/60 - u_m4/20
-        edge_u[2,cell] = 137*u_0/60 - 163*u_m1/60 + 137*u_m2/60 - 21*u_m3/20 + u_m4/5
+        edge_u[1,cell] = ( 12*u_0 + 77*u_m1 - 43*u_m2 + 17*u_m3 - 3*u_m4 ) / 60
+        edge_u[2,cell] = ( 137*u_0 - 163*u_m1 + 137*u_m2 - 63*u_m3 + 12*u_m4 ) / 60
     elseif idx == -3
-        edge_u[1,cell] = 9*u_0/20 - u_p1/20 + 47*u_m1/60 - 13*u_m2/60 + u_m3/30
-        edge_u[2,cell] = 77*u_0/60 + u_p1/5 - 43*u_m1/60 + 17*u_m2/60 - u_m3/20
+        edge_u[1,cell] = ( 27*u_0 - 3*u_p1 + 47*u_m1 - 13*u_m2 + 2*u_m3 ) / 60
+        edge_u[2,cell] = ( 77*u_0 + 12*u_p1 - 43*u_m1 + 17*u_m2 - 3*u_m3 ) / 60
     elseif idx == -2
-        edge_u[1,cell] = 47*u_0/60 - 13*u_p1/60 + u_p2/30 + 9*u_m1/20 - u_m2/20
-        edge_u[2,cell] = 47*u_0/60 + 9*u_p1/20 - u_p2/20 - 13*u_m1/60 + u_m2/30
+        edge_u[1,cell] = ( 47*u_0 - 13*u_p1 + 2*u_p2 + 27*u_m1 - 3*u_m2 ) / 60
+        edge_u[2,cell] = ( 47*u_0 + 27*u_p1 - 3*u_p2 - 13*u_m1 + 2*u_m2 ) / 60
     elseif idx == -1
-        edge_u[1,cell] = 77*u_0/60 - 43*u_p1/60 + 17*u_p2/60 - u_p3/20 + u_m1/5
-        edge_u[2,cell] = 9*u_0/20 + 47*u_p1/60 - 13*u_p2/60 + u_p3/30 - u_m1/20
+        edge_u[1,cell] = ( 77*u_0 - 43*u_p1 + 17*u_p2 - 3*u_p3 + 12*u_m1 ) / 60
+        edge_u[2,cell] = ( 27*u_0 + 47*u_p1 - 13*u_p2 + 2*u_p3 - 3*u_m1 ) / 60
     else # idx == 0
-        edge_u[1,cell] = 137*u_0/60 - 163*u_p1/60 + 137*u_p2/60 - 21*u_p3/20 + u_p4/5
-        edge_u[2,cell] = u_0/5 + 77*u_p1/60 - 43*u_p2/60 + 17*u_p3/60 - u_p4/20
+        edge_u[1,cell] = ( 137*u_0 - 163*u_p1 + 137*u_p2 - 63*u_p3 + 12*u_p4 ) / 60
+        edge_u[2,cell] = ( 12*u_0 + 77*u_p1 - 43*u_p2 + 17*u_p3 - 3*u_p4 ) / 60
     end
     nothing
 end
@@ -107,25 +107,24 @@ function (eno::ModifiedENO{6})(edge_u, cell, u_m5, u_m4, u_m3, u_m2, u_m1, u_0, 
     idx = eno.choose_stencil(u_m5, u_m4, u_m3, u_m2, u_m1, u_0, u_p1, u_p2, u_p3, u_p4, u_p5)
 
     @inbounds if idx == -5
-        edge_u[1,cell] = u_0/6 + 29*u_m1/20 - 21*u_m2/20 + 37*u_m3/60 - 13*u_m4/60 + u_m5/30
-        edge_u[2,cell] = 49*u_0/20 - 71*u_m1/20 + 79*u_m2/20 - 163*u_m3/60 + 31*u_m4/30 - u_m5/6
+        edge_u[1,cell] = ( 10*u_0 + 87*u_m1 - 63*u_m2 + 37*u_m3 - 13*u_m4 + 2*u_m5 ) / 60
+        edge_u[2,cell] = ( 147*u_0 - 213*u_m1 + 237*u_m2 - 163*u_m3 + 62*u_m4 - 10*u_m5 ) / 60
     elseif idx == -4
-        edge_u[1,cell] = 11*u_0/30 - u_p1/30 + 19*u_m1/20 - 23*u_m2/60 + 7*u_m3/60 - u_m4/60
-        edge_u[2,cell] = 29*u_0/20 + u_p1/6 - 21*u_m1/20 + 37*u_m2/60 - 13*u_m3/60 + u_m4/30
+        edge_u[1,cell] = ( 22*u_0 - 2*u_p1 + 57*u_m1 - 23*u_m2 + 7*u_m3 - u_m4 ) / 60
+        edge_u[2,cell] = ( 87*u_0 + 10*u_p1 - 63*u_m1 + 37*u_m2 - 13*u_m3 + 2*u_m4 ) / 60
     elseif idx == -3
-        edge_u[1,cell] = 37*u_0/60 - 2*u_p1/15 + u_p2/60 + 37*u_m1/60 - 2*u_m2/15 + u_m3/60
-        edge_u[2,cell] = 19*u_0/20 + 11*u_p1/30 - u_p2/30 - 23*u_m1/60 + 7*u_m2/60 - u_m3/60
+        edge_u[1,cell] = ( 37*u_0 - 8*u_p1 + u_p2 + 37*u_m1 - 8*u_m2 + u_m3 ) / 60
+        edge_u[2,cell] = ( 57*u_0 + 22*u_p1 - 2*u_p2 - 23*u_m1 + 7*u_m2 - u_m3 ) / 60
     elseif idx == -2
-        edge_u[1,cell] = 19*u_0/20 - 23*u_p1/60 + 7*u_p2/60 - u_p3/60 + 11*u_m1/30 - u_m2/30
-        edge_u[2,cell] = 37*u_0/60 + 37*u_p1/60 - 2*u_p2/15 + u_p3/60 - 2*u_m1/15 + u_m2/60
+        edge_u[1,cell] = ( 57*u_0 - 23*u_p1 + 7*u_p2 - u_p3 + 22*u_m1 - 2*u_m2 ) / 60
+        edge_u[2,cell] = ( 37*u_0 + 37*u_p1 - 8*u_p2 + u_p3 - 8*u_m1 + u_m2 ) / 60
     elseif idx == -1
-        edge_u[1,cell] = 29*u_0/20 - 21*u_p1/20 + 37*u_p2/60 - 13*u_p3/60 + u_p4/30 + u_m1/6
-        edge_u[2,cell] = 11*u_0/30 + 19*u_p1/20 - 23*u_p2/60 + 7*u_p3/60 - u_p4/60 - u_m1/30
+        edge_u[1,cell] = ( 87*u_0 - 63*u_p1 + 37*u_p2 - 13*u_p3 + 2*u_p4 + 10*u_m1 ) / 60
+        edge_u[2,cell] = ( 22*u_0 + 57*u_p1 - 23*u_p2 + 7*u_p3 - u_p4 - 2*u_m1 ) / 60
     else # idx == 0
-        edge_u[1,cell] = 49*u_0/20 - 71*u_p1/20 + 79*u_p2/20 - 163*u_p3/60 + 31*u_p4/30 - u_p5/6
-        edge_u[2,cell] = u_0/6 + 29*u_p1/20 - 21*u_p2/20 + 37*u_p3/60 - 13*u_p4/60 + u_p5/30
+        edge_u[1,cell] = ( 147*u_0 - 213*u_p1 + 237*u_p2 - 163*u_p3 + 62*u_p4 - 10*u_p5 ) / 60
+        edge_u[2,cell] = ( 10*u_0 + 87*u_p1 - 63*u_p2 + 37*u_p3 - 13*u_p4 + 2*u_p5 ) / 60
     end
-
     nothing
 end
 
@@ -133,28 +132,27 @@ function (eno::ModifiedENO{7})(edge_u, cell, u_m6, u_m5, u_m4, u_m3, u_m2, u_m1,
     idx = eno.choose_stencil(u_m6, u_m5, u_m4, u_m3, u_m2, u_m1, u_0, u_p1, u_p2, u_p3, u_p4, u_p5, u_p6)
 
     @inbounds if idx == -6
-            edge_u[1,cell] = u_0/7 + 223*u_m1/140 - 197*u_m2/140 + 153*u_m3/140 - 241*u_m4/420 + 37*u_m5/210 - u_m6/42
-            edge_u[2,cell] = 363*u_0/140 - 617*u_m1/140 + 853*u_m2/140 - 2341*u_m3/420 + 667*u_m4/210 - 43*u_m5/42 + u_m6/7
-        elseif idx == -5
-            edge_u[1,cell] = 13*u_0/42 - u_p1/42 + 153*u_m1/140 - 241*u_m2/420 + 109*u_m3/420 - 31*u_m4/420 + u_m5/105
-            edge_u[2,cell] = 223*u_0/140 + u_p1/7 - 197*u_m1/140 + 153*u_m2/140 - 241*u_m3/420 + 37*u_m4/210 - u_m5/42
-        elseif idx == -4
-            edge_u[1,cell] = 107*u_0/210 - 19*u_p1/210 + u_p2/105 + 319*u_m1/420 - 101*u_m2/420 + 5*u_m3/84 - u_m4/140
-            edge_u[2,cell] = 153*u_0/140 + 13*u_p1/42 - u_p2/42 - 241*u_m1/420 + 109*u_m2/420 - 31*u_m3/420 + u_m4/105
-        elseif idx == -3
-            edge_u[1,cell] = 319*u_0/420 - 101*u_p1/420 + 5*u_p2/84 - u_p3/140 + 107*u_m1/210 - 19*u_m2/210 + u_m3/105
-            edge_u[2,cell] = 319*u_0/420 + 107*u_p1/210 - 19*u_p2/210 + u_p3/105 - 101*u_m1/420 + 5*u_m2/84 - u_m3/140
-        elseif idx == -2
-            edge_u[1,cell] = 153*u_0/140 - 241*u_p1/420 + 109*u_p2/420 - 31*u_p3/420 + u_p4/105 + 13*u_m1/42 - u_m2/42
-            edge_u[2,cell] = 107*u_0/210 + 319*u_p1/420 - 101*u_p2/420 + 5*u_p3/84 - u_p4/140 - 19*u_m1/210 + u_m2/105
-        elseif idx == -1
-            edge_u[1,cell] = 223*u_0/140 - 197*u_p1/140 + 153*u_p2/140 - 241*u_p3/420 + 37*u_p4/210 - u_p5/42 + u_m1/7
-            edge_u[2,cell] = 13*u_0/42 + 153*u_p1/140 - 241*u_p2/420 + 109*u_p3/420 - 31*u_p4/420 + u_p5/105 - u_m1/42
-        else # idx == 0
-            edge_u[1,cell] = 363*u_0/140 - 617*u_p1/140 + 853*u_p2/140 - 2341*u_p3/420 + 667*u_p4/210 - 43*u_p5/42 + u_p6/7
-            edge_u[2,cell] = u_0/7 + 223*u_p1/140 - 197*u_p2/140 + 153*u_p3/140 - 241*u_p4/420 + 37*u_p5/210 - u_p6/42
-        end
-
+        edge_u[1,cell] = ( 60*u_0 + 669*u_m1 - 591*u_m2 + 459*u_m3 - 241*u_m4 + 74*u_m5 - 10*u_m6 ) / 420
+        edge_u[2,cell] = ( 1089*u_0 - 1851*u_m1 + 2559*u_m2 - 2341*u_m3 + 1334*u_m4 - 430*u_m5 + 60*u_m6 ) / 420
+    elseif idx == -5
+        edge_u[1,cell] = ( 130*u_0 - 10*u_p1 + 459*u_m1 - 241*u_m2 + 109*u_m3 - 31*u_m4 + 4*u_m5 ) / 420
+        edge_u[2,cell] = ( 669*u_0 + 60*u_p1 - 591*u_m1 + 459*u_m2 - 241*u_m3 + 74*u_m4 - 10*u_m5 ) / 420
+    elseif idx == -4
+        edge_u[1,cell] = ( 214*u_0 - 38*u_p1 + 4*u_p2 + 319*u_m1 - 101*u_m2 + 25*u_m3 - 3*u_m4 ) / 420
+        edge_u[2,cell] = ( 459*u_0 + 130*u_p1 - 10*u_p2 - 241*u_m1 + 109*u_m2 - 31*u_m3 + 4*u_m4 ) / 420
+    elseif idx == -3
+        edge_u[1,cell] = ( 319*u_0 - 101*u_p1 + 25*u_p2 - 3*u_p3 + 214*u_m1 - 38*u_m2 + 4*u_m3 ) / 420
+        edge_u[2,cell] = ( 319*u_0 + 214*u_p1 - 38*u_p2 + 4*u_p3 - 101*u_m1 + 25*u_m2 - 3*u_m3 ) / 420
+    elseif idx == -2
+        edge_u[1,cell] = ( 459*u_0 - 241*u_p1 + 109*u_p2 - 31*u_p3 + 4*u_p4 + 130*u_m1 - 10*u_m2 ) / 420
+        edge_u[2,cell] = ( 214*u_0 + 319*u_p1 - 101*u_p2 + 25*u_p3 - 3*u_p4 - 38*u_m1 + 4*u_m2 ) / 420
+    elseif idx == -1
+        edge_u[1,cell] = ( 669*u_0 - 591*u_p1 + 459*u_p2 - 241*u_p3 + 74*u_p4 - 10*u_p5 + 60*u_m1 ) / 420
+        edge_u[2,cell] = ( 130*u_0 + 459*u_p1 - 241*u_p2 + 109*u_p3 - 31*u_p4 + 4*u_p5 - 10*u_m1 ) / 420
+    else # idx == 0
+        edge_u[1,cell] = ( 1089*u_0 - 1851*u_p1 + 2559*u_p2 - 2341*u_p3 + 1334*u_p4 - 430*u_p5 + 60*u_p6 ) / 420
+        edge_u[2,cell] = ( 60*u_0 + 669*u_p1 - 591*u_p2 + 459*u_p3 - 241*u_p4 + 74*u_p5 - 10*u_p6 ) / 420
+    end
     nothing
 end
 
@@ -162,31 +160,30 @@ function (eno::ModifiedENO{8})(edge_u, cell, u_m7, u_m6, u_m5, u_m4, u_m3, u_m2,
     idx = eno.choose_stencil(u_m7, u_m6, u_m5, u_m4, u_m3, u_m2, u_m1, u_0, u_p1, u_p2, u_p3, u_p4, u_p5, u_p6, u_p7)
 
     @inbounds if idx == -7
-        edge_u[1,cell] = u_0/8 + 481*u_m1/280 - 499*u_m2/280 + 481*u_m3/280 - 1007*u_m4/840 + 463*u_m5/840 - 25*u_m6/168 + u_m7/56
-        edge_u[2,cell] = 761*u_0/280 - 1479*u_m1/280 + 2441*u_m2/280 - 8357*u_m3/840 + 6343*u_m4/840 - 613*u_m5/168 + 57*u_m6/56 - u_m7/8
+        edge_u[1,cell] = ( 105*u_0 + 1443*u_m1 - 1497*u_m2 + 1443*u_m3 - 1007*u_m4 + 463*u_m5 - 125*u_m6 + 15*u_m7 ) / 840
+        edge_u[2,cell] = ( 2283*u_0 - 4437*u_m1 + 7323*u_m2 - 8357*u_m3 + 6343*u_m4 - 3065*u_m5 + 855*u_m6 - 105*u_m7 ) / 840
     elseif idx == -6
-        edge_u[1,cell] = 15*u_0/56 - u_p1/56 + 341*u_m1/280 - 219*u_m2/280 + 131*u_m3/280 - 167*u_m4/840 + 43*u_m5/840 - u_m6/168
-        edge_u[2,cell] = 481*u_0/280 + u_p1/8 - 499*u_m1/280 + 481*u_m2/280 - 1007*u_m3/840 + 463*u_m4/840 - 25*u_m5/168 + u_m6/56
+        edge_u[1,cell] = ( 225*u_0 - 15*u_p1 + 1023*u_m1 - 657*u_m2 + 393*u_m3 - 167*u_m4 + 43*u_m5 - 5*u_m6 ) / 840
+        edge_u[2,cell] = ( 1443*u_0 + 105*u_p1 - 1497*u_m1 + 1443*u_m2 - 1007*u_m3 + 463*u_m4 - 125*u_m5 + 15*u_m6 ) / 840
     elseif idx == -5
-        edge_u[1,cell] = 73*u_0/168 - 11*u_p1/168 + u_p2/168 + 743*u_m1/840 - 307*u_m2/840 + 113*u_m3/840 - 9*u_m4/280 + u_m5/280
-        edge_u[2,cell] = 341*u_0/280 + 15*u_p1/56 - u_p2/56 - 219*u_m1/280 + 131*u_m2/280 - 167*u_m3/840 + 43*u_m4/840 - u_m5/168
+        edge_u[1,cell] = ( 365*u_0 - 55*u_p1 + 5*u_p2 + 743*u_m1 - 307*u_m2 + 113*u_m3 - 27*u_m4 + 3*u_m5 ) / 840
+        edge_u[2,cell] = ( 1023*u_0 + 225*u_p1 - 15*u_p2 - 657*u_m1 + 393*u_m2 - 167*u_m3 + 43*u_m4 - 5*u_m5 ) / 840
     elseif idx == -4
-        edge_u[1,cell] = 533*u_0/840 - 139*u_p1/840 + 29*u_p2/840 - u_p3/280 + 533*u_m1/840 - 139*u_m2/840 + 29*u_m3/840 - u_m4/280
-        edge_u[2,cell] = 743*u_0/840 + 73*u_p1/168 - 11*u_p2/168 + u_p3/168 - 307*u_m1/840 + 113*u_m2/840 - 9*u_m3/280 + u_m4/280
+        edge_u[1,cell] = ( 533*u_0 - 139*u_p1 + 29*u_p2 - 3*u_p3 + 533*u_m1 - 139*u_m2 + 29*u_m3 - 3*u_m4 ) / 840
+        edge_u[2,cell] = ( 743*u_0 + 365*u_p1 - 55*u_p2 + 5*u_p3 - 307*u_m1 + 113*u_m2 - 27*u_m3 + 3*u_m4 ) / 840
     elseif idx == -3
-        edge_u[1,cell] = 743*u_0/840 - 307*u_p1/840 + 113*u_p2/840 - 9*u_p3/280 + u_p4/280 + 73*u_m1/168 - 11*u_m2/168 + u_m3/168
-        edge_u[2,cell] = 533*u_0/840 + 533*u_p1/840 - 139*u_p2/840 + 29*u_p3/840 - u_p4/280 - 139*u_m1/840 + 29*u_m2/840 - u_m3/280
+        edge_u[1,cell] = ( 743*u_0 - 307*u_p1 + 113*u_p2 - 27*u_p3 + 3*u_p4 + 365*u_m1 - 55*u_m2 + 5*u_m3 ) / 840
+        edge_u[2,cell] = ( 533*u_0 + 533*u_p1 - 139*u_p2 + 29*u_p3 - 3*u_p4 - 139*u_m1 + 29*u_m2 - 3*u_m3 ) / 840
     elseif idx == -2
-        edge_u[1,cell] = 341*u_0/280 - 219*u_p1/280 + 131*u_p2/280 - 167*u_p3/840 + 43*u_p4/840 - u_p5/168 + 15*u_m1/56 - u_m2/56
-        edge_u[2,cell] = 73*u_0/168 + 743*u_p1/840 - 307*u_p2/840 + 113*u_p3/840 - 9*u_p4/280 + u_p5/280 - 11*u_m1/168 + u_m2/168
+        edge_u[1,cell] = ( 1023*u_0 - 657*u_p1 + 393*u_p2 - 167*u_p3 + 43*u_p4 - 5*u_p5 + 225*u_m1 - 15*u_m2 ) / 840
+        edge_u[2,cell] = ( 365*u_0 + 743*u_p1 - 307*u_p2 + 113*u_p3 - 27*u_p4 + 3*u_p5 - 55*u_m1 + 5*u_m2 ) / 840
     elseif idx == -1
-        edge_u[1,cell] = 481*u_0/280 - 499*u_p1/280 + 481*u_p2/280 - 1007*u_p3/840 + 463*u_p4/840 - 25*u_p5/168 + u_p6/56 + u_m1/8
-        edge_u[2,cell] = 15*u_0/56 + 341*u_p1/280 - 219*u_p2/280 + 131*u_p3/280 - 167*u_p4/840 + 43*u_p5/840 - u_p6/168 - u_m1/56
+        edge_u[1,cell] = ( 1443*u_0 - 1497*u_p1 + 1443*u_p2 - 1007*u_p3 + 463*u_p4 - 125*u_p5 + 15*u_p6 + 105*u_m1 ) / 840
+        edge_u[2,cell] = ( 225*u_0 + 1023*u_p1 - 657*u_p2 + 393*u_p3 - 167*u_p4 + 43*u_p5 - 5*u_p6 - 15*u_m1 ) / 840
     else # idx == 0
-        edge_u[1,cell] = 761*u_0/280 - 1479*u_p1/280 + 2441*u_p2/280 - 8357*u_p3/840 + 6343*u_p4/840 - 613*u_p5/168 + 57*u_p6/56 - u_p7/8
-        edge_u[2,cell] = u_0/8 + 481*u_p1/280 - 499*u_p2/280 + 481*u_p3/280 - 1007*u_p4/840 + 463*u_p5/840 - 25*u_p6/168 + u_p7/56
+        edge_u[1,cell] = ( 2283*u_0 - 4437*u_p1 + 7323*u_p2 - 8357*u_p3 + 6343*u_p4 - 3065*u_p5 + 855*u_p6 - 105*u_p7 ) / 840
+        edge_u[2,cell] = ( 105*u_0 + 1443*u_p1 - 1497*u_p2 + 1443*u_p3 - 1007*u_p4 + 463*u_p5 - 125*u_p6 + 15*u_p7 ) / 840
     end
-
     nothing
 end
 
