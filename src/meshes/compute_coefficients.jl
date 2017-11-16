@@ -73,6 +73,59 @@ function evaluate_coefficients!(xplot, uplot, u, mesh::AbstractMesh1D)
 end
 
 
+"""
+    evaluate_coefficients(u, balance_law, mesh::AbstractMesh1D,
+                          reconstruction::AbstractReconstruction,
+                          npoints=2*order(reconstruction))
+
+Evaluates the coefficients `u` in a finite volume method on `mesh` using
+`reconstruction`.
+Returns `xplot, uplot` as vectors that can be used for plots.
+"""
+function evaluate_coefficients(u, balance_law, meshx::AbstractMesh1D,
+                               reconstruction::AbstractReconstruction,
+                               npoints=2*order(reconstruction))
+    xplot = zeros(npoints*numcells(meshx))
+    uplot = zeros(eltype(u), npoints*numcells(meshx))
+
+    evaluate_coefficients!(xplot, uplot, u, balance_law, meshx, reconstruction)
+end
+
+function evaluate_coefficients(u, fv::UniformPeriodicReconstructedFV1D,
+                               npoints=2*order(fv.reconstruction))
+    evaluate_coefficients(u, fv.balance_law, fv.meshx, fv.reconstruction, npoints)
+end
+
+"""
+    evaluate_coefficients!(xplot, uplot, u, balance_law, mesh::AbstractMesh1D,
+                           reconstruction::AbstractReconstruction)
+
+Evaluates the coefficients `u` in a finite volume method on `mesh` using
+`reconstruction`.
+Returns `xplot, uplot` as vectors that can be used for plots.
+"""
+function evaluate_coefficients!(xplot, uplot, u, balance_law, meshx::AbstractMesh1D,
+                                reconstruction::AbstractReconstruction)
+    npoints = length(xplot) ÷ numcells(meshx)
+    @assert length(uplot) == npoints*numcells(meshx)
+
+    ξ = linspace(0+eps(), 1-eps(), npoints) |> collect
+    x = zeros(ξ)
+
+    uval = zeros(eltype(u), npoints)
+    @inbounds for cell in cell_indices(meshx)
+        xmin, xmax = bounds(cell, meshx)
+        interpolate!(uval, ξ, cell, u, balance_law, meshx, reconstruction, stencil_width_val(reconstruction))
+        for nx in 1:npoints
+            xplot[(cell-1)*npoints+(nx-1)+1] = xmin + ξ[nx]*(xmax-xmin)
+            uplot[(cell-1)*npoints+(nx-1)+1] = uval[nx]
+        end
+    end
+
+    xplot, uplot
+end
+
+
 ################################################################################
 
 function compute_coefficients(u, mesh::AbstractMesh1D, basis::NodalBasis, parallel=Val{:serial}())
