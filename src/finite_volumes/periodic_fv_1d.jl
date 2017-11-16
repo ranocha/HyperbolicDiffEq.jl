@@ -39,6 +39,11 @@ function Base.show(io::IO, fv::UniformPeriodicReconstructedFV1D)
             "\n  Reconstruction: ", fv.reconstruction)
 end
 
+function evaluate_coefficients(u, fv::UniformPeriodicReconstructedFV1D,
+                               npoints=2*order(fv.reconstruction))
+    evaluate_coefficients(u, fv.balance_law, fv.meshx, fv.reconstruction, npoints)
+end
+
 
 @noinline function (semidisc::UniformPeriodicReconstructedFV1D)(t, u, du)
     @boundscheck begin

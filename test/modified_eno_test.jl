@@ -70,3 +70,48 @@ uₐₙₐ = (t,x) -> sinpi(x-t)
 @test 0.9 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{6}(), MinL2Choice()), Ns_hi, Val{:serial}()) < 1.1
 @test 0.9 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{7}(), MinL2Choice()), Ns_hi, Val{:serial}()) < 1.1
 @test 0.9 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{8}(), MinL2Choice()), Ns_hi, Val{:serial}()) < 1.1
+
+
+# test evaluation
+mesh = UniformPeriodicMesh1D(0., 2., 50)
+
+K = 1
+fv = UniformPeriodicReconstructedFV1D(balance_law, mesh, fnum, ModifiedENO(K), Val{:serial})
+u = compute_coefficients(sinpi, mesh, K)
+xplot, uplot = evaluate_coefficients(u, fv)
+@test norm(sinpi.(xplot) - uplot) < 5.e-1
+K = 2
+fv = UniformPeriodicReconstructedFV1D(balance_law, mesh, fnum, ModifiedENO(K), Val{:serial})
+u = compute_coefficients(sinpi, mesh, K)
+xplot, uplot = evaluate_coefficients(u, fv)
+@test norm(sinpi.(xplot) - uplot) < 4.e-2
+K = 3
+fv = UniformPeriodicReconstructedFV1D(balance_law, mesh, fnum, ModifiedENO(K), Val{:serial})
+u = compute_coefficients(sinpi, mesh, K)
+xplot, uplot = evaluate_coefficients(u, fv)
+@test norm(sinpi.(xplot) - uplot) < 2.e-3
+K = 4
+fv = UniformPeriodicReconstructedFV1D(balance_law, mesh, fnum, ModifiedENO(K), Val{:serial})
+u = compute_coefficients(sinpi, mesh, K)
+xplot, uplot = evaluate_coefficients(u, fv)
+@test norm(sinpi.(xplot) - uplot) < 2.e-4
+K = 5
+fv = UniformPeriodicReconstructedFV1D(balance_law, mesh, fnum, ModifiedENO(K), Val{:serial})
+u = compute_coefficients(sinpi, mesh, K)
+xplot, uplot = evaluate_coefficients(u, fv)
+@test norm(sinpi.(xplot) - uplot) < 7.e-6
+K = 6
+fv = UniformPeriodicReconstructedFV1D(balance_law, mesh, fnum, ModifiedENO(K), Val{:serial})
+u = compute_coefficients(sinpi, mesh, K)
+xplot, uplot = evaluate_coefficients(u, fv)
+@test norm(sinpi.(xplot) - uplot) < 5.e-7
+K = 7
+fv = UniformPeriodicReconstructedFV1D(balance_law, mesh, fnum, ModifiedENO(K), Val{:serial})
+u = compute_coefficients(sinpi, mesh, K)
+xplot, uplot = evaluate_coefficients(u, fv)
+@test norm(sinpi.(xplot) - uplot) < 3.e-8
+K = 8
+fv = UniformPeriodicReconstructedFV1D(balance_law, mesh, fnum, ModifiedENO(K), Val{:serial})
+u = compute_coefficients(sinpi, mesh, K)
+xplot, uplot = evaluate_coefficients(u, fv)
+@test norm(sinpi.(xplot) - uplot) < 2.e-9

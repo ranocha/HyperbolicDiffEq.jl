@@ -91,11 +91,6 @@ function evaluate_coefficients(u, balance_law, meshx::AbstractMesh1D,
     evaluate_coefficients!(xplot, uplot, u, balance_law, meshx, reconstruction)
 end
 
-function evaluate_coefficients(u, fv::UniformPeriodicReconstructedFV1D,
-                               npoints=2*order(fv.reconstruction))
-    evaluate_coefficients(u, fv.balance_law, fv.meshx, fv.reconstruction, npoints)
-end
-
 """
     evaluate_coefficients!(xplot, uplot, u, balance_law, mesh::AbstractMesh1D,
                            reconstruction::AbstractReconstruction)
