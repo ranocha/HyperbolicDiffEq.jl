@@ -126,7 +126,7 @@ export semidiscretise, max_dt
 
 # finite volume methods
 export FirstOrderFV, UniformPeriodicReconstructedFV1D
-export ModifiedENO, ClassicalChoiceENO,
+export ModifiedENO, ClassicalChoiceENO, BiasedENOChoice,
        MinL2Choice, BiasedMinL2Choice, LexMinLegendreChoice
 export GodunovFlux, LocalLaxFriedrichsFlux, HartenLaxVanLeerFlux, HLL, SuliciuFlux,
        KineticFlux

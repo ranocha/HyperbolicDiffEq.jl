@@ -61,7 +61,6 @@ uₐₙₐ = (t,x) -> sinpi(x-t)
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(7), Ns_hi, Val{:threads}()) > 6.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(8), Ns_hi, Val{:threads}()) > 7.5
 
-
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{1}(), MinL2Choice()), Ns_lo, Val{:serial}()) > 0.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{2}(), MinL2Choice()), Ns_lo, Val{:serial}()) > 1.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), MinL2Choice()), Ns_lo, Val{:serial}()) > 2.8
@@ -76,6 +75,23 @@ uₐₙₐ = (t,x) -> sinpi(x-t)
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), BiasedMinL2Choice()), Ns_lo, Val{:serial}()) > 2.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{4}(), BiasedMinL2Choice()), Ns_lo, Val{:serial}()) > 3.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{5}(), BiasedMinL2Choice()), Ns_lo, Val{:serial}()) > 4.8
+
+
+# Order reduction observed by Rogerson & Meiburg and Shu (1990).
+balance_law = ConstantLinearAdvection()
+tspan = (0., 1.)
+fnum = LocalLaxFriedrichsFlux()
+uₐₙₐ = (t,x) -> (sinpi(x-t)^2)^2
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{2}(), ClassicalChoiceENO()), Ns_lo, Val{:serial}()) > 1.6
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), ClassicalChoiceENO()), Ns_lo, Val{:serial}()) > 2.2
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{4}(), ClassicalChoiceENO()), Ns_lo, Val{:serial}()) < 2.2
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{5}(), ClassicalChoiceENO()), Ns_lo, Val{:serial}()) < 1.9
+
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{2}(), BiasedENOChoice()), Ns_lo, Val{:serial}()) > 1.6
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), BiasedENOChoice()), Ns_lo, Val{:serial}()) > 2.6
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{4}(), BiasedENOChoice()), Ns_lo, Val{:serial}()) > 3.4
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{5}(), BiasedENOChoice()), Ns_lo, Val{:serial}()) > 4.6
+
 
 
 # test evaluation

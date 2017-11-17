@@ -1422,6 +1422,146 @@ end
 ################################################################################
 
 """
+    BiasedENOChoice
+
+Biased choice of the stencil in an ENO reconstruction, minimising the absolute
+values of the divided differences lexicographically with a bias towards the
+central stencil(s).
+"""
+struct BiasedENOChoice end
+
+@inline function (::BiasedENOChoice)(u_m1, u_0, u_p1)
+    if abs(-u_m1 + u_0) < abs(-u_0 + u_p1)
+        idx = -1
+    else
+        idx = 0
+    end
+
+    idx
+end
+
+@inline function (::BiasedENOChoice)(u_m2, u_m1, u_0, u_p1, u_p2)
+    if abs(-u_m1 + u_0) < abs(-u_0 + u_p1)
+        if 2*abs(-2*u_m1 + u_m2 + u_0) < abs(u_m1 - 2*u_0 + u_p1)
+            idx = -2
+        else
+            idx = -1
+        end
+    else
+        if abs(u_m1 - 2*u_0 + u_p1) < 2*abs(u_0 - 2*u_p1 + u_p2)
+            idx = -1
+        else
+            idx = 0
+        end
+    end
+
+    idx
+end
+
+@inline function (::BiasedENOChoice)(u_m3, u_m2, u_m1, u_0, u_p1, u_p2, u_p3)
+    if abs(-u_m1 + u_0) < abs(-u_0 + u_p1)
+        if 2*abs(-2*u_m1 + u_m2 + u_0) < abs(u_m1 - 2*u_0 + u_p1)
+            if 2*abs(-3*u_m1 + 3*u_m2 - u_m3 + u_0) < abs(3*u_m1 - u_m2 - 3*u_0 + u_p1)
+                idx = -3
+            else
+                idx = -2
+            end
+        else
+            if abs(3*u_m1 - u_m2 - 3*u_0 + u_p1) < abs(-u_m1 + 3*u_0 - 3*u_p1 + u_p2)
+                idx = -2
+            else
+                idx = -1
+            end
+        end
+    else
+        if abs(u_m1 - 2*u_0 + u_p1) < 2*abs(u_0 - 2*u_p1 + u_p2)
+            if abs(3*u_m1 - u_m2 - 3*u_0 + u_p1) < abs(-u_m1 + 3*u_0 - 3*u_p1 + u_p2)
+                idx = -2
+            else
+                idx = -1
+            end
+        else
+            if abs(-u_m1 + 3*u_0 - 3*u_p1 + u_p2) < 2*abs(-u_0 + 3*u_p1 - 3*u_p2 + u_p3)
+                idx = -1
+            else
+                idx = 0
+            end
+        end
+    end
+
+    idx
+end
+
+@inline function (::BiasedENOChoice)(u_m4, u_m3, u_m2, u_m1, u_0, u_p1, u_p2, u_p3, u_p4)
+    if abs(-u_m1 + u_0) < abs(-u_0 + u_p1)
+        if 2*abs(-2*u_m1 + u_m2 + u_0) < abs(u_m1 - 2*u_0 + u_p1)
+            if 2*abs(-3*u_m1 + 3*u_m2 - u_m3 + u_0) < abs(3*u_m1 - u_m2 - 3*u_0 + u_p1)
+                if 2*abs(-4*u_m1 + 6*u_m2 - 4*u_m3 + u_m4 + u_0) < abs(6*u_m1 - 4*u_m2 + u_m3 - 4*u_0 + u_p1)
+                    idx = -4
+                else
+                    idx = -3
+                end
+            else
+                if 2*abs(6*u_m1 - 4*u_m2 + u_m3 - 4*u_0 + u_p1) < abs(-4*u_m1 + u_m2 + 6*u_0 - 4*u_p1 + u_p2)
+                    idx = -3
+                else
+                    idx = -2
+                end
+            end
+        else
+            if abs(3*u_m1 - u_m2 - 3*u_0 + u_p1) < abs(-u_m1 + 3*u_0 - 3*u_p1 + u_p2)
+                if 2*abs(6*u_m1 - 4*u_m2 + u_m3 - 4*u_0 + u_p1) < abs(-4*u_m1 + u_m2 + 6*u_0 - 4*u_p1 + u_p2)
+                    idx = -3
+                else
+                    idx = -2
+                end
+            else
+                if abs(-4*u_m1 + u_m2 + 6*u_0 - 4*u_p1 + u_p2) < 2*abs(u_m1 - 4*u_0 + 6*u_p1 - 4*u_p2 + u_p3)
+                    idx = -2
+                else
+                    idx = -1
+                end
+            end
+        end
+    else
+        if abs(u_m1 - 2*u_0 + u_p1) < 2*abs(u_0 - 2*u_p1 + u_p2)
+            if abs(3*u_m1 - u_m2 - 3*u_0 + u_p1) < abs(-u_m1 + 3*u_0 - 3*u_p1 + u_p2)
+                if 2*abs(6*u_m1 - 4*u_m2 + u_m3 - 4*u_0 + u_p1) < abs(-4*u_m1 + u_m2 + 6*u_0 - 4*u_p1 + u_p2)
+                    idx = -3
+                else
+                    idx = -2
+                end
+            else
+                if abs(-4*u_m1 + u_m2 + 6*u_0 - 4*u_p1 + u_p2) < 2*abs(u_m1 - 4*u_0 + 6*u_p1 - 4*u_p2 + u_p3)
+                    idx = -2
+                else
+                    idx = -1
+                end
+            end
+        else
+            if abs(-u_m1 + 3*u_0 - 3*u_p1 + u_p2) < 2*abs(-u_0 + 3*u_p1 - 3*u_p2 + u_p3)
+                if abs(-4*u_m1 + u_m2 + 6*u_0 - 4*u_p1 + u_p2) < 2*abs(u_m1 - 4*u_0 + 6*u_p1 - 4*u_p2 + u_p3)
+                    idx = -2
+                else
+                    idx = -1
+                end
+            else
+                if abs(u_m1 - 4*u_0 + 6*u_p1 - 4*u_p2 + u_p3) < 2*abs(u_0 - 4*u_p1 + 6*u_p2 - 4*u_p3 + u_p4)
+                    idx = -1
+                else
+                    idx = 0
+                end
+            end
+        end
+    end
+
+    idx
+end
+
+
+################################################################################
+
+"""
     MinL2Choice
 
 Choice of the stencil in a modified ENO reconstruction minimising the L² norm of
