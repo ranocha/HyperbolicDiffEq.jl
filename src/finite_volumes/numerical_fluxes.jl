@@ -158,6 +158,13 @@ struct EnergyConservativeFlux2Param{T} <: NumericalFlux
     a₂::T
 end
 
+doc"
+    L2L4ConservativeFlux
+
+A numerical flux conserving the $L^2 \cap L^4$ entropy U(U) = u^2/2 + u^4/4.
+"
+struct L2L4ConservativeFlux <: NumericalFlux end
+
 
 doc"
     CentralFlux

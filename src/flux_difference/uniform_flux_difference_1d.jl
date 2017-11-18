@@ -105,6 +105,11 @@ end
 end
 
 
+function evaluate_coefficients(u, semidisc::Union{UniformFluxDiffDisc1D,UniformPeriodicFluxDiffDisc1D})
+    evaluate_coefficients(u, semidisc.meshx, semidisc.basis)
+end
+
+
 function add_flux_differences!(du, u, semidisc::Union{UniformFluxDiffDisc1D,UniformPeriodicFluxDiffDisc1D})
     Nx  = size(u, 2)
     Pp1 = size(u, 1)

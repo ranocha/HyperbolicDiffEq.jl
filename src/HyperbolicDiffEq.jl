@@ -5,7 +5,7 @@ module HyperbolicDiffEq
 using Reexport
 
 @reexport using PolynomialBases
-import PolynomialBases: integrate
+import PolynomialBases: integrate, interpolate, interpolate!
 
 using Roots
 using Parameters
@@ -132,7 +132,8 @@ export GodunovFlux, LocalLaxFriedrichsFlux, HartenLaxVanLeerFlux, HLL, SuliciuFl
        KineticFlux
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
 export EnergyConservativeFlux, EnergyConservativeFlux1Param, EnergyConservativeFlux2Param,
-       IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP
+       IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP,
+       L2L4ConservativeFlux
 export FluxPlusDissipation, LocalLaxFriedrichsDissipation, ScalarDissipation,
        MatrixDissipation
 
