@@ -97,8 +97,8 @@ end
 
 
 function (flux::L2L4ConservativeFlux)(uₗ::T, uᵣ::T, model::Burgers{T,1}) where T<:Real
-    ( 9 * ((uᵣ^2)^2 + uᵣ^3*uₗ + uᵣ^2*uₗ^2 + uᵣ*uₗ^3 + (uₗ^2)^2) + 5 * (uᵣ^2 + uᵣ*uₗ + uₗ^2) ) /
-        ( 30 * ( 1 + uᵣ^2 + uᵣ*uₗ + uₗ^2 ) )
+    ( 18 * ((uᵣ^2)^2 + uᵣ^3*uₗ + uᵣ^2*uₗ^2 + uᵣ*uₗ^3 + (uₗ^2)^2) + 5 * (uᵣ^2 + uᵣ*uₗ + uₗ^2) ) /
+        ( 30 + 60 * (uᵣ^2 + uᵣ*uₗ + uₗ^2) )
 end
 
 
