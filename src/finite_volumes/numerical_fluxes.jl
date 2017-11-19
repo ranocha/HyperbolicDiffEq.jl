@@ -165,6 +165,38 @@ A numerical flux conserving the $L^2 \cap L^4$ entropy U(U) = u^2 + u^4.
 "
 struct L2L4ConservativeFlux <: NumericalFlux end
 
+doc"
+    L2L2sConservativeFlux
+
+A numerical flux conserving the $L^2 \cap L^{2s}$ entropy U(U) = u^2 + u^(2s).
+"
+struct L2L2sConservativeFlux{s} <: NumericalFlux
+    half_pow::Val{s}
+
+    function L2L2sConservativeFlux(half_pow::Val{s}) where s
+        @assert typeof(s) <: Integer && s >= 1
+        new{s}(half_pow)
+    end
+end
+
+
+"""
+    jump_pow_u_r_over_jump_u(uₗ, uᵣ, ::Val{r})
+
+Compute `(uᵣ^r - uₗ^r) / (uᵣ - uₗ)` for integer `r >= 2` via the expanded
+expression `uᵣ^(r-1) + rᵣ^(r-2)*uₗ + ... + uᵣ*uₗ^(r-2) + uₗ^(r-1)`.
+"""
+@generated function jump_pow_u_r_over_jump_u(uₗ, uᵣ, ::Val{r}) where r
+    @assert typeof(r) <: Integer && r >= 2
+    ex = :( Base.FastMath.pow_fast(uₗ, $r-1) )
+    ex = :( $ex + Base.FastMath.pow_fast(uᵣ, $r-1) )
+    for pₗ in Base.OneTo(r-2)
+        pᵣ = r-1 - pₗ
+        ex = :( $ex + Base.FastMath.pow_fast(uₗ, $pₗ) * Base.FastMath.pow_fast(uᵣ, $pᵣ) )
+    end
+    return :(Base.@_inline_meta; $ex)
+end
+
 
 doc"
     CentralFlux

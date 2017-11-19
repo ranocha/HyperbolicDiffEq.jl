@@ -96,9 +96,18 @@ function (flux::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Burgers{T,2}, d
 end
 
 
-function (flux::L2L4ConservativeFlux)(uₗ::T, uᵣ::T, model::Burgers{T,1}) where T<:Real
-    ( 18 * ((uᵣ^2)^2 + uᵣ^3*uₗ + uᵣ^2*uₗ^2 + uᵣ*uₗ^3 + (uₗ^2)^2) + 5 * (uᵣ^2 + uᵣ*uₗ + uₗ^2) ) /
-        ( 30 + 60 * (uᵣ^2 + uᵣ*uₗ + uₗ^2) )
+@inline function (flux::L2L4ConservativeFlux)(uₗ::T, uᵣ::T, model::Burgers{T,1}) where T<:Real
+    ( 18 * jump_pow_u_r_over_jump_u(uₗ, uᵣ, Val{5}()) + 5 * jump_pow_u_r_over_jump_u(uₗ, uᵣ, Val{3}()) ) /
+        ( 60 * jump_pow_u_r_over_jump_u(uₗ, uᵣ, Val{3}()) + 30 )
+end
+
+@generated function (flux::L2L2sConservativeFlux{s})(uₗ, uᵣ, model::Burgers{T,1}) where {s,T<:Real}
+    ex = :(
+        ( $(6s^2-3s) * jump_pow_u_r_over_jump_u(uₗ, uᵣ, Val{$(2s+1)}())
+        + $(2s+1) * jump_pow_u_r_over_jump_u(uₗ, uᵣ, Val{3}()) ) /
+            ( $(12s^2+6s) * jump_pow_u_r_over_jump_u(uₗ, uᵣ, Val{$(2s-1)}()) + $(12s+6) )
+    )
+    return :(Base.@_inline_meta; $ex)
 end
 
 

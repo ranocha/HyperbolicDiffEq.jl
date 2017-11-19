@@ -133,7 +133,7 @@ export GodunovFlux, LocalLaxFriedrichsFlux, HartenLaxVanLeerFlux, HLL, SuliciuFl
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
 export EnergyConservativeFlux, EnergyConservativeFlux1Param, EnergyConservativeFlux2Param,
        IsmailRoeFluxEC, ChandrashekarFluxEC, RanochaFluxECandKEP,
-       L2L4ConservativeFlux
+       L2L4ConservativeFlux, L2L2sConservativeFlux
 export FluxPlusDissipation, LocalLaxFriedrichsDissipation, ScalarDissipation,
        MatrixDissipation
 
