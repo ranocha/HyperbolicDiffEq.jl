@@ -52,6 +52,34 @@ end
 
 ################################################################################
 
+@inline function add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law::ConstantLinearAdvection,
+                                                    Nx, basis::GaussLegendre,
+                                                    jacx, parallel)
+    Pp1 = length(basis.nodes)
+    Rl = reshape(interpolation_matrix(-1, basis), Pp1)
+    Rr = reshape(interpolation_matrix(+1, basis), Pp1)
+    utmp = zeros(eltype(u), size(u,1))
+
+    # add numerical fluxes
+    @inbounds for ix in Base.OneTo(Nx)
+        for nx in 1:Pp1
+            utmp[nx] = u[nx,ix]
+        end
+        Rul = dot(Rl, utmp)
+        Rur = dot(Rr, utmp)
+
+        for nx in 1:Pp1
+            du[nx,ix] += ((fluxes[ix] - Rul) * Rl[nx] - (fluxes[ix+1] - Rur) * Rr[nx]
+                            ) * jacx / basis.weights[nx]
+        end
+    end
+
+    nothing
+end
+
+
+################################################################################
+
 """
     ConstantLinearAdvectionRiemannSolution{T,T1}
 
