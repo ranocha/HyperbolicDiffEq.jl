@@ -117,29 +117,31 @@ end
                                                     Nx, basis::GaussLegendre,
                                                     jacx, parallel)
     Pp1 = length(basis.nodes)
-    Rl = reshape(interpolation_matrix(-1, basis), Pp1)
-    Rr = reshape(interpolation_matrix(+1, basis), Pp1)
-    utmp = zeros(eltype(u), size(u,1))
+    Rl = basis.interp_left
+    Rr = basis.interp_right
     one_3 = 1 / 3
     one_6 = 1 / 6
 
     # add numerical fluxes
     @inbounds for ix in Base.OneTo(Nx)
-        for nx in 1:Pp1
-            utmp[nx] = u[nx,ix]
+        Rul = zero(eltype(u))
+        Rur = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            Rul += Rl[nx]*u[nx,ix]
+            Rur += Rr[nx]*u[nx,ix]
         end
-        Rul = dot(Rl, utmp)
-        Rur = dot(Rr, utmp)
-        for nx in 1:Pp1
-            utmp[nx] = u[nx,ix]^2
+        Ru2l = zero(eltype(u))
+        Ru2r = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            tmp = u[nx,ix]^2
+            Ru2l += Rl[nx]*tmp
+            Ru2r += Rr[nx]*tmp
         end
-        Ru2l = dot(Rl, utmp)
-        Ru2r = dot(Rr, utmp)
 
         #@. du[:,ix] += ((fluxes[ix] - one_3 * Ru2l - one_6 * Rul^2) * Rl
         #                - (fluxes[ix+1] - one_3 * Ru2r - one_6 * Rur^2) * Rr
         #                ) * jacx / basis.weights
-        for nx in 1:Pp1
+        for nx in Base.OneTo(Pp1)
             du[nx,ix] += ((fluxes[ix] - one_3 * Ru2l - one_6 * Rul^2) * Rl[nx]
                             - (fluxes[ix+1] - one_3 * Ru2r - one_6 * Rur^2) * Rr[nx]
                             ) * jacx / basis.weights[nx]

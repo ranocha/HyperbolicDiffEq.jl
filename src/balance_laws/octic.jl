@@ -71,56 +71,70 @@ end
                                                     Nx, basis::GaussLegendre,
                                                     jacx, parallel)
     Pp1 = length(basis.nodes)
-    Rl = reshape(interpolation_matrix(-1, basis), Pp1)
-    Rr = reshape(interpolation_matrix(+1, basis), Pp1)
-    utmp = zeros(eltype(u), size(u,1))
+    Rl = basis.interp_left
+    Rr = basis.interp_right
     one_9 = 1 / 9
     two_9 = 2 / 9
 
     # add numerical fluxes
     @inbounds for ix in Base.OneTo(Nx)
-        for nx in 1:Pp1
-            utmp[nx] = u[nx,ix]
+        Rul = zero(eltype(u))
+        Rur = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            Rul += Rl[nx]*u[nx,ix]
+            Rur += Rr[nx]*u[nx,ix]
         end
-        Rul = dot(Rl, utmp)
-        Rur = dot(Rr, utmp)
-        for nx in 1:Pp1
-            utmp[nx] = u[nx,ix]^2
+        Ru2l = zero(eltype(u))
+        Ru2r = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            tmp = u[nx,ix]^2
+            Ru2l += Rl[nx]*tmp
+            Ru2r += Rr[nx]*tmp
         end
-        Ru2l = dot(Rl, utmp)
-        Ru2r = dot(Rr, utmp)
-        for nx in 1:Pp1
-            utmp[nx] = u[nx,ix]^3
+        Ru3l = zero(eltype(u))
+        Ru3r = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            tmp = u[nx,ix]^3
+            Ru3l += Rl[nx]*tmp
+            Ru3r += Rr[nx]*tmp
         end
-        Ru3l = dot(Rl, utmp)
-        Ru3r = dot(Rr, utmp)
-        for nx in 1:Pp1
-            utmp[nx] = (u[nx,ix]^2)^2
+        Ru4l = zero(eltype(u))
+        Ru4r = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            tmp = (u[nx,ix]^2)^2
+            Ru4l += Rl[nx]*tmp
+            Ru4r += Rr[nx]*tmp
         end
-        Ru4l = dot(Rl, utmp)
-        Ru4r = dot(Rr, utmp)
-        for nx in 1:Pp1
-            utmp[nx] = u[nx,ix]^3*u[nx,ix]^2
+        Ru5l = zero(eltype(u))
+        Ru5r = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            tmp = u[nx,ix]^2*u[nx,ix]^3
+            Ru5l += Rl[nx]*tmp
+            Ru5r += Rr[nx]*tmp
         end
-        Ru5l = dot(Rl, utmp)
-        Ru5r = dot(Rr, utmp)
-        for nx in 1:Pp1
-            utmp[nx] = (u[nx,ix]^3)^2
+        Ru6l = zero(eltype(u))
+        Ru6r = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            tmp = (u[nx,ix]^3)^2
+            Ru6l += Rl[nx]*tmp
+            Ru6r += Rr[nx]*tmp
         end
-        Ru6l = dot(Rl, utmp)
-        Ru6r = dot(Rr, utmp)
-        for nx in 1:Pp1
-            utmp[nx] = u[nx,ix]^3*(u[nx,ix]^2)^2
+        Ru7l = zero(eltype(u))
+        Ru7r = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            tmp = (u[nx,ix]^3)^2*u[nx,ix]
+            Ru7l += Rl[nx]*tmp
+            Ru7r += Rr[nx]*tmp
         end
-        Ru7l = dot(Rl, utmp)
-        Ru7r = dot(Rr, utmp)
-        for nx in 1:Pp1
-            utmp[nx] = ((u[nx,ix]^2)^2)^2
+        Ru8l = zero(eltype(u))
+        Ru8r = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            tmp = ((u[nx,ix]^2)^2)^2
+            Ru8l += Rl[nx]*tmp
+            Ru8r += Rr[nx]*tmp
         end
-        Ru8l = dot(Rl, utmp)
-        Ru8r = dot(Rr, utmp)
 
-        for nx in 1:Pp1
+        for nx in Base.OneTo(Pp1)
             du[nx,ix] += (  (fluxes[ix  ]   - two_9 * Ru8l
                                             - two_9 * u[nx,ix] * Ru7l
                                             - two_9 * u[nx,ix]^2 * Ru6l

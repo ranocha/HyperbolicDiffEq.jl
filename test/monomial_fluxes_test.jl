@@ -47,7 +47,9 @@ function compute_solution(balance_law, p, N, basis_type, fvol_type, fnum_type, c
                                             GodunovFlux(), zero, zero, parallel)
     end
 
-    if typeof(balance_law) <: Burgers
+    if typeof(balance_law) <: ConstantLinearAdvection
+        tspan = (0., 1.0)
+    elseif typeof(balance_law) <: Burgers
         tspan = (0., 0.3)
     elseif typeof(balance_law) <: Cubic
         tspan = (0., 0.1)
@@ -89,6 +91,31 @@ function mass_and_energy_differences(balance_law, basis_type, cfl)
 
     mass_diff, ener_diff
 end
+
+mass_diff, ener_diff = mass_and_energy_differences(ConstantLinearAdvection(), :LobattoLegendre, 0.9)
+@test abs(mass_diff) < 10*eps()
+@test ener_diff < 5.e-8
+mass_diff, ener_diff = mass_and_energy_differences(ConstantLinearAdvection(), :LobattoLegendre, 0.09)
+@test abs(mass_diff) < 10*eps()
+@test ener_diff < 5.e-12
+mass_diff, ener_diff = mass_and_energy_differences(ConstantLinearAdvection(), :GaussLegendre, 0.9)
+@test abs(mass_diff) < 10*eps()
+@test ener_diff < 5.e-8
+mass_diff, ener_diff = mass_and_energy_differences(ConstantLinearAdvection(), :GaussLegendre, 0.09)
+@test abs(mass_diff) < 10*eps()
+@test ener_diff < 5.e-12
+sol_serial, _  = compute_solution(ConstantLinearAdvection(), 4, 20, :LobattoLegendre, :EC, :EC, 0.9, UniformPeriodicMesh1D, Val{:serial}())
+sol_threads, _ = compute_solution(ConstantLinearAdvection(), 4, 20, :LobattoLegendre, :EC, :EC, 0.9, UniformPeriodicMesh1D, Val{:threads}())
+@test norm(sol_serial[end] - sol_threads[end], Inf) < 10*eps()
+sol_serial, _  = compute_solution(ConstantLinearAdvection(), 4, 20, :LobattoLegendre, :EC, :EC, 0.9, UniformMesh1D, Val{:serial}())
+sol_threads, _ = compute_solution(ConstantLinearAdvection(), 4, 20, :LobattoLegendre, :EC, :EC, 0.9, UniformMesh1D, Val{:threads}())
+@test norm(sol_serial[end] - sol_threads[end], Inf) < 10*eps()
+sol_serial, _  = compute_solution(ConstantLinearAdvection(), 4, 20, :GaussLegendre, :EC, :EC, 0.9, UniformPeriodicMesh1D, Val{:serial}())
+sol_threads, _ = compute_solution(ConstantLinearAdvection(), 4, 20, :GaussLegendre, :EC, :EC, 0.9, UniformPeriodicMesh1D, Val{:threads}())
+@test norm(sol_serial[end] - sol_threads[end], Inf) < 10*eps()
+sol_serial, _  = compute_solution(ConstantLinearAdvection(), 4, 20, :GaussLegendre, :EC, :EC, 0.9, UniformMesh1D, Val{:serial}())
+sol_threads, _ = compute_solution(ConstantLinearAdvection(), 4, 20, :GaussLegendre, :EC, :EC, 0.9, UniformMesh1D, Val{:threads}())
+@test norm(sol_serial[end] - sol_threads[end], Inf) < 10*eps()
 
 mass_diff, ener_diff = mass_and_energy_differences(Burgers(), :LobattoLegendre, 0.9)
 @test abs(mass_diff) < 10*eps()

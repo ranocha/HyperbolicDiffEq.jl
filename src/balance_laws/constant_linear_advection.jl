@@ -49,6 +49,10 @@ function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::ConstantLinearAdvection{T,1
     uₗ
 end
 
+function (flux::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::ConstantLinearAdvection{T,1}) where T<:Real
+    (uₗ + uᵣ) / 2
+end
+
 
 ################################################################################
 
@@ -56,19 +60,19 @@ end
                                                     Nx, basis::GaussLegendre,
                                                     jacx, parallel)
     Pp1 = length(basis.nodes)
-    Rl = reshape(interpolation_matrix(-1, basis), Pp1)
-    Rr = reshape(interpolation_matrix(+1, basis), Pp1)
-    utmp = zeros(eltype(u), size(u,1))
+    Rl = basis.interp_left
+    Rr = basis.interp_right
 
     # add numerical fluxes
     @inbounds for ix in Base.OneTo(Nx)
-        for nx in 1:Pp1
-            utmp[nx] = u[nx,ix]
+        Rul = zero(eltype(u))
+        Rur = zero(eltype(u))
+        for nx in Base.OneTo(Pp1)
+            Rul += Rl[nx]*u[nx,ix]
+            Rur += Rr[nx]*u[nx,ix]
         end
-        Rul = dot(Rl, utmp)
-        Rur = dot(Rr, utmp)
 
-        for nx in 1:Pp1
+        for nx in Base.OneTo(Pp1)
             du[nx,ix] += ((fluxes[ix] - Rul) * Rl[nx] - (fluxes[ix+1] - Rur) * Rr[nx]
                             ) * jacx / basis.weights[nx]
         end
