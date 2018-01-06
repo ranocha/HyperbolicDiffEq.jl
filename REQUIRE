@@ -3,6 +3,7 @@ julia 0.6
 PolynomialBases 0.3.1
 
 Roots
+ArgCheck
 Reexport
 Parameters
 StaticArrays

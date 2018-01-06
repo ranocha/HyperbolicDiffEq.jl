@@ -43,6 +43,16 @@ tspan = (0., 1.)
 fnum = LocalLaxFriedrichsFlux()
 uₐₙₐ = (t,x) -> sinpi(x-t)
 
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(1), Ns_lo, Val{:serial}()) > 0.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(3), Ns_lo, Val{:serial}()) > 2.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(5), Ns_lo, Val{:serial}()) > 4.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(7), Ns_hi, Val{:serial}()) > 6.8
+
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(1), Ns_lo, Val{:threads}()) > 0.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(3), Ns_lo, Val{:threads}()) > 2.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(5), Ns_lo, Val{:threads}()) > 4.8
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(7), Ns_hi, Val{:threads}()) > 6.8
+
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(1), Ns_lo, Val{:serial}()) > 0.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(2), Ns_lo, Val{:serial}()) > 1.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(3), Ns_lo, Val{:serial}()) > 2.8
