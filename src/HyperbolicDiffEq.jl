@@ -5,7 +5,9 @@ module HyperbolicDiffEq
 using Reexport
 
 @reexport using PolynomialBases
-import PolynomialBases: integrate, interpolate, interpolate!
+import PolynomialBases: integrate, interpolate, interpolate!,
+                        compute_coefficients, compute_coefficients!,
+                        evaluate_coefficients, evaluate_coefficients!
 
 using Roots
 using ArgCheck
