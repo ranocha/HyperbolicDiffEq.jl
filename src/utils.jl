@@ -67,6 +67,10 @@ function integrate(u::AbstractArray{U,1}, meshx::AbstractMesh1D) where U
     integrate(identity, u, meshx)
 end
 
+function integrate(func, u, fv::UniformPeriodicReconstructedFV1D)
+    integrate(func, u, fv.meshx)
+end
+
 
 """
     integrate(func, u::AbstractArray{U,2}, meshx::AbstractMesh1D, basis::NodalBasis)
