@@ -353,6 +353,10 @@ function semidiscretise(semidisc::Union{UniformFluxDiffDisc1D, UniformPeriodicFl
     ODEProblem(semidisc, u₀, tspan)
 end
 
+function integrate(func, u, semidisc::Union{UniformFluxDiffDisc1D, UniformPeriodicFluxDiffDisc1D})
+    integrate(func, u, semidisc.meshx, semidisc.basis)
+end
+
 """
     max_dt(t, u, semidisc::UniformFluxDiffDisc1D, cfl)
 
