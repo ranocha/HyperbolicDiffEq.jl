@@ -1,4 +1,9 @@
 
+# general fallback
+function logmean(a, b)
+    (a-b) / (log(a/b))
+end
+
 """
     logmean(a::Real, b::Real)
 

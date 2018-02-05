@@ -114,8 +114,8 @@ function (fvol::EnergyConservativeFlux)(uₗ::KeyfitzKranzerVar, uᵣ::KeyfitzKr
     U = (U₋ + U₊) / 2
     Ulog = logmean(U₋, U₊)
 
-    fnum_u1 = ( 5*u1₊^2 + 2*u1₋*u1₊ + u1₋^2) / 12 - (u2₋ + u2₊) / 2
-    fnum_u2 = u1 * fnum_u1 - (u1₋^3 + u1₊^3) / 3 - (u1₋*u2₋ + u1₊*u2₊) / 2 - u1 * U / Ulog
+    fnum_u1 = ( 5*u1₊^2 + 2*u1₋*u1₊ + 5*u1₋^2) / 12 - (u2₋ + u2₊) / 2
+    fnum_u2 = u1 * fnum_u1 - (u1₋^3 + u1₊^3) / 3 + (u1₋*u2₋ + u1₊*u2₊) / 2 - u1 * U / Ulog
 
     SVector(fnum_u1, fnum_u2)
 end
