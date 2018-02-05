@@ -103,6 +103,7 @@ include("balance_laws/octic.jl")
 include("balance_laws/buckley_leverette.jl")
 include("balance_laws/shallow_water.jl")
 include("balance_laws/euler.jl")
+include("balance_laws/keyfitz_kranzer.jl")
 
 include("utils.jl")
 
@@ -113,6 +114,7 @@ export ConstantLinearAdvection, Burgers, IntegralQuantitiesBurgers,
        BuckleyLeverette
 export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar1D, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
+export KeyfitzKranzer, KeyfitzKranzerVar, IntegralQuantitiesKeyfitzKranzer
 
 export flux, max_abs_speed, naive_max_abs_speed, variables, kinetic_energy,
        entropy, conserved_variables, primitive_variables, entropy_variables,
