@@ -40,11 +40,11 @@ end
 
 
 """
-    (fv::FirstOrderFV)(t, u, du)
+    (fv::FirstOrderFV)(du, u, p, t)
 
 Apply a first order finite volume semidiscretisation.
 """
-function (fv::FirstOrderFV)(t, u, du)
+function (fv::FirstOrderFV)(du, u, p, t)
   @boundscheck begin
     if length(u) != length(du)
       error("length(u) = $(length(u)) != $(length(du)) = length(du)")

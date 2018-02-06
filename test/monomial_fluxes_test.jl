@@ -1,6 +1,6 @@
 using Base.Test, OrdinaryDiffEq, HyperbolicDiffEq, DiffEqCallbacks
 
-function save_func(t, u, integrator)
+function save_func(u, t, integrator)
     meshx = integrator.f.meshx
     basis = integrator.f.basis
     balance_law = integrator.f.balance_law
@@ -67,15 +67,15 @@ function compute_solution(balance_law, p, N, basis_type, fvol_type, fnum_type, c
         error("Balance law $balance_law not supported.")
     end
 
-    u₀= sinpi
+    u₀ = sinpi
 
     ode = semidiscretise(semidisc, u₀, tspan)
     tstops = linspace(tspan[1], tspan[end], 2)
-    maxdt = (t,u) -> max_dt(t, u, semidisc, cfl)
+    maxdt = (u,p,t) -> max_dt(t, u, semidisc, cfl)
     saved_values = SavedValues(Vector{Float64}(), Vector{IntegralQuantitiesBurgers{Float64}}())
     cb = CallbackSet(StepsizeLimiter(maxdt), SavingCallback(save_func, saved_values))
-    sol = solve(ode, SSPRK104(), dt=maxdt(tspan[1],ode.u0), saveat=tstops, tstops=tstops, dense=false,
-                  callback=cb)
+    sol = solve(ode, SSPRK104(), dt=maxdt(ode.u0,nothing,tspan[1]), saveat=tstops, tstops=tstops,
+                dense=false, callback=cb)
     sol, saved_values
 end
 

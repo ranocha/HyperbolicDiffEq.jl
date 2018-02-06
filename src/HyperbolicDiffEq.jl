@@ -19,7 +19,6 @@ using RecipesBase
 using LaTeXStrings
 
 @reexport using DiffEqBase
-@reexport using DiffEqPDEBase
 
 # interfaces
 import DiffEqBase: solve
@@ -45,12 +44,12 @@ An abstract type representing a scalar balance law using `T` as real type in
 `Dim` space dimensions.
 """
 abstract type ScalarBalanceLaw{T,Dim} <: AbstractBalanceLaw{Dim} end
-variables{T,Dim}(model::ScalarBalanceLaw{T,Dim}) = T
+variables(model::ScalarBalanceLaw{T}) where {T} = T
 
 """
 An abstract type representing a Riemann problem.
 """
-abstract type AbstractRiemannProblem <: PDEProblem end
+abstract type AbstractRiemannProblem end
 
 """
 An abstract type representing the solution of a Riemann problem.

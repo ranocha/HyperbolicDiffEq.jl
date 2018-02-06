@@ -12,5 +12,4 @@ MappedArrays
 RecipesBase
 LaTeXStrings
 
-DiffEqBase
-DiffEqPDEBase
+DiffEqBase 3.0.4
