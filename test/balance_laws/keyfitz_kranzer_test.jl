@@ -16,7 +16,7 @@ function runtest()
     balance_law = KeyfitzKranzer()
     fvol = EnergyConservativeFlux()
     fnum = FluxPlusDissipation(EnergyConservativeFlux(), LocalLaxFriedrichsDissipation())
-    semidisc = UniformPeriodicFluxDiffDisc1D(balance_law, mesh, basis, fvol, fnumint, fnumext, bcleft, bcright)
+    semidisc = UniformPeriodicFluxDiffDisc1D(balance_law, mesh, basis, fvol, fnum)
     ode = semidiscretise(semidisc, u0func, tspan)
 
     save_func = (u,t,integrator) -> integrate(u->IntegralQuantitiesKeyfitzKranzer(u,balance_law), u, integrator.f)
