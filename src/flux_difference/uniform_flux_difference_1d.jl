@@ -34,7 +34,7 @@ function UniformFluxDiffDisc1D(balance_law, meshx, basis, fvol, fnumint, fnumext
                             left_bc, right_bc, fluxes, parallel)
 end
 
-@noinline function (semidisc::UniformFluxDiffDisc1D)(t, u, du)
+@noinline function (semidisc::UniformFluxDiffDisc1D)(du, u, p, t)
   @boundscheck begin
     if size(u) != size(du)
       error("size(u) = $(size(u)) != $(size(du)) = size(du)")
@@ -85,7 +85,7 @@ function UniformPeriodicFluxDiffDisc1D(balance_law, meshx, basis, fvol, fnumint,
                                     fluxes, parallel)
 end
 
-@noinline function (semidisc::UniformPeriodicFluxDiffDisc1D)(t, u, du)
+@noinline function (semidisc::UniformPeriodicFluxDiffDisc1D)(du, u, p, t)
   @boundscheck begin
     if size(u) != size(du)
       error("size(u) = $(size(u)) != $(size(du)) = size(du)")

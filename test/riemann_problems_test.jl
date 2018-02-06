@@ -217,7 +217,7 @@ end
 ################################################################################
 
 # Euler equations
-model = Euler()
+model = HyperbolicDiffEq.Euler()
 
 # intermediate values
 # Toro (2009), Riemann Solvers and Numerical Methods for Fluid Dynamics,

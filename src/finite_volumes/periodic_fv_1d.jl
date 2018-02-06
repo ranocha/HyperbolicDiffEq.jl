@@ -45,7 +45,7 @@ function evaluate_coefficients(u, fv::UniformPeriodicReconstructedFV1D,
 end
 
 
-@noinline function (semidisc::UniformPeriodicReconstructedFV1D)(t, u, du)
+@noinline function (semidisc::UniformPeriodicReconstructedFV1D)(du, u, p, t)
     @boundscheck begin
         if size(u) != size(du)
             error("size(u) = $(size(u)) != $(size(du)) = size(du)")
