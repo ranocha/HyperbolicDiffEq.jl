@@ -63,9 +63,9 @@ end
 end
 
 @inline function max_abs_speed(u::KeyfitzKranzerVar, model::KeyfitzKranzer)
-  @unpack u1, u2 = u
+  @unpack u1 = u
 
-  abs(u1) + 1
+  ifelse(u1 < 0, u1-1, u1+1)
 end
 
 #= TODO: Estimate the maximal speed in the solution of the Riemann problem with
