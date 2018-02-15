@@ -59,7 +59,7 @@ end
 ################################################################################
 
 @inline function add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law::Cubic,
-                                                    Nx, basis::GaussLegendre,
+                                                    Nx, basis, boundaries_included::Val{false},
                                                     jacx, parallel)
     Pp1 = length(basis.nodes)
     Rl = basis.interp_left

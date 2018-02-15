@@ -184,13 +184,15 @@ function add_numerical_fluxes!(du, u, semidisc::UniformFluxDiffDisc1D, t)
     jacx = 2 / semidisc.meshx.Δx
 
     add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law, fnumint,
-                                        fnumext, left_bc, right_bc, Nx, basis, jacx, parallel)
-    add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, Nx, basis, jacx, parallel)
+                                        fnumext, left_bc, right_bc, Nx, basis,
+                                        includes_boundaries(basis), jacx, parallel)
+    add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, Nx, basis, 
+                                        includes_boundaries(basis), jacx, parallel)
 end
 
 @inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
                                                     fnumint, fnumext, left_bc, right_bc,
-                                                    Nx, basis::LobattoLegendre,
+                                                    Nx, basis, boundaries_included::Val{true},
                                                     jacx, parallel)
     # calculate external numerical fluxes
     @inbounds fluxes[1] = fnumext(left_bc(t), u[1,1], balance_law)
@@ -206,7 +208,7 @@ end
 end
 @inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
                                                     fnumint, fnumext, left_bc, right_bc,
-                                                    Nx, basis::LobattoLegendre,
+                                                    Nx, basis, boundaries_included::Val{true},
                                                     jacx, parallel::Val{:threads})
     # calculate external numerical fluxes
     @inbounds fluxes[1] = fnumext(left_bc(t), u[1,1], balance_law)
@@ -222,7 +224,8 @@ end
 end
 @inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
                                                     fnumint, fnumext, left_bc, right_bc,
-                                                    Nx, basis, jacx, parallel)
+                                                    Nx, basis, boundaries_included::Val{false},
+                                                    jacx, parallel)
     # calculate external numerical fluxes
     @views @inbounds fluxes[1] = fnumext(left_bc(t), interpolate(-1, u[:,1], basis), balance_law)
     @views @inbounds fluxes[end] = fnumext(interpolate(1, u[:,end], basis), right_bc(t), balance_law)
@@ -239,7 +242,7 @@ end
 end
 
 @inline function add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law,
-                                                    Nx, basis::LobattoLegendre,
+                                                    Nx, basis, boundaries_included::Val{true},
                                                     jacx, parallel)
     @inbounds i_ω1 = 1 / basis.weights[1]
     @inbounds i_ωend = 1 / basis.weights[end]
@@ -260,7 +263,7 @@ end
     nothing
 end
 @inline function add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law,
-                                                    Nx, basis::LobattoLegendre,
+                                                    Nx, basis, boundaries_included::Val{true},
                                                     jacx, parallel::Val{:threads})
     @inbounds i_ω1 = 1 / basis.weights[1]
     @inbounds i_ωend = 1 / basis.weights[end]
@@ -293,12 +296,14 @@ function add_numerical_fluxes!(du, u, semidisc::UniformPeriodicFluxDiffDisc1D, t
     jacx = 2 / semidisc.meshx.Δx
 
     add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law, fnumint,
-                                        Nx, basis, jacx, parallel)
-    add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, Nx, basis, jacx, parallel)
+                                        Nx, basis, includes_boundaries(basis),
+                                        jacx, parallel)
+    add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, Nx, basis,
+                                        includes_boundaries(basis),jacx, parallel)
 end
 
 @inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
-                                                    fnumint, Nx, basis::LobattoLegendre,
+                                                    fnumint, Nx, basis, boundaries_included::Val{true},
                                                     jacx, parallel)
     # calculate boundary numerical fluxes
     @inbounds fluxes[1] = fluxes[end] = fnumint(u[end,end], u[1,1], balance_law)
@@ -312,7 +317,7 @@ end
     nothing
 end
 @inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
-                                                    fnumint, Nx, basis::LobattoLegendre,
+                                                    fnumint, Nx, basis, boundaries_included::Val{true},
                                                     jacx, parallel::Val{:threads})
     # calculate boundary numerical fluxes
     @inbounds fluxes[1] = fluxes[end] = fnumint(u[end,end], u[1,1], balance_law)
@@ -326,7 +331,8 @@ end
     nothing
 end
 @inline function add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law,
-                                                    fnumint, Nx, basis, jacx, parallel)
+                                                    fnumint, Nx, basis, boundaries_included::Val{false},
+                                                    jacx, parallel)
     # calculate external numerical fluxes
     @views @inbounds fluxes[1] = fluxes[end] = fnumint(interpolate(+1, u[:,end], basis),
                                                        interpolate(-1, u[:,1], basis),
