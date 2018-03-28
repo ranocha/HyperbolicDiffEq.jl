@@ -121,3 +121,8 @@ function max_dt(t, u, fv::FirstOrderFV, cfl=0.5)
     end
     cfl * dt
 end
+
+
+function integrate(func, u, fv::FirstOrderFV)
+    integrate(func, u, fv.mesh)
+end
