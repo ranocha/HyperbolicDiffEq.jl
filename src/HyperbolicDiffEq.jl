@@ -87,6 +87,8 @@ include("finite_volumes/reconstructions.jl")
 include("finite_volumes/modified_eno.jl")
 include("finite_volumes/central_reconstruction.jl")
 
+include("tecno/tecno.jl")
+
 include("flux_difference/uniform_flux_difference.jl")
 include("flux_difference/uniform_flux_difference_1d.jl")
 
@@ -130,7 +132,7 @@ export evaluate_coefficients, evaluate_coefficients!
 export semidiscretise, max_dt
 
 # finite volume methods
-export FirstOrderFV, UniformPeriodicReconstructedFV1D
+export FirstOrderFV, UniformPeriodicReconstructedFV1D, ScalarUniformPeriodicTecno1D
 export CentralReconstruction
 export ModifiedENO, ClassicalChoiceENO, BiasedENOChoice,
        MinL2Choice, BiasedMinL2Choice, LexMinLegendreChoice
