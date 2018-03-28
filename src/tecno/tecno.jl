@@ -1,12 +1,14 @@
 
 struct ScalarUniformPeriodicTecno1D{BalanceLaw, T, Fnum, Diss, Reconstruction,
-                                    EntropyVar, EdgeEntropyVar, Fluxes, Parallel} <: FiniteVolumeSemidiscretisation
+                                    ComputeEntropyVar, EntropyVar, EdgeEntropyVar, 
+                                    Fluxes, Parallel} <: FiniteVolumeSemidiscretisation
     balance_law::BalanceLaw
     meshx::UniformPeriodicMesh1D{T}
     fnum::Fnum
     diss::Diss
     reconstruction::Reconstruction
 
+    compute_entropy_var::ComputeEntropyVar
     entropy_var::EntropyVar
     edge_entropy_var::EdgeEntropyVar
     fluxes::Fluxes
@@ -15,25 +17,26 @@ struct ScalarUniformPeriodicTecno1D{BalanceLaw, T, Fnum, Diss, Reconstruction,
     function ScalarUniformPeriodicTecno1D(
             balance_law::BalanceLaw, meshx::UniformPeriodicMesh1D{T},
             fnum::Fnum, diss::Diss, reconstruction::Reconstruction,
+            compute_entropy_var::ComputeEntropyVar,
             entropy_var::EntropyVar, edge_entropy_var::EdgeEntropyVar,
-            fluxes::Fluxes, parallel::Parallel) where {BalanceLaw, T, Fnum, Diss, Reconstruction, EntropyVar, EdgeEntropyVar, Fluxes, Parallel}
+            fluxes::Fluxes, parallel::Parallel) where {BalanceLaw, T, Fnum, Diss, Reconstruction, ComputeEntropyVar, EntropyVar, EdgeEntropyVar, Fluxes, Parallel}
         @assert typeof(fluxes) <: AbstractArray{variables(balance_law), 1}
         @assert typeof(entropy_var) <: AbstractArray{variables(balance_law), 1}
         @assert typeof(edge_entropy_var) <: AbstractArray{variables(balance_law), 2}
         @assert size(fluxes, 1) == size(entropy_var, 1) == size(edge_entropy_var, 2) == numcells(meshx)
         @assert size(edge_entropy_var, 1) == 2
-        new{BalanceLaw, T, Fnum, Diss, Reconstruction, EntropyVar, EdgeEntropyVar, Fluxes, Parallel}(
-            balance_law, meshx, fnum, diss, reconstruction, entropy_var, edge_entropy_var, fluxes, parallel)
+        new{BalanceLaw, T, Fnum, Diss, Reconstruction, ComputeEntropyVar, EntropyVar, EdgeEntropyVar, Fluxes, Parallel}(
+            balance_law, meshx, fnum, diss, reconstruction, compute_entropy_var, entropy_var, edge_entropy_var, fluxes, parallel)
     end
 end
 
 function ScalarUniformPeriodicTecno1D(balance_law, meshx, fnum, diss, reconstruction,
-                                      parallel=Val{:serial}())
+                                      compute_entropy_var, parallel=Val{:serial}())
     fluxes = Array{variables(balance_law)}(numcells(meshx))
     entropy_var = Array{variables(balance_law)}(numcells(meshx))
     edge_entropy_var = Array{variables(balance_law)}(2, numcells(meshx))
     ScalarUniformPeriodicTecno1D(balance_law, meshx, fnum, diss, reconstruction,
-                                 entropy_var, edge_entropy_var, fluxes, parallel)
+                                 compute_entropy_var, entropy_var, edge_entropy_var, fluxes, parallel)
 end
 
 function Base.show(io::IO, fv::ScalarUniformPeriodicTecno1D)
@@ -70,10 +73,10 @@ end
 end
 
 function add_numerical_fluxes!(du, u, fv::ScalarUniformPeriodicTecno1D, t)
-    @unpack balance_law, meshx, fnum, diss, reconstruction, entropy_var, edge_entropy_var, fluxes, parallel = fv
+    @unpack balance_law, meshx, fnum, diss, reconstruction, compute_entropy_var, entropy_var, edge_entropy_var, fluxes, parallel = fv
 
     # L² entropy
-    entropy_var .= u
+    entropy_var .= compute_entropy_var.(u, balance_law)
     reconstruct!(edge_entropy_var, entropy_var, balance_law, meshx, reconstruction, stencil_width_val(reconstruction), parallel)
     compute_EC_fluxes!(fluxes, u, balance_law, meshx, fnum, stencil_width_val(reconstruction), parallel)
     compute_ES_fluxes!(fluxes, edge_entropy_var, balance_law, meshx, diss, parallel)
