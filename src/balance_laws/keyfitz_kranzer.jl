@@ -1,14 +1,14 @@
 
-doc"
+"""
     KeyfitzKranzer{T<:Real}
 
 The Keyfitz-Kranzer system
-$$
-    \partial_t u_1 + \partial_x (u_1^3 - u_2) = 0,
-    \partial_t u_2 + \partial_x (\frac{1}{3}u_2^3 - u_1) = 0,
-$$
+\$\$
+    \\partial_t u_1 + \\partial_x (u_1^3 - u_2) = 0,
+    \\partial_t u_2 + \\partial_x (\\frac{1}{3}u_2^3 - u_1) = 0,
+\$\$
 using `T` as scalar type.
-"
+"""
 struct KeyfitzKranzer{T} <: AbstractBalanceLaw{1} end
 
 KeyfitzKranzer(::Type{T}=Float64) where {T} = KeyfitzKranzer{T}()
@@ -26,11 +26,11 @@ struct KeyfitzKranzerVar{T} <: FieldVector{2,T}
   u2::T
 end
 
-function (::Type{KeyfitzKranzerVar{T}}){T}(val::Real)
+function (::Type{KeyfitzKranzerVar{T}})(val::Real) where {T}
   KeyfitzKranzerVar{T}(val, val)
 end
 
-function similar_type{T}(::KeyfitzKranzerVar{T})
+function similar_type(::KeyfitzKranzerVar{T}) where {T}
   KeyfitzKranzerVar{T}
 end
 

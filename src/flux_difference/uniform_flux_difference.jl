@@ -303,7 +303,7 @@ function max_dt(t, u, semidisc::UniformPeriodicFluxDiffDisc2D, cfl=0.5)
     p = length(basis.nodes)-1
     factor = Δx / (2p+1)
 
-    dt = mapreduce(u->factor/max_abs_speed(u, balance_law), min, typemax(t), u)
+    dt = mapreduce(u->factor/max_abs_speed(u, balance_law), min, u, init=typemax(t))
     if dt == Inf
         dt = factor
     end

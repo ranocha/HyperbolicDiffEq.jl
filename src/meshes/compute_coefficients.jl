@@ -104,7 +104,7 @@ function evaluate_coefficients!(xplot, uplot, u, balance_law, meshx::AbstractMes
     npoints = length(xplot) ÷ numcells(meshx)
     @assert length(uplot) == npoints*numcells(meshx)
 
-    ξ = linspace(0+eps(), 1-eps(), npoints) |> collect
+    ξ = range(0+eps(), 1-eps(), length=npoints) |> collect
     x = zeros(ξ)
 
     uval = zeros(eltype(u), npoints)
@@ -159,7 +159,7 @@ function evaluate_coefficients!(xplot, uplot, u, meshx::AbstractMesh1D, basis::N
     @assert length(xplot) == npoints*numcells(meshx)
     @assert length(xplot) == length(uplot)
 
-    ξ = linspace(-1+eps(), 1-eps(), npoints) |> collect
+    ξ = range(-1+eps(), 1-eps(), length=npoints) |> collect
     x = zeros(ξ)
 
     Nx  = numcells(meshx)
@@ -224,8 +224,8 @@ function evaluate_coefficients!(xplot, yplot, uplot, u, meshx::AbstractMesh1D,
     @assert length(xplot) == size(uplot,2)
     @assert length(yplot) == size(uplot,1)
 
-    ξ = linspace(-1+eps(),1-eps(),npoints) |> collect
-    η = linspace(-1+eps(),1-eps(),npoints) |> collect
+    ξ = range(-1+eps(), 1-eps(), length=npoints) |> collect
+    η = range(-1+eps(), 1-eps(), length=npoints) |> collect
     intX = Jacobi.interp_mat(ξ, basis.nodes)
     intY = Jacobi.interp_mat(η, basis.nodes)
 

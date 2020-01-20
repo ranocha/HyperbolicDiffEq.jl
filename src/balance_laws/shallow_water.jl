@@ -13,7 +13,7 @@ function ShallowWater(g=1., Dim=1)
   ShallowWater{typeof(g), Dim}(g)
 end
 
-function Base.show{T,Dim}(io::IO, model::ShallowWater{T,Dim})
+function Base.show(io::IO, model::ShallowWater{T,Dim}) where {T,Dim}
   print(io, "Shallow water equations with g=", model.g, " {T=", T, ", Dim=", Dim, "}")
 end
 
@@ -26,15 +26,15 @@ struct ShallowWaterVar1D{T} <: FieldVector{2,T}
   hv::T
 end
 
-function (::Type{ShallowWaterVar1D{T}}){T}(val::Real)
+function (::Type{ShallowWaterVar1D{T}})(val::Real) where {T}
   ShallowWaterVar1D{T}(val, val)
 end
 
-function similar_type{T}(::ShallowWaterVar1D{T})
+function similar_type(::ShallowWaterVar1D{T}) where {T}
   ShallowWaterVar1D{T}
 end
 
-@inline variables{T}(model::ShallowWater{T,1}) = ShallowWaterVar1D{T}
+@inline variables(model::ShallowWater{T,1}) where {T} = ShallowWaterVar1D{T}
 
 @inline function primitive_variables(u::ShallowWaterVar1D)
   @unpack h, hv = u
@@ -68,14 +68,14 @@ end
     g*h^2*v/2
 end
 
-@inline function flux{T}(u::ShallowWaterVar1D{T}, model::ShallowWater{T,1})
+@inline function flux(u::ShallowWaterVar1D{T}, model::ShallowWater{T,1}) where {T}
   h, v = primitive_variables(u)
   @unpack g = model
 
   SVector{2,T}(h*v, h*v^2 + g*h^2/2)
 end
 
-@inline function max_abs_speed{T}(u::ShallowWaterVar1D, model::ShallowWater{T,1})
+@inline function max_abs_speed(u::ShallowWaterVar1D, model::ShallowWater{T,1}) where {T}
   h, v = primitive_variables(u)
   @unpack g = model
 
@@ -191,13 +191,13 @@ function (fvol::EnergyConservativeFlux2Param)(uₗ::ShallowWaterVar1D, uᵣ::Sha
 end
 
 
-doc"
+"""
     (diss::ScalarDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
 
-The scalar dissipation operator $- \frac{\lambda}{2} R \cdot R^T \cdot  (w_r - w_l)$
-for the shallow water equations, where $\partial_w u = R \cdot R^T$ is evaluated
-at the arithmetic mean values $h = (h_- + h_+) / 2$, $v = (v_- + v_+) / 2$.
-"
+The scalar dissipation operator \$- \\frac{\\lambda}{2} R \\cdot R^T \\cdot  (w_r - w_l)\$
+for the shallow water equations, where \$\\partial_w u = R \\cdot R^T\$ is evaluated
+at the arithmetic mean values \$h = (h_- + h_+) / 2\$, \$v = (v_- + v_+) / 2\$.
+"""
 function (diss::ScalarDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
     h₋, v₋ = primitive_variables(uₗ, model)
     h₊, v₊ = primitive_variables(uᵣ, model)
@@ -215,13 +215,13 @@ function (diss::ScalarDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVa
     -λ/2 * du_dw * (w₊ - w₋)
 end
 
-doc"
+"""
     (diss::MatrixDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
 
-The scalar dissipation operator $- \frac{1}{2} R \cdot |\Lambda| \cdot R^T \cdot  (w_r - w_l)$
-for the shallow water equations, where $f'(u) = R \cdot \Lambda \cdot R^{-1}$ is
-evaluated at the arithmetic mean values $h = (h_- + h_+) / 2$, $v = (v_- + v_+) / 2$.
-"
+The scalar dissipation operator \$- \\frac{1}{2} R \\cdot |\\Lambda| \\cdot R^T \\cdot  (w_r - w_l)\$
+for the shallow water equations, where \$f'(u) = R \\cdot \\Lambda \\cdot R^{-1}\$ is
+evaluated at the arithmetic mean values \$h = (h_- + h_+) / 2\$, \$v = (v_- + v_+) / 2\$.
+"""
 function (diss::MatrixDissipation)(uₗ::ShallowWaterVar1D, uᵣ::ShallowWaterVar1D, model::ShallowWater)
     h₋, v₋ = primitive_variables(uₗ, model)
     h₊, v₊ = primitive_variables(uᵣ, model)
@@ -368,7 +368,7 @@ struct ShallowWaterRiemannSolution{T,T1} <: AbstractRiemannSolution
   end
 end
 
-function solve{T,T1}(prob::RiemannProblem{ShallowWater{T,1},ShallowWaterVar1D{T},T1})
+function solve(prob::RiemannProblem{ShallowWater{T,1},ShallowWaterVar1D{T},T1}) where {T,T1}
   ShallowWaterRiemannSolution{T,T1}(prob)
 end
 
@@ -394,14 +394,14 @@ function (sol::ShallowWaterRiemannSolution)(ξ::Real)
   end
 end
 
-function rarefaction_wave_1{T}(ξ, uₗ::ShallowWaterVar1D{T}, g)
+function rarefaction_wave_1(ξ, uₗ::ShallowWaterVar1D{T}, g) where {T}
   hₗ, vₗ = primitive_variables(uₗ)
   h  = (vₗ + 2*sqrt(g*hₗ) -  ξ)^2 / 9g
   hv = (vₗ + 2*sqrt(g*hₗ) + 2ξ)*h / 3
   ShallowWaterVar1D{T}(h, hv)
 end
 
-function rarefaction_wave_2{T}(ξ, uₗ::ShallowWaterVar1D{T}, g)
+function rarefaction_wave_2(ξ, uₗ::ShallowWaterVar1D{T}, g) where {T}
   hₗ, vₗ = primitive_variables(uₗ)
   h  = (vₗ - 2*sqrt(g*hₗ) -  ξ)^2 / 9g
   hv = (vₗ - 2*sqrt(g*hₗ) + 2ξ)*h / 3
@@ -416,7 +416,7 @@ function (sol::ShallowWaterRiemannSolution)(t::Real, x::Real)
 end
 
 
-function compute_state_and_speeds{T}(uₗ::ShallowWaterVar1D{T}, uᵣ::ShallowWaterVar1D{T}, model::ShallowWater)
+function compute_state_and_speeds(uₗ::ShallowWaterVar1D{T}, uᵣ::ShallowWaterVar1D{T}, model::ShallowWater) where {T}
   @unpack g = model
   hₗ, vₗ = primitive_variables(uₗ)
   hᵣ, vᵣ = primitive_variables(uᵣ)
@@ -498,7 +498,7 @@ v_S2_SWE(h, hₗ, vₗ, g) = vₗ + (h-hₗ) * sqrt( (1/h+1/hₗ)*g/2 )
 
 
 
-@recipe function f{Ξ,T}(ξu::Tuple{Ξ,Vector{ShallowWaterVar1D{T}}})
+@recipe function f(ξu::Tuple{Ξ,Vector{ShallowWaterVar1D{T}}}) where {Ξ,T}
   ξ, u = ξu
 
   h  = mappedarray(u->u.h, u)

@@ -23,7 +23,7 @@ The index of the edge to the left of `cell` in `mesh`.
 """
 @inline function left_edge(cell::Int, mesh::AbstractMesh1D)
     @boundscheck begin
-        assert(1 <= cell <= numcells(mesh))
+        @assert(1 <= cell <= numcells(mesh))
     end
     cell
 end
@@ -35,7 +35,7 @@ The index of the edge to the right of `cell` in `mesh`.
 """
 @inline function right_edge(cell::Int, mesh::AbstractMesh1D)
     @boundscheck begin
-        assert(1 <= cell <= numcells(mesh))
+        @assert(1 <= cell <= numcells(mesh))
     end
     cell+1
 end
@@ -48,7 +48,7 @@ The index of the cell to the left of `edge` in `mesh`.
 """
 @inline function left_cell(edge::Int, mesh::AbstractMesh1D)
     @boundscheck begin
-        assert(1 <= edge <= numedges(mesh))
+        @assert(1 <= edge <= numedges(mesh))
     end
     if isperiodic(mesh)
         edge == 1 ? numcells(mesh) : edge-1
@@ -64,7 +64,7 @@ The index of the cell to the right of `edge` in `mesh`.
 """
 @inline function right_cell(edge::Int, mesh::AbstractMesh1D)
     @boundscheck begin
-        assert(1 <= edge <= numedges(mesh))
+        @assert(1 <= edge <= numedges(mesh))
     end
     if isperiodic(mesh)
         edge == numedges(mesh) ? 1 : edge
@@ -110,7 +110,7 @@ end
 A uniform periodic mesh in one space dimension of `Nx` cells between
 `xmin` and `xmax`.
 """
-immutable UniformPeriodicMesh1D{T<:Real} <: AbstractPeriodicMesh1D
+struct UniformPeriodicMesh1D{T<:Real} <: AbstractPeriodicMesh1D
   xmin::T
   xmax::T
   Nx::Int
@@ -155,7 +155,7 @@ end
 """
 A uniform mesh in one space dimension of `Nx` cells between `xmin` and `xmax`.
 """
-immutable UniformMesh1D{T<:Real} <: AbstractMesh1D
+struct UniformMesh1D{T<:Real} <: AbstractMesh1D
   xmin::T
   xmax::T
   Nx::Int

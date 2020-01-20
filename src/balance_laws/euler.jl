@@ -12,7 +12,7 @@ function Euler(γ=1.4, Dim=1)
   Euler{typeof(γ), Dim}(γ)
 end
 
-function Base.show{T,Dim}(io::IO, model::Euler{T,Dim})
+function Base.show(io::IO, model::Euler{T,Dim}) where {T,Dim}
   print(io, "Compressible Euler equations with γ=", model.γ, " {T=", T, ", Dim=", Dim, "}")
 end
 
@@ -28,15 +28,15 @@ struct EulerVar1D{T<:Real} <: FieldVector{3,T}
   ϱe::T
 end
 
-function (::Type{EulerVar1D{T}}){T}(val::Real)
+function (::Type{EulerVar1D{T}})(val::Real) where {T}
   EulerVar2D{T}(val, val, val)
 end
 
-function similar_type{T}(::EulerVar1D{T})
+function similar_type(::EulerVar1D{T}) where {T}
   EulerVar1D{T}
 end
 
-@inline variables{T}(model::Euler{T,1}) = EulerVar1D{T}
+@inline variables(model::Euler{T,1}) where {T} = EulerVar1D{T}
 
 
 """
@@ -51,15 +51,15 @@ struct EulerVar2D{T<:Real} <: FieldVector{4,T}
   ϱe ::T
 end
 
-function (::Type{EulerVar2D{T}}){T}(val::Real)
+function (::Type{EulerVar2D{T}})(val::Real) where {T}
   EulerVar2D{T}(val, val, val, val)
 end
 
-function similar_type{T}(::EulerVar2D{T})
+function similar_type(::EulerVar2D{T}) where {T}
   EulerVar2D{T}
 end
 
-@inline variables{T}(model::Euler{T,2}) = EulerVar2D{T}
+@inline variables(model::Euler{T,2}) where {T} = EulerVar2D{T}
 
 
 """
@@ -75,15 +75,15 @@ struct EulerVar3D{T<:Real} <: FieldVector{5,T}
   ϱe ::T
 end
 
-function (::Type{EulerVar3D{T}}){T}(val::Real)
+function (::Type{EulerVar3D{T}})(val::Real) where {T}
   EulerVar3D{T}(val, val, val, val, val)
 end
 
-function similar_type{T}(::EulerVar3D{T})
+function similar_type(::EulerVar3D{T}) where {T}
   EulerVar3D{T}
 end
 
-@inline variables{T}(model::Euler{T,3}) = EulerVar3D{T}
+@inline variables(model::Euler{T,3}) where {T} = EulerVar3D{T}
 
 
 """
@@ -234,42 +234,42 @@ Base.@pure function entropy(u::EulerVar3D, model::Euler)
 end
 
 
-@inline function flux{T}(u::EulerVar1D{T}, model::Euler)
+@inline function flux(u::EulerVar1D{T}, model::Euler) where {T}
     @unpack ϱv, ϱe = u
     ϱ, v, p = primitive_variables(u, model)
 
     SVector{3,T}(ϱv, ϱv*v + p, (ϱe+p)*v)
 end
 
-@inline function flux{T}(u::EulerVar2D{T}, model::Euler, dir::Val{:x})
+@inline function flux(u::EulerVar2D{T}, model::Euler, dir::Val{:x}) where {T}
     @unpack ϱvx, ϱvy, ϱe = u
     ϱ, vx, vy, p = primitive_variables(u, model)
 
     SVector{4,T}(ϱvx, ϱvx*vx + p, ϱvx*vy, (ϱe+p)*vx)
 end
 
-@inline function flux{T}(u::EulerVar2D{T}, model::Euler, dir::Val{:y})
+@inline function flux(u::EulerVar2D{T}, model::Euler, dir::Val{:y}) where {T}
     @unpack ϱvx, ϱvy, ϱe = u
     ϱ, vx, vy, p = primitive_variables(u, model)
 
     SVector{4,T}(ϱvy, ϱvy*vx, ϱvy*vy + p, (ϱe+p)*vy)
 end
 
-@inline function flux{T}(u::EulerVar3D{T}, model::Euler, dir::Val{:x})
+@inline function flux(u::EulerVar3D{T}, model::Euler, dir::Val{:x}) where {T}
     @unpack ϱvx, ϱvy, ϱvz, ϱe = u
     ϱ, vx, vy, vz, p = primitive_variables(u, model)
 
     SVector{5,T}(ϱvx, ϱvx*vx + p, ϱvy*vx, ϱvz*vx, (ϱe+p)*vx)
 end
 
-@inline function flux{T}(u::EulerVar3D{T}, model::Euler, dir::Val{:y})
+@inline function flux(u::EulerVar3D{T}, model::Euler, dir::Val{:y}) where {T}
     @unpack ϱvx, ϱvy, ϱvz, ϱe = u
     ϱ, vx, vy, vz, p = primitive_variables(u, model)
 
     SVector{5,T}(ϱvy, ϱvx*vy, ϱvy*vy + p, ϱvz*vy, (ϱe+p)*vy)
 end
 
-@inline function flux{T}(u::EulerVar3D{T}, model::Euler, dir::Val{:z})
+@inline function flux(u::EulerVar3D{T}, model::Euler, dir::Val{:z}) where {T}
     @unpack ϱvx, ϱvy, ϱvz, ϱe = u
     ϱ, vx, vy, vz, p = primitive_variables(u, model)
 
@@ -1582,7 +1582,7 @@ struct EulerRiemannSolution{T,T1} <: AbstractRiemannSolution
     end
 end
 
-function solve{T,T1}(prob::RiemannProblem{Euler{T,1},EulerVar1D{T},T1})
+function solve(prob::RiemannProblem{Euler{T,1},EulerVar1D{T},T1}) where {T,T1}
     EulerRiemannSolution{T,T1}(prob)
 end
 
@@ -1609,7 +1609,7 @@ function (sol::EulerRiemannSolution)(ξ::Real)
     end
 end
 
-function rarefaction_wave_1{T}(ξ, uₗ::EulerVar1D, model::Euler{T,1})
+function rarefaction_wave_1(ξ, uₗ::EulerVar1D, model::Euler{T,1}) where {T}
     @unpack γ = model
     ϱₗ, vₗ, pₗ = primitive_variables(uₗ, model)
     aₗ = sqrt(γ * pₗ / ϱₗ)
@@ -1621,7 +1621,7 @@ function rarefaction_wave_1{T}(ξ, uₗ::EulerVar1D, model::Euler{T,1})
     conserved_variables(ϱ, v, p, model)
 end
 
-function rarefaction_wave_2{T}(ξ, uᵣ::EulerVar1D, model::Euler{T,1})
+function rarefaction_wave_2(ξ, uᵣ::EulerVar1D, model::Euler{T,1}) where {T}
     @unpack γ = model
     ϱᵣ, vᵣ, pᵣ = primitive_variables(uᵣ, model)
     aᵣ = sqrt(γ * pᵣ / ϱᵣ)
@@ -1641,7 +1641,7 @@ function (sol::EulerRiemannSolution)(t::Real, x::Real)
 end
 
 
-function compute_state_and_speeds{T}(uₗ::EulerVar1D{T}, uᵣ::EulerVar1D{T}, model::Euler)
+function compute_state_and_speeds(uₗ::EulerVar1D{T}, uᵣ::EulerVar1D{T}, model::Euler) where {T}
     @unpack γ = model
     ϱₗ, vₗ, pₗ = primitive_variables(uₗ, model)
     aₗ = sqrt(γ * pₗ / ϱₗ)

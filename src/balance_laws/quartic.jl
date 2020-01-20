@@ -14,17 +14,17 @@ function Quartic(T=Float64)
   Quartic{T}()
 end
 
-function Base.show{T}(io::IO, model::Quartic{T})
+function Base.show(io::IO, model::Quartic{T}) where {T}
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^4")
 end
 
 
 """
-    flux{T}(u, model::Quartic{T,1})
+    flux(u, model::Quartic)
 
 Compute the flux of `u` for `model`.
 """
-@inline flux{T}(u, model::Quartic{T}) = (u^2)^2
+@inline flux(u, model::Quartic) = (u^2)^2
 
 """
     speed(u::Real, model::Quartic)
@@ -37,11 +37,11 @@ Compute the speed f'(`u`) for `model`.
 ################################################################################
 
 """
-    (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Quartic{T})
+    (::GodunovFlux)(uₗ::T, uᵣ::T, model::Quartic{T}) where {T}
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Quartic{T})
+function (::GodunovFlux)(uₗ::T, uᵣ::T, model::Quartic{T}) where {T}
     if uₗ < uᵣ
       if uₗ < 0 && 0 < uᵣ
         zero(T)
@@ -55,7 +55,7 @@ end
 
 
 """
-    (::EnergyConservativeFlux){T}(uₗ::T, uᵣ::T, model::Quartic{T})
+    (::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Quartic{T}) where {T}
 
 Compute the energy (L₂ entropy) conservative flux between `uₗ` and `uᵣ` for `model`.
 """

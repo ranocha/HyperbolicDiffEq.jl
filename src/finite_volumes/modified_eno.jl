@@ -9,7 +9,7 @@ struct ModifiedENO{K, ChooseStencil} <: AbstractReconstruction
     choose_stencil::ChooseStencil
 end
 
-function ModifiedENO{K}(::Val{K}=Val{2}(), choose_stencil=ClassicalChoiceENO())
+function ModifiedENO(::Val{K}=Val{2}(), choose_stencil=ClassicalChoiceENO()) where {K}
     ModifiedENO{K,typeof(choose_stencil)}(choose_stencil)
 end
 
@@ -20,7 +20,7 @@ end
 
 # ENO{K} uses K different polynomials of degree K-1
 # -> the total stencil width is 2K-1
-@inline stencil_width{K}(::ModifiedENO{K}) = 2K-1
+@inline stencil_width(::ModifiedENO{K}) where {K} = 2K-1
 @inline stencil_width_val(::ModifiedENO{1}) = Val{1}()
 @inline stencil_width_val(::ModifiedENO{2}) = Val{3}()
 @inline stencil_width_val(::ModifiedENO{3}) = Val{5}()
@@ -30,7 +30,7 @@ end
 @inline stencil_width_val(::ModifiedENO{7}) = Val{13}()
 @inline stencil_width_val(::ModifiedENO{8}) = Val{15}()
 
-@inline order{K}(::ModifiedENO{K}) = K
+@inline order(::ModifiedENO{K}) where {K} = K
 
 
 function (eno::ModifiedENO{2})(edge_u, cell, u_m1, u_0, u_p1, balance_law, meshx)

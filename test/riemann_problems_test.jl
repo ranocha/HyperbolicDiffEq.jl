@@ -1,4 +1,4 @@
-using Base.Test
+using Test
 using MappedArrays
 using HyperbolicDiffEq
 @static if Int==Int64
@@ -25,7 +25,7 @@ sol = solve(prob1)
 print(DevNull, sol)
 @test sol(-1) ≈ 0
 @test sol( 2) ≈ 1
-ξ = linspace(0, 1, 10)
+ξ = range(0, 1, length=10)
 @test all(sol.(ξ) .== ξ)
 @test sol(2., -0.5) ≈ 0
 @test sol(2., 1.) ≈ 0.5
@@ -73,7 +73,7 @@ print(DevNull, sol)
     plot(sol)
 end
 
-us = linspace(-1, 1, 10)
+us = range(-1, 1, length=10)
 for (uₗ,uᵣ) in Iterators.product(us,us)
   prob = RiemannProblem(model, uₗ, uᵣ)
   sol = solve(prob)
@@ -85,7 +85,7 @@ end
 
 # Buckley-Leverette equation
 model = BuckleyLeverette()
-us = linspace(0, 1, 10)
+us = range(0, 1, length=10)
 for (uₗ,uᵣ) in Iterators.product(us,us)
   prob = RiemannProblem(model, uₗ, uᵣ)
   sol = solve(prob)
@@ -97,7 +97,7 @@ end
 
 # Cubic conservation law
 model = Cubic()
-us = linspace(-5, 5, 100)
+us = range(-5, 5, length=100)
 for (uₗ,uᵣ) in Iterators.product(us,us)
   prob = RiemannProblem(model, uₗ, uᵣ)
   sol = solve(prob)
@@ -116,7 +116,7 @@ uₗ = ShallowWaterVar1D(1., 0.)
 uᵣ = ShallowWaterVar1D(0., 0.)
 prob = RiemannProblem(model, uₗ, uᵣ)
 sol = solve(prob)
-x = linspace(-3, 3)
+x = range(-3, 3, length=50)
 u = sol.(1., x)
 h = mappedarray(u->u.h, u)
 v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
@@ -133,7 +133,7 @@ end
 uₗ, uᵣ = uᵣ, uₗ
 prob = RiemannProblem(model, uₗ, uᵣ)
 sol = solve(prob)
-x = linspace(-3, 3)
+x = range(-3, 3, length=50)
 u = sol.(1., x)
 h = mappedarray(u->u.h, u)
 v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
@@ -151,7 +151,7 @@ uₗ = ShallowWaterVar1D(1., 0.)
 uᵣ = ShallowWaterVar1D(eps(), 0.)
 prob = RiemannProblem(model, uₗ, uᵣ)
 sol = solve(prob)
-x = linspace(-3, 3)
+x = range(3, 3, length=50)
 u = sol.(1., x)
 h = mappedarray(u->u.h, u)
 v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
@@ -168,7 +168,7 @@ end
 uₗ, uᵣ = uᵣ, uₗ
 prob = RiemannProblem(model, uₗ, uᵣ)
 sol = solve(prob)
-x = linspace(-3, 3)
+x = range(3, 3, length=50)
 u = sol.(1., x)
 h = mappedarray(u->u.h, u)
 v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)
@@ -190,7 +190,7 @@ uₗ = ShallowWaterVar1D(h₀, -v₀)
 uᵣ = ShallowWaterVar1D(h₀,  v₀)
 prob = RiemannProblem(model, uₗ, uᵣ)
 sol = solve(prob)
-x = linspace(-1-(v₀+sqrt(h₀)), 1+v₀+sqrt(h₀))
+x = range(-1-(v₀+sqrt(h₀)), 1+v₀+sqrt(h₀), length=50)
 u = sol.(1., x)
 h = mappedarray(u->u.h, u)
 v = mappedarray(u->(u.h ≈ 0 ? zero(u.hv) : u.hv/u.h), u)

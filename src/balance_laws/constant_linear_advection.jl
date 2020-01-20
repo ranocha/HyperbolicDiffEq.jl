@@ -14,7 +14,7 @@ function ConstantLinearAdvection(T=Float64, Dim=1)
   ConstantLinearAdvection{T,Dim}()
 end
 
-function Base.show{T,Dim}(io::IO, model::ConstantLinearAdvection{T,Dim})
+function Base.show(io::IO, model::ConstantLinearAdvection{T,Dim}) where {T,Dim}
   print(io, "Linear advection equation with constant coefficient {T=", T, ", Dim=", Dim, "}",
             " with flux f(u) = u * (1,...,1)")
 end
@@ -25,7 +25,7 @@ end
 
 Compute the flux of `u` for `model`.
 """
-@inline flux{T}(u, model::ConstantLinearAdvection{T,1}) = u
+@inline flux(u, model::ConstantLinearAdvection{T,1}) where {T} = u
 
 """
     speed(u::Real, model::ConstantLinearAdvection)
@@ -35,7 +35,7 @@ Compute the speed f'(`u`) for `model`.
 @inline speed(u, model::ConstantLinearAdvection) = one(u)
 
 
-@inline flux{T}(u, model::ConstantLinearAdvection{T,2}, direction) = u
+@inline flux(u, model::ConstantLinearAdvection{T,2}, direction) where {T} = u
 
 
 ################################################################################
@@ -45,7 +45,7 @@ Compute the speed f'(`u`) for `model`.
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::ConstantLinearAdvection{T,1})
+function (::GodunovFlux)(uₗ::T, uᵣ::T, model::ConstantLinearAdvection{T,1}) where {T}
     uₗ
 end
 
@@ -141,6 +141,6 @@ end
 
 Compute the solution of the Riemann prolem `prob`.
 """
-function solve{T,T1}(prob::RiemannProblem{ConstantLinearAdvection{T,1},T,T1})
+function solve(prob::RiemannProblem{ConstantLinearAdvection{T,1},T,T1}) where {T,T1}
     ConstantLinearAdvectionRiemannSolution(prob, one(T))
 end

@@ -14,7 +14,7 @@ function Burgers(T=Float64, Dim=1)
   Burgers{T,Dim}()
 end
 
-function Base.show{T,Dim}(io::IO, model::Burgers{T,Dim})
+function Base.show(io::IO, model::Burgers{T,Dim}) where {T,Dim}
   print(io, "Burgers' equation {T=", T, ", Dim=", Dim, "}",
             " with flux f(u) = u^2 / 2 * (1,...,1)/sqrt(Dim)")
 end
@@ -37,11 +37,11 @@ end
 
 
 """
-    flux{T}(u, model::Burgers{T,1})
+    flux(u, model::Burgers)
 
 Compute the flux of `u` for `model`.
 """
-@inline flux{T}(u, model::Burgers{T,1}) = u^2/2
+@inline flux(u, model::Burgers) = u^2/2
 
 """
     speed(u::Real, model::Burgers)
@@ -51,17 +51,17 @@ Compute the speed f'(`u`) for `model`.
 @inline speed(u, model::Burgers) = u
 
 
-@inline flux{T}(u, model::Burgers{T,2}, direction) = u^2 / (2*sqrt(2))
+@inline flux(u, model::Burgers{T,2}, direction) where {T} = u^2 / (2*sqrt(2))
 
 
 ################################################################################
 
 """
-    (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Burgers{T,1})
+    (::GodunovFlux)(uₗ::T, uᵣ::T, model::Burgers{T,1}) where {T}
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Burgers{T,1})
+function (::GodunovFlux)(uₗ::T, uᵣ::T, model::Burgers{T,1}) where {T}
   if uₗ < uᵣ
     if uₗ < 0 && 0 < uᵣ
       zero(T)
@@ -74,7 +74,7 @@ function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Burgers{T,1})
 end
 
 
-function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Burgers{T,2}, direction)
+function (::GodunovFlux)(uₗ::T, uᵣ::T, model::Burgers{T,2}, direction) where {T}
   if uₗ < uᵣ
     if uₗ < 0 && 0 < uᵣ
       zero(T)
@@ -208,11 +208,11 @@ end
 
 
 """
-    solve{T,T1}(prob::RiemannProblem{Burgers{T,1},T,T1})
+    solve(prob::RiemannProblem{Burgers{T,1},T,T1}) where {T,T1}
 
 Compute the solution of the Riemann prolem `prob`.
 """
-function solve{T,T1}(prob::RiemannProblem{Burgers{T,1},T,T1})
+function solve(prob::RiemannProblem{Burgers{T,1},T,T1}) where {T,T1}
   @unpack uₗ, uᵣ = prob
   if uₗ > uᵣ
     σ⁻ = σ⁺ = (uₗ + uᵣ) / 2

@@ -14,17 +14,17 @@ function Septic(T=Float64)
   Septic{T}()
 end
 
-function Base.show{T}(io::IO, model::Septic{T})
+function Base.show(io::IO, model::Septic{T}) where {T}
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^7")
 end
 
 
 """
-    flux{T}(u, model::Septic{T,1})
+    flux(u, model::Septic)
 
 Compute the flux of `u` for `model`.
 """
-@inline flux{T}(u, model::Septic{T}) = (u^2)^2*u^3
+@inline flux(u, model::Septic) = (u^2)^2*u^3
 
 """
     speed(u::Real, model::Septic)
@@ -41,13 +41,13 @@ Compute the speed f'(`u`) for `model`.
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Septic{T})
+function (::GodunovFlux)(uₗ::T, uᵣ::T, model::Septic{T}) where {T}
   flux(uₗ, model)
 end
 
 
 """
-    (::EnergyConservativeFlux){T}(uₗ::T, uᵣ::T, model::Septic{T})
+    (::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Septic{T}) where {T}
 
 Compute the energy (L₂ entropy) conservative flux between `uₗ` and `uᵣ` for `model`.
 """

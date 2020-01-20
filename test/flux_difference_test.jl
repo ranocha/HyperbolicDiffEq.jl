@@ -1,4 +1,4 @@
-using Base.Test, OrdinaryDiffEq, HyperbolicDiffEq
+using Test, OrdinaryDiffEq, HyperbolicDiffEq
 
 u₀func(x) = sinpi(x)
 
