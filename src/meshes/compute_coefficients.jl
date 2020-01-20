@@ -105,7 +105,7 @@ function evaluate_coefficients!(xplot, uplot, u, balance_law, meshx::AbstractMes
     @assert length(uplot) == npoints*numcells(meshx)
 
     ξ = range(0+eps(), 1-eps(), length=npoints) |> collect
-    x = zeros(ξ)
+    x = zero(ξ)
 
     uval = zeros(eltype(u), npoints)
     @inbounds for cell in cell_indices(meshx)
@@ -125,7 +125,7 @@ end
 
 function compute_coefficients(u, mesh::AbstractMesh1D, basis::NodalBasis, parallel=Val{:serial}())
     xmin, xmax = bounds(mesh)
-    uval = Array{typeof(u((xmin+xmax)/2))}(length(basis.nodes), numcells(mesh))
+    uval = Array{typeof(u((xmin+xmax)/2))}(undef, length(basis.nodes), numcells(mesh))
     compute_coefficients!(uval, u, mesh, basis)
     uval
 end
@@ -160,7 +160,7 @@ function evaluate_coefficients!(xplot, uplot, u, meshx::AbstractMesh1D, basis::N
     @assert length(xplot) == length(uplot)
 
     ξ = range(-1+eps(), 1-eps(), length=npoints) |> collect
-    x = zeros(ξ)
+    x = zero(ξ)
 
     Nx  = numcells(meshx)
     Pp1 = length(basis.nodes)

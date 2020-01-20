@@ -1,9 +1,10 @@
 using Test, OrdinaryDiffEq, HyperbolicDiffEq, DiffEqCallbacks
+using LinearAlgebra
 
 function save_func(u, t, integrator)
-    meshx = integrator.f.meshx
-    basis = integrator.f.basis
-    balance_law = integrator.f.balance_law
+    meshx = integrator.f.f.meshx
+    basis = integrator.f.f.basis
+    balance_law = integrator.f.f.balance_law
     integrate(u->IntegralQuantitiesBurgers(u,balance_law), u, meshx, basis)
 end
 

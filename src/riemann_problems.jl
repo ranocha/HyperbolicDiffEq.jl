@@ -20,7 +20,7 @@ Create the `RiemannProblem` for `model` with left and right values  `uₗ`,`uᵣ
 `x₀`,`t₀`.
 """
 function RiemannProblem(model::AbstractBalanceLaw{1}, uₗ, uᵣ, x₀::Real=0, t₀::Real=0)
-  assert(typeof(uₗ) == typeof(uᵣ))
+  @assert(typeof(uₗ) == typeof(uᵣ))
   x₀, t₀ == promote(x₀, t₀)
   RiemannProblem{typeof(model),typeof(uₗ),typeof(x₀)}(model, uₗ, uᵣ, x₀, t₀)
 end
@@ -87,7 +87,7 @@ end
 end
 
 
-@recipe function f{Ξ,U}(ξumodel::Tuple{Ξ,U,AbstractBalanceLaw{1}})
+@recipe function f(ξumodel::Tuple{Ξ,U,AbstractBalanceLaw{1}}) where {Ξ,U}
     ξ, u, model = ξumodel
     ((ξ, u), )
 end
@@ -124,6 +124,7 @@ function RiemannProblemTuple(tup::NTuple{N,RiemannProblem{Model,U,T}}) where {N,
   RiemannProblemTuple{N,Model,U,T}(tup)
 end
 
+Base.length(tup::RiemannProblemTuple) = length(tup.tup)
 Base.iterate(tup::RiemannProblemTuple) = iterate(tup.tup)
 Base.iterate(tup::RiemannProblemTuple, state) = iterate(tup.tup, state)
 
@@ -183,6 +184,9 @@ function Base.show(io::IO, prob::RiemannSolutionTuple{N,Sol}) where {N,Sol}
     println(io, prob.tup[i])
   end
 end
+
+# for broadcasting; treat as scalar
+Base.broadcastable(sol::RiemannSolutionTuple) = Ref(sol)
 
 
 function solve(prob::RiemannProblemTuple)

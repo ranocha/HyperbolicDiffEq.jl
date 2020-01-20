@@ -21,7 +21,7 @@ struct UniformPeriodicFluxDiffDisc2D{BalanceLaw, T, Fvol, Fnum, Fluxes, UseThrea
 end
 
 function UniformPeriodicFluxDiffDisc2D(balance_law, meshx, meshy, basis, fvol, fnum, usethreads::Bool=false)
-    fluxes = Array{variables(balance_law)}(length(basis.nodes), 2, numedges(meshx), numedges(meshy))
+    fluxes = Array{variables(balance_law)}(undef, length(basis.nodes), 2, numedges(meshx), numedges(meshy))
     UniformPeriodicFluxDiffDisc2D(balance_law, meshx, meshy, basis, fvol, fnum, fluxes, Val{usethreads}())
 end
 

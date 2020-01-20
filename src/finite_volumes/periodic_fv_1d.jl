@@ -25,8 +25,8 @@ end
 
 function UniformPeriodicReconstructedFV1D(balance_law, meshx, fnum, reconstruction,
                                           parallel=Val{:serial}())
-    fluxes = Array{variables(balance_law)}(numcells(meshx))
-    edge_u = Array{variables(balance_law)}(2, numcells(meshx))
+    fluxes = Array{variables(balance_law)}(undef, numcells(meshx))
+    edge_u = Array{variables(balance_law)}(undef, 2, numcells(meshx))
     UniformPeriodicReconstructedFV1D(balance_law, meshx, fnum, reconstruction,
                                      edge_u, fluxes, parallel)
 end

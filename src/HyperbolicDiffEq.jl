@@ -34,10 +34,16 @@ An abstract type for a computational mesh.
 """
 abstract type AbstractMesh end
 
+# for broadcasting; treat as scalar
+Base.broadcastable(mesh::AbstractMesh) = Ref(mesh)
+
 """
 An abstract type representing a balance law in `Dim` space dimensions.
 """
 abstract type AbstractBalanceLaw{Dim} end
+
+# for broadcasting; treat as scalar
+Base.broadcastable(model::AbstractBalanceLaw) = Ref(model)
 
 """
 An abstract type representing a scalar balance law using `T` as real type in
@@ -51,30 +57,48 @@ An abstract type representing a Riemann problem.
 """
 abstract type AbstractRiemannProblem end
 
+# for broadcasting; treat as scalar
+Base.broadcastable(prob::AbstractRiemannProblem) = Ref(prob)
+
 """
 An abstract type representing the solution of a Riemann problem.
 """
 abstract type AbstractRiemannSolution end
+
+# for broadcasting; treat as scalar
+Base.broadcastable(sol::AbstractRiemannSolution) = Ref(sol)
 
 """
 An abstract type for a semidiscretisation.
 """
 abstract type AbstractSemidiscretisation end
 
+# for broadcasting; treat as scalar
+Base.broadcastable(semidisc::AbstractSemidiscretisation) = Ref(semidisc)
+
 """
 An abstract type for a reconstruction.
 """
 abstract type AbstractReconstruction end
+
+# for broadcasting; treat as scalar
+Base.broadcastable(recons::AbstractReconstruction) = Ref(recons)
 
 """
 An abstract type for a numerical flux.
 """
 abstract type NumericalFlux end
 
+# for broadcasting; treat as scalar
+Base.broadcastable(flux::NumericalFlux) = Ref(flux)
+
 """
 An abstract type for a dissipation operator.
 """
 abstract type DissipationOperator end
+
+# for broadcasting; treat as scalar
+Base.broadcastable(op::DissipationOperator) = Ref(op)
 
 
 include("meshes/meshes1d.jl")
