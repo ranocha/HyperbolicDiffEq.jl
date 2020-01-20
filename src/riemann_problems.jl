@@ -26,11 +26,11 @@ function RiemannProblem(model::AbstractBalanceLaw{1}, uₗ, uᵣ, x₀::Real=0, 
 end
 
 
-function Base.convert{Model,U,T1,T2}(::Type{RiemannProblem{Model,U,T1}}, prob::RiemannProblem{Model,U,T2})
+function Base.convert(::Type{RiemannProblem{Model,U,T1}}, prob::RiemannProblem{Model,U,T2}) where {Model,U,T1,T2}
   RiemannProblem{Model,U,T1}(prob.model, prob.uₗ, prob.uᵣ, convert(T1,prob.x₀), convert(T1,prob.t₀))
 end
 
-function Base.promote_rule{Model,U,T1,T2}(::Type{RiemannProblem{Model,U,T1}}, ::Type{RiemannProblem{Model,U,T2}})
+function Base.promote_rule(::Type{RiemannProblem{Model,U,T1}}, ::Type{RiemannProblem{Model,U,T2}}) where {Model,U,T1,T2}
   RiemannProblem{Model,U,promote_type(T1,T2)}
 end
 
@@ -80,7 +80,7 @@ end
   σ⁻ = σ⁻ - σ
   σ⁺ = σ⁺ + σ
 
-  ξ = linspace(σ⁻, σ⁺, 10^3)
+  ξ = range(σ⁻, σ⁺, length=10^3)
   u = sol.(ξ)
 
   ((ξ, u, sol.prob.model),)
@@ -120,34 +120,32 @@ struct RiemannProblemTuple{N, Model<:AbstractBalanceLaw{1}, U, T<:Real}
   end
 end
 
-function RiemannProblemTuple{N,Model,U,T}(tup::NTuple{N,RiemannProblem{Model,U,T}})
+function RiemannProblemTuple(tup::NTuple{N,RiemannProblem{Model,U,T}}) where {N,Model,U,T}
   RiemannProblemTuple{N,Model,U,T}(tup)
 end
 
-Base.start(tup::RiemannProblemTuple) = start(tup.tup)
-Base.done(tup::RiemannProblemTuple, i) = done(tup.tup, i)
-Base.next(tup::RiemannProblemTuple, i) = next(tup.tup, i)
+Base.iterate(tup::RiemannProblemTuple) = iterate(tup.tup)
+Base.iterate(tup::RiemannProblemTuple, state) = iterate(tup.tup, state)
 
 
-function *{Model,U}(prob1::RiemannProblem{Model,U}, prob2::RiemannProblem{Model,U})
+function *(prob1::RiemannProblem{Model,U}, prob2::RiemannProblem{Model,U}) where {Model,U}
   RiemannProblemTuple(promote(prob1, prob2))
 end
 
-function *{N,Model,U}(tup::RiemannProblemTuple{N,Model,U}, prob::RiemannProblem{Model,U})
+function *(tup::RiemannProblemTuple{N,Model,U}, prob::RiemannProblem{Model,U}) where {N,Model,U}
   RiemannProblemTuple(promote(tup..., prob))
 end
 
-function *{N,Model,U}(prob::RiemannProblem{Model,U}, tup::RiemannProblemTuple{N,Model,U})
+function *(prob::RiemannProblem{Model,U}, tup::RiemannProblemTuple{N,Model,U}) where {N,Model,U}
   RiemannProblemTuple(promote(prob, tup...))
 end
 
-function *{N,M,Model,U}(tup1::RiemannProblemTuple{N,Model,U},
-                        tup2::RiemannProblemTuple{M,Model,U})
+function *(tup1::RiemannProblemTuple{N,Model,U}, tup2::RiemannProblemTuple{M,Model,U}) where {N,M,Model,U}
   RiemannProblemTuple(promote(tup1..., tup2...))
 end
 
 
-function Base.show{N,Model,U,T}(io::IO, prob::RiemannProblemTuple{N,Model,U,T})
+function Base.show(io::IO, prob::RiemannProblemTuple{N,Model,U,T}) where {N,Model,U,T}
   println(io, "Tuple of ", N, " consecutive Riemann problems:")
   for i in 1:N
     print(io, prob.tup[i], "\n")
@@ -158,7 +156,7 @@ end
 """
 An NTuple of consecutive Riemann solutions.
 """
-immutable RiemannSolutionTuple{N,Sol<:AbstractRiemannSolution}
+struct RiemannSolutionTuple{N,Sol<:AbstractRiemannSolution}
   tup::NTuple{N, Sol}
 
   function RiemannSolutionTuple{N,Sol}(tup::NTuple{N, Sol}) where {N,Sol}
@@ -174,12 +172,12 @@ immutable RiemannSolutionTuple{N,Sol<:AbstractRiemannSolution}
   end
 end
 
-function RiemannSolutionTuple{N,Sol<:AbstractRiemannSolution}(tup::NTuple{N,Sol})
+function RiemannSolutionTuple(tup::NTuple{N,Sol}) where {N,Sol<:AbstractRiemannSolution}
   RiemannSolutionTuple{N,Sol}(tup)
 end
 
 
-function Base.show{N,Sol}(io::IO, prob::RiemannSolutionTuple{N,Sol})
+function Base.show(io::IO, prob::RiemannSolutionTuple{N,Sol}) where {N,Sol}
   println(io, "Tuple of ", N, " solutions to consecutive Riemann problems:")
   for i in 1:N
     println(io, prob.tup[i])
@@ -192,13 +190,13 @@ function solve(prob::RiemannProblemTuple)
 end
 
 
-@inline get_t₀{N,Sol}(sol::RiemannSolutionTuple{N,Sol}) = sol.tup[1].prob.t₀
+@inline get_t₀(sol::RiemannSolutionTuple) = sol.tup[1].prob.t₀
 
 
 """
 Tha maximal time before any of the solutions interact.
 """
-function compute_tmax{N,Sol}(sol::RiemannSolutionTuple{N,Sol})
+function compute_tmax(sol::RiemannSolutionTuple{N,Sol}) where {N,Sol}
   tup = sol.tup
   t₀ = get_t₀(sol)
 
@@ -214,7 +212,7 @@ function compute_tmax{N,Sol}(sol::RiemannSolutionTuple{N,Sol})
 end
 
 
-function (sol::RiemannSolutionTuple{N,Sol}){N,Sol}(t::Real, x::Real)
+function (sol::RiemannSolutionTuple{N,Sol})(t::Real, x::Real) where {N,Sol}
   tup = sol.tup
   t₀ = sol.tup[1].prob.t₀
 
@@ -254,7 +252,7 @@ end
   xmin = xmin - Δx
   xmax = xmax + Δx
 
-  x = linspace(xmin, xmax, 10^3)
+  x = range(xmin, xmax, length=10^3)
   u = sol.(t,x)
 
   ((x, u, sol.tup[1].prob.model),)

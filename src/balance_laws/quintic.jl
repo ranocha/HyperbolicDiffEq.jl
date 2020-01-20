@@ -14,17 +14,17 @@ function Quintic(T=Float64)
   Quintic{T}()
 end
 
-function Base.show{T}(io::IO, model::Quintic{T})
+function Base.show(io::IO, model::Quintic{T}) where {T}
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^5")
 end
 
 
 """
-    flux{T}(u, model::Quintic{T,1})
+    flux(u, model::Quintic)
 
 Compute the flux of `u` for `model`.
 """
-@inline flux{T}(u, model::Quintic{T}) = u^2*u^3
+@inline flux(u, model::Quintic) = u^2*u^3
 
 """
     speed(u::Real, model::Quintic)
@@ -37,17 +37,17 @@ Compute the speed f'(`u`) for `model`.
 ################################################################################
 
 """
-    (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Quintic{T})
+    (::GodunovFlux)(uₗ::T, uᵣ::T, model::Quintic{T}) where {T}
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Quintic{T})
+function (::GodunovFlux)(uₗ::T, uᵣ::T, model::Quintic{T}) where {T}
   flux(uₗ, model)
 end
 
 
 """
-    (::EnergyConservativeFlux){T}(uₗ::T, uᵣ::T, model::Quintic{T})
+    (::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Quintic{T}) where {T}
 
 Compute the energy (L₂ entropy) conservative flux between `uₗ` and `uᵣ` for `model`.
 """

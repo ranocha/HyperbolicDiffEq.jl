@@ -14,17 +14,17 @@ function Cubic(T=Float64)
   Cubic{T}()
 end
 
-function Base.show{T}(io::IO, model::Cubic{T})
+function Base.show(io::IO, model::Cubic{T}) where {T}
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^3")
 end
 
 
 """
-    flux{T}(u, model::Cubic{T,1})
+    flux(u, model::Cubic)
 
 Compute the flux of `u` for `model`.
 """
-@inline flux{T}(u, model::Cubic{T}) = u^3
+@inline flux(u, model::Cubic) = u^3
 
 """
     speed(u::Real, model::Cubic)
@@ -37,17 +37,17 @@ Compute the speed f'(`u`) for `model`.
 ################################################################################
 
 """
-    (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Cubic{T})
+    (::GodunovFlux)(uₗ::T, uᵣ::T, model::Cubic{T}) where {T}
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Cubic{T})
+function (::GodunovFlux)(uₗ::T, uᵣ::T, model::Cubic{T}) where {T}
   flux(uₗ, model)
 end
 
 
 """
-    (::EnergyConservativeFlux){T}(uₗ::T, uᵣ::T, model::Cubic{T})
+    (::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Cubic{T}) where {T}
 
 Compute the energy (L₂ entropy) conservative flux between `uₗ` and `uᵣ` for `model`.
 """
@@ -116,7 +116,7 @@ end
 
 The solution of a Riemann problem `prob` for the cubic conservation law.
 """
-immutable CubicRiemannSolution{T,T1} <: ScalarRiemannSolution
+struct CubicRiemannSolution{T,T1} <: ScalarRiemannSolution
   prob::RiemannProblem{Cubic{T},T,T1}
   σ⁻::T
   σ⁺::T
@@ -172,11 +172,11 @@ end
 
 
 """
-    solve{T,T1}(prob::RiemannProblem{Cubic{T},T,T1})
+    solve(prob::RiemannProblem{Cubic{T},T,T1}) where {T,T1}
 
 Compute the solution of the Riemann prolem `prob`.
 """
-function solve{T,T1}(prob::RiemannProblem{Cubic{T},T,T1})
+function solve(prob::RiemannProblem{Cubic{T},T,T1}) where {T,T1}
   @unpack uₗ, uᵣ, model = prob
   u_crit = zero(T)
 

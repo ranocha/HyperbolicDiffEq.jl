@@ -125,9 +125,9 @@ speed in this cell.
 function max_dt(t, u, fv::UniformPeriodicReconstructedFV1D, cfl=0.5)
     @unpack balance_law, meshx = fv
     dt = mapreduce(cell->volume(cell,meshx) / max_abs_speed(u[cell],balance_law),
-                    min, typemax(t), cell_indices(meshx))
+                    min, cell_indices(meshx), init=typemax(t))
     if dt == Inf
-        dt = mapreduce(cell->volume(cell,meshx), min, dt, cell_indices(meshx))
+        dt = mapreduce(cell->volume(cell,meshx), min, cell_indices(meshx), init=dt)
     end
     cfl * dt
 end

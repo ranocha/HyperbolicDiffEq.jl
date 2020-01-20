@@ -1,4 +1,4 @@
-using Base.Test, OrdinaryDiffEq, HyperbolicDiffEq, Roots
+using Test, OrdinaryDiffEq, HyperbolicDiffEq, Roots
 
 
 function calc_error(balance_law, uₐₙₐ, tmin, tmax, fnum, reconstruction, N, parallel)

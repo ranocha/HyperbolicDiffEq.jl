@@ -14,17 +14,17 @@ function Octic(T=Float64)
   Octic{T}()
 end
 
-function Base.show{T}(io::IO, model::Octic{T})
+function Base.show(io::IO, model::Octic{T}) where {T}
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^8")
 end
 
 
 """
-    flux{T}(u, model::Octic{T,1})
+    flux(u, model::Octic)
 
 Compute the flux of `u` for `model`.
 """
-@inline flux{T}(u, model::Octic{T}) = ((u^2)^2)^2
+@inline flux(u, model::Octic) = ((u^2)^2)^2
 
 """
     speed(u::Real, model::Octic)
@@ -37,11 +37,11 @@ Compute the speed f'(`u`) for `model`.
 ################################################################################
 
 """
-    (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Octic{T})
+    (::GodunovFlux)(uₗ::T, uᵣ::T, model::Octic{T}) where {T}
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Octic{T})
+function (::GodunovFlux)(uₗ::T, uᵣ::T, model::Octic{T}) where {T}
     if uₗ < uᵣ
       if uₗ < 0 && 0 < uᵣ
         zero(T)
@@ -55,7 +55,7 @@ end
 
 
 """
-    (::EnergyConservativeFlux){T}(uₗ::T, uᵣ::T, model::Octic{T})
+    (::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Octic{T}) where {T}
 
 Compute the energy (L₂ entropy) conservative flux between `uₗ` and `uᵣ` for `model`.
 """

@@ -1,4 +1,4 @@
-using Base.Test, OrdinaryDiffEq, HyperbolicDiffEq, DiffEqCallbacks
+using Test, OrdinaryDiffEq, HyperbolicDiffEq, DiffEqCallbacks
 
 function save_func(u, t, integrator)
     meshx = integrator.f.meshx
@@ -70,7 +70,7 @@ function compute_solution(balance_law, p, N, basis_type, fvol_type, fnum_type, c
     u₀ = sinpi
 
     ode = semidiscretise(semidisc, u₀, tspan)
-    tstops = linspace(tspan[1], tspan[end], 2)
+    tstops = range(tspan[1], tspan[end], length=2)
     maxdt = (u,p,t) -> max_dt(t, u, semidisc, cfl)
     saved_values = SavedValues(Vector{Float64}(), Vector{IntegralQuantitiesBurgers{Float64}}())
     cb = CallbackSet(StepsizeLimiter(maxdt), SavingCallback(save_func, saved_values))

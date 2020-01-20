@@ -186,7 +186,7 @@ function add_numerical_fluxes!(du, u, semidisc::UniformFluxDiffDisc1D, t)
     add_numerical_fluxes_inner_loop1!(du, fluxes, u, t, balance_law, fnumint,
                                         fnumext, left_bc, right_bc, Nx, basis,
                                         includes_boundaries(basis), jacx, parallel)
-    add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, Nx, basis, 
+    add_numerical_fluxes_inner_loop2!(du, fluxes, u, balance_law, Nx, basis,
                                         includes_boundaries(basis), jacx, parallel)
 end
 
@@ -376,7 +376,7 @@ function max_dt(t, u, semidisc::Union{UniformFluxDiffDisc1D, UniformPeriodicFlux
     p = length(basis.nodes)-1
     factor = Δx / (2p+1)
 
-    dt = mapreduce(u->factor/max_abs_speed(u, balance_law), min, typemax(t), u)
+    dt = mapreduce(u->factor/max_abs_speed(u, balance_law), min, u, init=typemax(t))
     if dt == Inf
         dt = factor
     end

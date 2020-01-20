@@ -1,20 +1,20 @@
 
-doc"
+"""
     GodunovFlux
 
-Godunovs flux $f(u(x/t = 0))$, i.e. the flux of the value at zero of the solution
+Godunovs flux \$f(u(x/t = 0))\$, i.e. the flux of the value at zero of the solution
 of the Riemann problem.
-"
+"""
 struct GodunovFlux <: NumericalFlux end
 
 
-doc"
+"""
     LocalLaxFriedrichsFlux{MaxAbsSpeed}
 
-The local Lax-Friedrichs flux $\frac{f(u_r) + f(u_l)}{2} - \frac{\lambda}{2} (u_r - u_l)$.
-$\lambda$ is the maximal absolute value of the speed in the solution of a Riemann
+The local Lax-Friedrichs flux \$\\frac{f(u_r) + f(u_l)}{2} - \\frac{\\lambda}{2} (u_r - u_l)\$.
+\$\\lambda\$ is the maximal absolute value of the speed in the solution of a Riemann
 problem, computed by `max_abs_speed::MaxAbsSpeed`.
-"
+"""
 struct LocalLaxFriedrichsFlux{MaxAbsSpeed} <: NumericalFlux
     max_abs_speed::MaxAbsSpeed
 end
@@ -61,25 +61,25 @@ end
 
 Compute the maximal absolute value of speed at `u` for `model`.
 """
-@inline max_abs_speed{T}(u::T, model::ScalarBalanceLaw{T,1}) = abs(speed(u, model))
+@inline max_abs_speed(u::T, model::ScalarBalanceLaw{T,1}) where {T} = abs(speed(u, model))
 
 """
     min_max_speed{T}(u::T, model::ScalarBalanceLaw{T,1})
 
 Compute the minimal and maximal speed at `u` for `model`.
 """
-@inline function min_max_speed{T}(u::T, model::ScalarBalanceLaw{T,1})
+@inline function min_max_speed(u::T, model::ScalarBalanceLaw{T,1}) where {T}
     λ = speed(u, model)
     λ, λ
 end
 
 
-doc"
+"""
     HartenLaxVanLeerFlux{MinMaxSpeed}
 
 The HLL (Harten, Lax, van Leer) flux using `min_max_speed::MinMaxSpeed` to compute
  the (approximate) minimal and maximal speed in the solution of a Riemann problem.
-"
+"""
 struct HartenLaxVanLeerFlux{MinMaxSpeed} <: NumericalFlux
     min_max_speed::MinMaxSpeed
 end
@@ -158,18 +158,18 @@ struct EnergyConservativeFlux2Param{T} <: NumericalFlux
     a₂::T
 end
 
-doc"
+"""
     L2L4ConservativeFlux
 
-A numerical flux conserving the $L^2 \cap L^4$ entropy U(U) = u^2 + u^4.
-"
+A numerical flux conserving the \$L^2 \\cap L^4\$ entropy U(U) = u^2 + u^4.
+"""
 struct L2L4ConservativeFlux <: NumericalFlux end
 
-doc"
+"""
     L2L2sConservativeFlux
 
-A numerical flux conserving the $L^2 \cap L^{2s}$ entropy U(U) = u^2 + u^(2s).
-"
+A numerical flux conserving the \$L^2 \\cap L^{2s}\$ entropy U(U) = u^2 + u^(2s).
+"""
 struct L2L2sConservativeFlux{s} <: NumericalFlux
     half_pow::Val{s}
 
@@ -198,11 +198,11 @@ expression `uᵣ^(r-1) + rᵣ^(r-2)*uₗ + ... + uᵣ*uₗ^(r-2) + uₗ^(r-1)`.
 end
 
 
-doc"
+"""
     CentralFlux
 
-The central flux $\frac{f(u_r) + f(u_l)}{2}$.
-"
+The central flux \$\\frac{f(u_r) + f(u_l)}{2}\$.
+"""
 struct CentralFlux <: NumericalFlux end
 
 Base.@pure function (fnum::CentralFlux)(uₗ, uᵣ, model)
@@ -301,13 +301,13 @@ end
 end
 
 
-doc"
+"""
     LocalLaxFriedrichsDissipation{MaxAbsSpeed}
 
-The local Lax-Friedrichs dissipation $- \frac{\lambda}{2} (u_r - u_l)$.
-$\lambda$ is the approximate maximal absolute value of the speed in the solution
+The local Lax-Friedrichs dissipation \$- \\frac{\\lambda}{2} (u_r - u_l)\$.
+\$\\lambda\$ is the approximate maximal absolute value of the speed in the solution
 of a Riemann problem, computed by `max_abs_speed::MaxAbsSpeed`.
-"
+"""
 struct LocalLaxFriedrichsDissipation{MaxAbsSpeed} <: DissipationOperator
     max_abs_speed::MaxAbsSpeed
 end
@@ -322,13 +322,13 @@ end
 
 
 
-doc"
+"""
     ScalarDissipation{MaxAbsSpeed}
 
-The scalar dissipation $- \frac{\lambda}{2} R \cdot R^T \cdot  (w_r - w_l)$.
-$\lambda$ is the approximate maximal absolute value of the speed, computed by
+The scalar dissipation \$- \\frac{\\lambda}{2} R \\cdot R^T \\cdot  (w_r - w_l)\$.
+\$\\lambda\$ is the approximate maximal absolute value of the speed, computed by
 `max_abs_speed::MaxAbsSpeed`.
-"
+"""
 struct ScalarDissipation{MaxAbsSpeed} <: DissipationOperator
     max_abs_speed::MaxAbsSpeed
 end
@@ -336,9 +336,9 @@ end
 ScalarDissipation() = ScalarDissipation(naive_max_abs_speed)
 
 
-doc"
+"""
     MatrixDissipation
 
-The matrix dissipation $- \frac{1}{2} R \cdot |\Lambda| \cdot R^T \cdot  (w_r - w_l)$.
-"
+The matrix dissipation \$- \\frac{1}{2} R \\cdot |\\Lambda| \\cdot R^T \\cdot  (w_r - w_l)\$.
+"""
 struct MatrixDissipation <: DissipationOperator end

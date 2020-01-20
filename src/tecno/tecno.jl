@@ -1,6 +1,6 @@
 
 struct ScalarUniformPeriodicTecno1D{BalanceLaw, T, Fnum, Diss, Reconstruction,
-                                    ComputeEntropyVar, EntropyVar, EdgeEntropyVar, 
+                                    ComputeEntropyVar, EntropyVar, EdgeEntropyVar,
                                     Fluxes, Parallel} <: FiniteVolumeSemidiscretisation
     balance_law::BalanceLaw
     meshx::UniformPeriodicMesh1D{T}
@@ -102,18 +102,18 @@ function compute_EC_fluxes!(fluxes, u, balance_law, meshx::UniformPeriodicMesh1D
 
     @inbounds begin
         fluxes[1] = c1 * fnum(u[end], u[1], balance_law) +
-                        c2 * fnum(u[end-1], u[1], balance_law) + 
+                        c2 * fnum(u[end-1], u[1], balance_law) +
                         c2 * fnum(u[end], u[2], balance_law)
         fluxes[2] = c1 * fnum(u[1], u[2], balance_law) +
-                        c2 * fnum(u[end], u[2], balance_law) + 
+                        c2 * fnum(u[end], u[2], balance_law) +
                         c2 * fnum(u[1], u[3], balance_law)
         fluxes[end] = c1 * fnum(u[end-1], u[end], balance_law) +
-                        c2 * fnum(u[end-2], u[end], balance_law) + 
+                        c2 * fnum(u[end-2], u[end], balance_law) +
                         c2 * fnum(u[end-1], u[1], balance_law)
     end
     @inbounds for edge in 3:length(fluxes)-1
         fluxes[edge] = c1 * fnum(u[edge-1], u[edge], balance_law) +
-                        c2 * fnum(u[edge-2], u[edge], balance_law) + 
+                        c2 * fnum(u[edge-2], u[edge], balance_law) +
                         c2 * fnum(u[edge-1], u[edge+1], balance_law)
     end
     nothing
@@ -128,42 +128,42 @@ function compute_EC_fluxes!(fluxes, u, balance_law, meshx::UniformPeriodicMesh1D
 
     @inbounds begin
         fluxes[1] = c1 * fnum(u[end], u[1], balance_law) +
-                        c2 * fnum(u[end-1], u[1], balance_law) + 
-                        c2 * fnum(u[end], u[2], balance_law) + 
-                        c3 * fnum(u[end-2], u[1], balance_law) + 
-                        c3 * fnum(u[end-1], u[2], balance_law) + 
+                        c2 * fnum(u[end-1], u[1], balance_law) +
+                        c2 * fnum(u[end], u[2], balance_law) +
+                        c3 * fnum(u[end-2], u[1], balance_law) +
+                        c3 * fnum(u[end-1], u[2], balance_law) +
                         c3 * fnum(u[end], u[3], balance_law)
         fluxes[2] = c1 * fnum(u[1], u[2], balance_law) +
-                        c2 * fnum(u[end], u[2], balance_law) + 
-                        c2 * fnum(u[1], u[3], balance_law) + 
-                        c3 * fnum(u[end-1], u[2], balance_law) + 
-                        c3 * fnum(u[end], u[3], balance_law) + 
+                        c2 * fnum(u[end], u[2], balance_law) +
+                        c2 * fnum(u[1], u[3], balance_law) +
+                        c3 * fnum(u[end-1], u[2], balance_law) +
+                        c3 * fnum(u[end], u[3], balance_law) +
                         c3 * fnum(u[1], u[4], balance_law)
         fluxes[3] = c1 * fnum(u[2], u[3], balance_law) +
-                        c2 * fnum(u[1], u[3], balance_law) + 
-                        c2 * fnum(u[2], u[4], balance_law) + 
-                        c3 * fnum(u[end], u[3], balance_law) + 
-                        c3 * fnum(u[1], u[4], balance_law) + 
+                        c2 * fnum(u[1], u[3], balance_law) +
+                        c2 * fnum(u[2], u[4], balance_law) +
+                        c3 * fnum(u[end], u[3], balance_law) +
+                        c3 * fnum(u[1], u[4], balance_law) +
                         c3 * fnum(u[2], u[5], balance_law)
         fluxes[end-1] = c1 * fnum(u[end-2], u[end-1], balance_law) +
-                        c2 * fnum(u[end-3], u[end-1], balance_law) + 
-                        c2 * fnum(u[end-2], u[end], balance_law) + 
-                        c3 * fnum(u[end-4], u[end-1], balance_law) + 
-                        c3 * fnum(u[end-3], u[end], balance_law) + 
+                        c2 * fnum(u[end-3], u[end-1], balance_law) +
+                        c2 * fnum(u[end-2], u[end], balance_law) +
+                        c3 * fnum(u[end-4], u[end-1], balance_law) +
+                        c3 * fnum(u[end-3], u[end], balance_law) +
                         c3 * fnum(u[end-2], u[1], balance_law)
         fluxes[end] = c1 * fnum(u[end-1], u[end], balance_law) +
-                        c2 * fnum(u[end-2], u[end], balance_law) + 
-                        c2 * fnum(u[end-1], u[1], balance_law) + 
-                        c3 * fnum(u[end-3], u[end], balance_law) + 
-                        c3 * fnum(u[end-2], u[1], balance_law) + 
+                        c2 * fnum(u[end-2], u[end], balance_law) +
+                        c2 * fnum(u[end-1], u[1], balance_law) +
+                        c3 * fnum(u[end-3], u[end], balance_law) +
+                        c3 * fnum(u[end-2], u[1], balance_law) +
                         c3 * fnum(u[end-1], u[2], balance_law)
     end
     @inbounds for edge in 4:length(fluxes)-2
         fluxes[edge] = c1 * fnum(u[edge-1], u[edge], balance_law) +
-                        c2 * fnum(u[edge-2], u[edge], balance_law) + 
-                        c2 * fnum(u[edge-1], u[edge+1], balance_law) + 
-                        c3 * fnum(u[edge-3], u[edge], balance_law) + 
-                        c3 * fnum(u[edge-2], u[edge+1], balance_law) + 
+                        c2 * fnum(u[edge-2], u[edge], balance_law) +
+                        c2 * fnum(u[edge-1], u[edge+1], balance_law) +
+                        c3 * fnum(u[edge-3], u[edge], balance_law) +
+                        c3 * fnum(u[edge-2], u[edge+1], balance_law) +
                         c3 * fnum(u[edge-1], u[edge+2], balance_law)
     end
     nothing
@@ -206,9 +206,9 @@ speed in this cell.
 function max_dt(t, u, fv::ScalarUniformPeriodicTecno1D, cfl=0.5)
     @unpack balance_law, meshx = fv
     dt = mapreduce(cell->volume(cell,meshx) / max_abs_speed(u[cell],balance_law),
-                    min, typemax(t), cell_indices(meshx))
+                    min, cell_indices(meshx), init=typemax(t))
     if dt == Inf
-        dt = mapreduce(cell->volume(cell,meshx), min, dt, cell_indices(meshx))
+        dt = mapreduce(cell->volume(cell,meshx), min, cell_indices(meshx), init=dt)
     end
     cfl * dt
 end

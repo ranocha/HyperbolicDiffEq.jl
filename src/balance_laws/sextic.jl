@@ -14,17 +14,17 @@ function Sextic(T=Float64)
   Sextic{T}()
 end
 
-function Base.show{T}(io::IO, model::Sextic{T})
+function Base.show(io::IO, model::Sextic{T}) where {T}
   print(io, "Scalar conservation law {T=", T, "} with flux f(u) = u^6")
 end
 
 
 """
-    flux{T}(u, model::Sextic{T,1})
+    flux(u, model::Sextic)
 
 Compute the flux of `u` for `model`.
 """
-@inline flux{T}(u, model::Sextic{T}) = (u^3)^2
+@inline flux(u, model::Sextic) = (u^3)^2
 
 """
     speed(u::Real, model::Sextic)
@@ -37,11 +37,11 @@ Compute the speed f'(`u`) for `model`.
 ################################################################################
 
 """
-    (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Sextic{T})
+    (::GodunovFlux)(uₗ::T, uᵣ::T, model::Sextic{T}) where {T}
 
 Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
 """
-function (::GodunovFlux){T}(uₗ::T, uᵣ::T, model::Sextic{T})
+function (::GodunovFlux)(uₗ::T, uᵣ::T, model::Sextic{T}) where {T}
     if uₗ < uᵣ
       if uₗ < 0 && 0 < uᵣ
         zero(T)
@@ -55,7 +55,7 @@ end
 
 
 """
-    (::EnergyConservativeFlux){T}(uₗ::T, uᵣ::T, model::Sextic{T})
+    (::EnergyConservativeFlux)(uₗ::T, uᵣ::T, model::Sextic{T}) where {T}
 
 Compute the energy (L₂ entropy) conservative flux between `uₗ` and `uᵣ` for `model`.
 """

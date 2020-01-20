@@ -1,4 +1,4 @@
-using Base.Test, OrdinaryDiffEq, HyperbolicDiffEq, DiffEqCallbacks
+using Test, OrdinaryDiffEq, HyperbolicDiffEq, DiffEqCallbacks
 
 function runtest()
     xmin = -1.0
@@ -21,7 +21,7 @@ function runtest()
 
     save_func = (u,t,integrator) -> integrate(u->IntegralQuantitiesKeyfitzKranzer(u,balance_law), u, integrator.f)
     saved_values = SavedValues(Float64, IntegralQuantitiesKeyfitzKranzer{Float64})
-    saving = SavingCallback(save_func, saved_values, saveat=linspace(tspan..., 10^3))
+    saving = SavingCallback(save_func, saved_values, saveat=range(tspan..., length=10^3))
     stepsize = StepsizeLimiter((u,p,t)->max_dt(t,u,semidisc), safety_factor=1.0)
 
     sol = solve(ode, ode_solver, dt=dt(p,N), save_everystep=false, callback=CallbackSet(stepsize,saving))

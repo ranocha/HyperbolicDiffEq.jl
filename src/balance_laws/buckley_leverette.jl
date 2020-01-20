@@ -11,7 +11,7 @@ function BuckleyLeverette(T=Float64)
   BuckleyLeverette{T}()
 end
 
-function Base.show{T}(io::IO, model::BuckleyLeverette{T})
+function Base.show(io::IO, model::BuckleyLeverette{T}) where {T}
   print(io, "Buckley-Leverette equation {T=", T, "}",
             " with flux f(u) = u^2 / (u^2 + (1-u)^2)")
 end
@@ -79,11 +79,6 @@ end
 
 ################################################################################
 
-"""
-    (::GodunovFlux)(uₗ, uᵣ, model::BuckleyLeverette)
-
-Compute Godunov's flux between `uₗ` and `uᵣ` for `model`.
-"""
 function (::GodunovFlux)(uₗ, uᵣ, model::BuckleyLeverette)
   flux(uₗ, model)
 end
@@ -160,11 +155,11 @@ end
 
 
 """
-    solve{T,T1}(prob::RiemannProblem{BuckleyLeverette{T},T,T1})
+    solve(prob::RiemannProblem{BuckleyLeverette{T},T,T1}) where {T,T1}
 
 Compute the solution of the Riemann prolem `prob`.
 """
-function solve{T,T1}(prob::RiemannProblem{BuckleyLeverette{T},T,T1})
+function solve(prob::RiemannProblem{BuckleyLeverette{T},T,T1}) where {T,T1}
   @unpack uₗ, uᵣ, model = prob
   u_crit = one(T) / 2
 
