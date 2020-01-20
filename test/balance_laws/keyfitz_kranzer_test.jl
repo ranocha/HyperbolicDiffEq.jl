@@ -19,7 +19,7 @@ function runtest()
     semidisc = UniformPeriodicFluxDiffDisc1D(balance_law, mesh, basis, fvol, fnum)
     ode = semidiscretise(semidisc, u0func, tspan)
 
-    save_func = (u,t,integrator) -> integrate(u->IntegralQuantitiesKeyfitzKranzer(u,balance_law), u, integrator.f)
+    save_func = (u,t,integrator) -> integrate(u->IntegralQuantitiesKeyfitzKranzer(u,balance_law), u, integrator.f.f)
     saved_values = SavedValues(Float64, IntegralQuantitiesKeyfitzKranzer{Float64})
     saving = SavingCallback(save_func, saved_values, saveat=range(tspan..., length=10^3))
     stepsize = StepsizeLimiter((u,p,t)->max_dt(t,u,semidisc), safety_factor=1.0)

@@ -29,7 +29,7 @@ end
 
 function UniformFluxDiffDisc1D(balance_law, meshx, basis, fvol, fnumint, fnumext,
                                 left_bc, right_bc, parallel=Val{:serial}())
-    fluxes = Array{variables(balance_law)}(numedges(meshx))
+    fluxes = Array{variables(balance_law)}(undef, numedges(meshx))
     UniformFluxDiffDisc1D(balance_law, meshx, basis, fvol, fnumint, fnumext,
                             left_bc, right_bc, fluxes, parallel)
 end
@@ -80,7 +80,7 @@ end
 
 function UniformPeriodicFluxDiffDisc1D(balance_law, meshx, basis, fvol, fnumint,
                                         parallel=Val{:serial}())
-    fluxes = Array{variables(balance_law)}(numedges(meshx))
+    fluxes = Array{variables(balance_law)}(undef, numedges(meshx))
     UniformPeriodicFluxDiffDisc1D(balance_law, meshx, basis, fvol, fnumint,
                                     fluxes, parallel)
 end
@@ -132,12 +132,12 @@ end
 
     @inbounds for ix in Base.OneTo(Nx)
         for nx in Base.OneTo(Pp1)
-            idx = sub2ind(dims, nx, ix)
+            idx = LinearIndices(dims)[nx, ix]
             u_idx = u[idx]
             # compute x derivative
             # at first for different indices
             for k in (nx+1):Pp1
-                idxk = sub2ind(dims, k, ix)
+                idxk = LinearIndices(dims)[k, ix]
                 f = fvol(u_idx, u[idxk], balance_law)
                 du[idx]  -= 2*jacx*D[nx,k] * f
                 du[idxk] -= 2*jacx*D[k,nx] * f
@@ -155,12 +155,12 @@ end
 
      @inbounds Threads.@threads for ix in Base.OneTo(Nx)
         for nx in Base.OneTo(Pp1)
-            idx = sub2ind(dims, nx, ix)
+            idx = LinearIndices(dims)[nx, ix]
             u_idx = u[idx]
             # compute x derivative
             # at first for different indices
             for k in (nx+1):Pp1
-                idxk = sub2ind(dims, k, ix)
+                idxk = LinearIndices(dims)[k, ix]
                 f = fvol(u_idx, u[idxk], balance_law)
                 du[idx]  -= 2*jacx*D[nx,k] * f
                 du[idxk] -= 2*jacx*D[k,nx] * f
@@ -252,11 +252,11 @@ end
     # add numerical fluxes
     @inbounds for ix in Base.OneTo(Nx)
         # flux x - left
-        idx = sub2ind(dims, 1, ix)
+        idx = LinearIndices(dims)[1, ix]
         du[idx] += ( fluxes[ix] - flux(u[idx], balance_law) ) * jacx * i_ω1
 
         # flux x - right
-        idx = sub2ind(dims, Pp1, ix)
+        idx = LinearIndices(dims)[Pp1, ix]
         du[idx] -= ( fluxes[ix+1] - flux(u[idx], balance_law) ) * jacx * i_ωend
     end
 
@@ -273,11 +273,11 @@ end
     # add numerical fluxes
     @inbounds Threads.@threads for ix in Base.OneTo(Nx)
         # flux x - left
-        idx = sub2ind(dims, 1, ix)
+        idx = LinearIndices(dims)[1, ix]
         du[idx] += ( fluxes[ix] - flux(u[idx], balance_law) ) * jacx * i_ω1
 
         # flux x - right
-        idx = sub2ind(dims, Pp1, ix)
+        idx = LinearIndices(dims)[Pp1, ix]
         du[idx] -= ( fluxes[ix+1] - flux(u[idx], balance_law) ) * jacx * i_ωend
     end
 

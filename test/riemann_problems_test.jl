@@ -18,11 +18,11 @@ model = Burgers()
 
 # Rarefaction wave
 prob1 = RiemannProblem(model, 0., 1.)
-print(DevNull, prob1)
+print(devnull, prob1)
 @test prob1(0-eps()) ≈ 0
 @test prob1(0+eps()) ≈ 1
 sol = solve(prob1)
-print(DevNull, sol)
+print(devnull, sol)
 @test sol(-1) ≈ 0
 @test sol( 2) ≈ 1
 ξ = range(0, 1, length=10)
@@ -37,11 +37,11 @@ end
 
 # Stationary shock wave
 prob2 = RiemannProblem(model, 1., -1., 1.)
-print(DevNull, prob2)
+print(devnull, prob2)
 @test prob2(1-eps()) ≈ 1
 @test prob2(1+eps()) ≈ -1
 sol = solve(prob2)
-print(DevNull, sol)
+print(devnull, sol)
 @test sol(-1) ≈  1
 @test sol( 1) ≈ -1
 @static if Int==Int64
@@ -59,10 +59,10 @@ prob1 * prob2
 prob1 * (prob2 * prob3)
 (prob1 * prob2) * (prob3 * prob4)
 prob = prob1 * prob2
-print(DevNull, prob)
+print(devnull, prob)
 
 sol = solve(prob)
-print(DevNull, sol)
+print(devnull, sol)
 @test sol(1., -1.) ≈ 0
 @test sol(1., 0.) ≈ 0
 @test sol(1., 0.5) ≈ 0.5

@@ -32,9 +32,9 @@ end
 
 function ScalarUniformPeriodicTecno1D(balance_law, meshx, fnum, diss, reconstruction,
                                       compute_entropy_var, parallel=Val{:serial}())
-    fluxes = Array{variables(balance_law)}(numcells(meshx))
-    entropy_var = Array{variables(balance_law)}(numcells(meshx))
-    edge_entropy_var = Array{variables(balance_law)}(2, numcells(meshx))
+    fluxes = Array{variables(balance_law)}(undef, numcells(meshx))
+    entropy_var = Array{variables(balance_law)}(undef, numcells(meshx))
+    edge_entropy_var = Array{variables(balance_law)}(undef, 2, numcells(meshx))
     ScalarUniformPeriodicTecno1D(balance_law, meshx, fnum, diss, reconstruction,
                                  compute_entropy_var, entropy_var, edge_entropy_var, fluxes, parallel)
 end
