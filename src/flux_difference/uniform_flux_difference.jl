@@ -74,12 +74,12 @@ end
     dims = (Pp1,Pp1,Nx*Ny)
     @inbounds Threads.@threads for ixy in Base.OneTo(NxNy)
         for ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
-            idx = sub2ind(dims, nx, ny, ixy)
+            idx = LinearIndices(dims)[nx, ny, ixy]
             u_idx = u[idx]
             # compute x derivative
             # at first for different indices
             for k in (nx+1):Pp1
-                idxk = sub2ind(dims, k, ny, ixy)
+                idxk = LinearIndices(dims)[k, ny, ixy]
                 f = fvol(u_idx, u[idxk], balance_law, dirx)
                 du[idx]  -= 2*jacx*D[nx,k] * f
                 du[idxk] -= 2*jacx*D[k,nx] * f
@@ -90,7 +90,7 @@ end
             # compute y derivative
             # at first for different indices
             for k in (ny+1):Pp1
-                idxk = sub2ind(dims, nx, k, ixy)
+                idxk = LinearIndices(dims)[nx, k, ixy]
                 f = fvol(u_idx, u[idxk], balance_law, diry)
                 du[idx]  -= 2*jacy*D[ny,k] * f
                 du[idxk] -= 2*jacy*D[k,ny] * f
@@ -110,12 +110,12 @@ end
     dims = (Pp1,Pp1,Nx*Ny)
     @inbounds for ixy in Base.OneTo(NxNy)
         for ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
-            idx = sub2ind(dims, nx, ny, ixy)
+            idx = LinearIndices(dims)[nx, ny, ixy]
             u_idx = u[idx]
             # compute x derivative
             # at first for different indices
             for k in (nx+1):Pp1
-                idxk = sub2ind(dims, k, ny, ixy)
+                idxk = LinearIndices(dims)[k, ny, ixy]
                 f = fvol(u_idx, u[idxk], balance_law, dirx)
                 du[idx]  -= 2*jacx*D[nx,k] * f
                 du[idxk] -= 2*jacx*D[k,nx] * f
@@ -126,7 +126,7 @@ end
             # compute y derivative
             # at first for different indices
             for k in (ny+1):Pp1
-                idxk = sub2ind(dims, nx, k, ixy)
+                idxk = LinearIndices(dims)[nx, k, ixy]
                 f = fvol(u_idx, u[idxk], balance_law, diry)
                 du[idx]  -= 2*jacy*D[ny,k] * f
                 du[idxk] -= 2*jacy*D[k,ny] * f
@@ -163,7 +163,7 @@ end
     dims = (Pp1, Pp1, Nx, Ny)
     # calculate numerical fluxes
     @inbounds Threads.@threads for ixy in Base.OneTo(Nx*Ny)
-        ix, iy = ind2sub((Nx,Ny), ixy)
+        ix, iy = Tuple(CartesianIndices((Nx,Ny))[ixy])
         ixm1 = ix ==  1 ? Nx : ix-1
         iym1 = iy ==  1 ? Ny : iy-1
 
@@ -190,29 +190,29 @@ end
     dims = (Pp1, Pp1, Nx, Ny)
     # add numerical fluxes
     @inbounds Threads.@threads for ixy in Base.OneTo(Nx*Ny)
-        ix, iy = ind2sub((Nx,Ny), ixy)
+        ix, iy = Tuple(CartesianIndices((Nx,Ny))[ixy])
         ixp1 = ix == Nx ?  1 : ix+1
         iyp1 = iy == Ny ?  1 : iy+1
 
         # flux x
         for ny in 1:Pp1
             # flux x - left
-            idx = sub2ind(dims, 1, ny, ix, iy)
+            idx = LinearIndices(dims)[1, ny, ix, iy]
             du[idx] += ( fluxes[ny,1,ix,iy] - flux(u[idx], balance_law, dirx) ) * jacx * i_ω1
 
             # flux x - right
-            idx = sub2ind(dims, Pp1, ny, ix, iy)
+            idx = LinearIndices(dims)[Pp1, ny, ix, iy]
             du[idx] -= ( fluxes[ny,1,ixp1,iy] - flux(u[idx], balance_law, dirx) ) * jacx * i_ωend
         end
 
         # flux y
         for nx in 1:Pp1
             # flux y - bottom
-            idx = sub2ind(dims, nx, 1, ix, iy)
+            idx = LinearIndices(dims)[nx, 1, ix, iy]
             du[idx] += ( fluxes[nx,2,ix,iy] - flux(u[idx], balance_law, diry) ) * jacy * i_ω1
 
             # flux y - top
-            idx = sub2ind(dims, nx, Pp1, ix, iy)
+            idx = LinearIndices(dims)[nx, Pp1, ix, iy]
             du[idx] -= ( fluxes[nx,2,ix,iyp1] - flux(u[idx], balance_law, diry) ) * jacy * i_ωend
         end
     end
@@ -226,7 +226,7 @@ end
     dims = (Pp1, Pp1, Nx, Ny)
     # calculate numerical fluxes
     @inbounds for ixy in Base.OneTo(Nx*Ny)
-        ix, iy = ind2sub((Nx,Ny), ixy)
+        ix, iy = Tuple(CartesianIndices((Nx,Ny))[ixy])
         ixm1 = ix ==  1 ? Nx : ix-1
         iym1 = iy ==  1 ? Ny : iy-1
 
@@ -253,29 +253,29 @@ end
     dims = (Pp1, Pp1, Nx, Ny)
     # add numerical fluxes
     @inbounds for ixy in Base.OneTo(Nx*Ny)
-        ix, iy = ind2sub((Nx,Ny), ixy)
+        ix, iy = Tuple(CartesianIndices((Nx,Ny))[ixy])
         ixp1 = ix == Nx ?  1 : ix+1
         iyp1 = iy == Ny ?  1 : iy+1
 
         # flux x
         for ny in 1:Pp1
             # flux x - left
-            idx = sub2ind(dims, 1, ny, ix, iy)
+            idx = LinearIndices(dims)[1, ny, ix, iy]
             du[idx] += ( fluxes[ny,1,ix,iy] - flux(u[idx], balance_law, dirx) ) * jacx * i_ω1
 
             # flux x - right
-            idx = sub2ind(dims, Pp1, ny, ix, iy)
+            idx = LinearIndices(dims)[Pp1, ny, ix, iy]
             du[idx] -= ( fluxes[ny,1,ixp1,iy] - flux(u[idx], balance_law, dirx) ) * jacx * i_ωend
         end
 
         # flux y
         for nx in 1:Pp1
             # flux y - bottom
-            idx = sub2ind(dims, nx, 1, ix, iy)
+            idx = LinearIndices(dims)[nx, 1, ix, iy]
             du[idx] += ( fluxes[nx,2,ix,iy] - flux(u[idx], balance_law, diry) ) * jacy * i_ω1
 
             # flux y - top
-            idx = sub2ind(dims, nx, Pp1, ix, iy)
+            idx = LinearIndices(dims)[nx, Pp1, ix, iy]
             du[idx] -= ( fluxes[nx,2,ix,iyp1] - flux(u[idx], balance_law, diry) ) * jacy * i_ωend
         end
     end
@@ -384,13 +384,12 @@ end
     dims = (Pp1,Pp1,Pp1,NxNyNz)
     @inbounds Threads.@threads for ixyz in Base.OneTo(NxNyNz)
         for nz in Base.OneTo(Pp1), ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
-            idx = sub2ind(dims, nx, ny, nz, ixyz)
-            u_idx = u[idx]
+            idx = LinearIndices(dims)[nx, ny, nz, ixyz]
 
             # compute x derivative
             # at first for different indices
             for k in (nx+1):Pp1
-                idxk = sub2ind(dims, k, ny, nz, ixyz)
+                idxk = LinearIndices(dims)[k, ny, nz, ixyz]
                 f = fvol(u_idx, u[idxk], balance_law, dirx)
                 du[idx]  -= 2*jacx*D[nx,k] * f
                 du[idxk] -= 2*jacx*D[k,nx] * f
@@ -402,7 +401,7 @@ end
             # compute y derivative
             # at first for different indices
             for k in (ny+1):Pp1
-                idxk = sub2ind(dims, nx, k, nz, ixyz)
+                idxk = LinearIndices(dims)[nx, k, nz, ixyz]
                 f = fvol(u_idx, u[idxk], balance_law, diry)
                 du[idx]  -= 2*jacy*D[ny,k] * f
                 du[idxk] -= 2*jacy*D[k,ny] * f
@@ -413,7 +412,7 @@ end
             # compute z derivative
             # at first for different indices
             for k in (nz+1):Pp1
-                idxk = sub2ind(dims, nx, ny, k, ixyz)
+                idxk = LinearIndices(dims)[nx, ny, k, ixyz]
                 f = fvol(u_idx, u[idxk], balance_law, dirz)
                 du[idx]  -= 2*jacz*D[nz,k] * f
                 du[idxk] -= 2*jacz*D[k,nz] * f
@@ -434,13 +433,13 @@ end
     dims = (Pp1,Pp1,Pp1,NxNyNz)
     @inbounds for ixyz in Base.OneTo(NxNyNz)
         for nz in Base.OneTo(Pp1), ny in Base.OneTo(Pp1), nx in Base.OneTo(Pp1)
-            idx = sub2ind(dims, nx, ny, nz, ixyz)
+            idx = LinearIndices(dims)[nx, ny, nz, ixyz]
             u_idx = u[idx]
 
             # compute x derivative
             # at first for different indices
             for k in (nx+1):Pp1
-                idxk = sub2ind(dims, k, ny, nz, ixyz)
+                idxk = LinearIndices(dims)[k, ny, nz, ixyz]
                 f = fvol(u_idx, u[idxk], balance_law, dirx)
                 du[idx]  -= 2*jacx*D[nx,k] * f
                 du[idxk] -= 2*jacx*D[k,nx] * f
@@ -452,7 +451,7 @@ end
             # compute y derivative
             # at first for different indices
             for k in (ny+1):Pp1
-                idxk = sub2ind(dims, nx, k, nz, ixyz)
+                idxk = LinearIndices(dims)[nx, k, nz, ixyz]
                 f = fvol(u_idx, u[idxk], balance_law, diry)
                 du[idx]  -= 2*jacy*D[ny,k] * f
                 du[idxk] -= 2*jacy*D[k,ny] * f
@@ -463,7 +462,7 @@ end
             # compute z derivative
             # at first for different indices
             for k in (nz+1):Pp1
-                idxk = sub2ind(dims, nx, ny, k, ixyz)
+                idxk = LinearIndices(dims)[nx, ny, k, ixyz]
                 f = fvol(u_idx, u[idxk], balance_law, dirz)
                 du[idx]  -= 2*jacz*D[nz,k] * f
                 du[idxk] -= 2*jacz*D[k,nz] * f
@@ -500,7 +499,7 @@ end
     diry = Val{:y}()
     dirz = Val{:y}()
     @inbounds Threads.@threads for ixyz in Base.OneTo(Nx*Ny*Nz)
-        ix, iy, iz = ind2sub((Nx,Ny,Nz), ixyz)
+        ix, iy, iz = Tuple(CartesianIndices((Nx,Ny,Nz))[ixyz])
         ixm1 = ix ==  1 ? Nx : ix-1
         ixp1 = ix == Nx ?  1 : ix+1
         iym1 = iy ==  1 ? Ny : iy-1
@@ -556,7 +555,7 @@ end
     diry = Val{:y}()
     dirz = Val{:y}()
     @inbounds for ixyz in Base.OneTo(Nx*Ny*Nz)
-        ix, iy, iz = ind2sub((Nx,Ny,Nz), ixyz)
+        ix, iy, iz = Tuple(CartesianIndices((Nx,Ny,Nz))[ixyz])
         ixm1 = ix ==  1 ? Nx : ix-1
         ixp1 = ix == Nx ?  1 : ix+1
         iym1 = iy ==  1 ? Ny : iy-1
