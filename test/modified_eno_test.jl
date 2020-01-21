@@ -43,6 +43,7 @@ tspan = (0., 1.)
 fnum = LocalLaxFriedrichsFlux()
 uₐₙₐ = (t,x) -> sinpi(x-t)
 
+println("CentralReconstruction")
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(1), Ns_lo, Val{:serial}()) > 0.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(3), Ns_lo, Val{:serial}()) > 2.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(5), Ns_lo, Val{:serial}()) > 4.8
@@ -53,6 +54,7 @@ uₐₙₐ = (t,x) -> sinpi(x-t)
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(5), Ns_lo, Val{:threads}()) > 4.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, CentralReconstruction(7), Ns_hi, Val{:threads}()) > 6.8
 
+println("ModifiedENO")
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(1), Ns_lo, Val{:serial}()) > 0.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(2), Ns_lo, Val{:serial}()) > 1.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(3), Ns_lo, Val{:serial}()) > 2.8
@@ -71,6 +73,7 @@ uₐₙₐ = (t,x) -> sinpi(x-t)
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(7), Ns_hi, Val{:threads}()) > 6.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(8), Ns_hi, Val{:threads}()) > 7.5
 
+println("MinL2Choice")
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{1}(), MinL2Choice()), Ns_lo, Val{:serial}()) > 0.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{2}(), MinL2Choice()), Ns_lo, Val{:serial}()) > 1.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), MinL2Choice()), Ns_lo, Val{:serial}()) > 2.8
@@ -80,6 +83,7 @@ uₐₙₐ = (t,x) -> sinpi(x-t)
 @test 0.5 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{7}(), MinL2Choice()), Ns_hi, Val{:serial}()) < 1.1
 @test 0.5 < calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{8}(), MinL2Choice()), Ns_hi, Val{:serial}()) < 1.1
 
+println("BiasedMinL2Choice")
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{1}(), BiasedMinL2Choice()), Ns_lo, Val{:serial}()) > 0.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{2}(), BiasedMinL2Choice()), Ns_lo, Val{:serial}()) > 1.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), BiasedMinL2Choice()), Ns_lo, Val{:serial}()) > 2.8
@@ -92,11 +96,13 @@ balance_law = ConstantLinearAdvection()
 tspan = (0., 1.)
 fnum = LocalLaxFriedrichsFlux()
 uₐₙₐ = (t,x) -> (sinpi(x-t)^2)^2
+println("ClassicalChoiceENO")
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{2}(), ClassicalChoiceENO()), Ns_lo, Val{:serial}()) > 1.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), ClassicalChoiceENO()), Ns_lo, Val{:serial}()) > 2.2
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{4}(), ClassicalChoiceENO()), Ns_lo, Val{:serial}()) < 2.2
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{5}(), ClassicalChoiceENO()), Ns_lo, Val{:serial}()) < 1.9
 
+println("BiasedENOChoice")
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{2}(), BiasedENOChoice()), Ns_lo, Val{:serial}()) > 1.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), BiasedENOChoice()), Ns_lo, Val{:serial}()) > 2.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{4}(), BiasedENOChoice()), Ns_lo, Val{:serial}()) > 3.4
