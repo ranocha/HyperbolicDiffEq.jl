@@ -1,7 +1,7 @@
 name = "HyperbolicDiffEq"
 uuid = "d92025e9-ae38-5717-8c85-ea01ece6a931"
-version = "0.0.0"
 author = ["Hendrik Ranocha"]
+version = "0.0.0"
 
 [deps]
 ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"
@@ -21,6 +21,7 @@ DiffEqBase = "6"
 Parameters = "0.12"
 PolynomialBases = "0.4.3"
 Reexport = "0.2"
+Roots = "0.8"
 StaticArrays = "0.12"
 julia = "1"
 
