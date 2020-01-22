@@ -18,6 +18,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 [compat]
 ArgCheck = "1"
 DiffEqBase = "6"
+LaTeXStrings = "1.0"
 Parameters = "0.12"
 PolynomialBases = "0.4.3"
 Reexport = "0.2"
