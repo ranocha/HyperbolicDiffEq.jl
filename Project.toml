@@ -24,7 +24,7 @@ Parameters = "0.12"
 PolynomialBases = "0.4.3"
 RecipesBase = "0.7, 0.8"
 Reexport = "0.2"
-Roots = "0.8"
+Roots = "0.8, 1.0"
 StaticArrays = "0.12"
 julia = "1"
 
