@@ -126,6 +126,7 @@ include("balance_laws/sextic.jl")
 include("balance_laws/septic.jl")
 include("balance_laws/octic.jl")
 include("balance_laws/buckley_leverette.jl")
+include("balance_laws/quartic_nonconvex.jl")
 include("balance_laws/shallow_water.jl")
 include("balance_laws/euler.jl")
 include("balance_laws/keyfitz_kranzer.jl")
@@ -136,7 +137,8 @@ include("utils.jl")
 # models
 export ConstantLinearAdvection, Burgers, IntegralQuantitiesBurgers,
        Cubic, Quartic, Quintic, Sextic, Septic, Octic,
-       BuckleyLeverette
+       BuckleyLeverette,
+       QuarticNonconvex
 export ShallowWater, ShallowWaterVar1D
 export Euler, EulerVar1D, EulerVar2D, EulerVar3D, IntegralQuantitiesEuler
 export KeyfitzKranzer, KeyfitzKranzerVar, IntegralQuantitiesKeyfitzKranzer
