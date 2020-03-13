@@ -9,6 +9,7 @@ using HyperbolicDiffEq
   @time @testset "Flux Difference" begin include("flux_difference_test.jl") end
   @time @testset "ENO Reconstruction" begin include("modified_eno_test.jl") end
   @time @testset "TeCNO" begin include("tecno_test.jl") end
+  @time @testset "Quartic Nonconvex Flux" begin include("balance_laws/quartic_nonconvex_test.jl") end
   @time @testset "Keyfitz-Kranzer System" begin include("balance_laws/keyfitz_kranzer_test.jl") end
 
 end
