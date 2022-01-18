@@ -109,6 +109,7 @@ include("finite_volumes/numerical_fluxes.jl")
 include("finite_volumes/periodic_fv_1d.jl")
 include("finite_volumes/reconstructions.jl")
 include("finite_volumes/modified_eno.jl")
+include("finite_volumes/weno_jiang_shu.jl")
 include("finite_volumes/central_reconstruction.jl")
 
 include("tecno/tecno.jl")
@@ -162,6 +163,7 @@ export FirstOrderFV, UniformPeriodicReconstructedFV1D, ScalarUniformPeriodicTecn
 export CentralReconstruction
 export ModifiedENO, ClassicalChoiceENO, BiasedENOChoice,
        MinL2Choice, BiasedMinL2Choice, LexMinLegendreChoice
+export WENOJiangShu
 export GodunovFlux, LocalLaxFriedrichsFlux, HartenLaxVanLeerFlux, HLL, SuliciuFlux,
        KineticFlux
 export CentralFlux, MorinishiFlux, DucrosEtAlFlux, KennedyGruberFlux, PirozzoliFlux
