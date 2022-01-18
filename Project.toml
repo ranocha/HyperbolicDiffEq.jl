@@ -26,7 +26,7 @@ RecipesBase = "0.7, 0.8, 1.0"
 Reexport = "0.2, 1.0"
 Roots = "0.8, 1.0"
 StaticArrays = "1.0"
-julia = "1"
+julia = "1.6"
 
 [extras]
 DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
