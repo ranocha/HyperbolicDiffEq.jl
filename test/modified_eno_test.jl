@@ -1,4 +1,6 @@
 using Test, OrdinaryDiffEq, HyperbolicDiffEq, Roots
+using Statistics: mean
+using LinearAlgebra: norm
 
 
 function calc_error(balance_law, uₐₙₐ, tmin, tmax, fnum, reconstruction, N, parallel)
@@ -89,6 +91,9 @@ println("BiasedMinL2Choice")
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{3}(), BiasedMinL2Choice()), Ns_lo, Val{:serial}()) > 2.8
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{4}(), BiasedMinL2Choice()), Ns_lo, Val{:serial}()) > 3.6
 @test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, ModifiedENO(Val{5}(), BiasedMinL2Choice()), Ns_lo, Val{:serial}()) > 4.8
+
+println("WENOJiangShu")
+@test calc_order_estimate(balance_law, uₐₙₐ, tspan, fnum, WENOJiangShu{5}(), Ns_lo, Val{:serial}()) > 4.8
 
 
 # Order reduction observed by Rogerson & Meiburg and Shu (1990).
